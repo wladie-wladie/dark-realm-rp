@@ -7,6 +7,8 @@ import { ZONES, DANGER } from "../data/zones.js";
 import { derive, power, canLearn, masteryLevel, skillValues, gatherLevel, saveGame, xpToNext } from "../systems/state.js";
 import { skillIcon } from "../art/icons.js";
 import { questById, progressText, isComplete } from "../systems/quests.js";
+import { updateState, checkForUpdates, applyUpdateNow, onUpdateState } from "../native.js";
+import { APP_VERSION } from "../version.js";
 
 const TABS = [["hero", "Герой"], ["bag", "Сумка"], ["skills", "Навыки"], ["quests", "Задания"], ["map", "Карта"], ["menu", "Меню"]];
 const fmt = v => (Math.round(v * 10) / 10).toString();
@@ -246,6 +248,14 @@ export class Panels {
     col.appendChild(h("label.row", { style: { padding: "8px" } }, h("input", { type: "checkbox", checked: st.settings.showHelm, onchange: e => { st.settings.showHelm = e.target.checked; G.world && G.world.refreshPlayerLook(); } }), "Показывать шлем"));
     col.appendChild(h("div.hint", {}, `Время в игре: ${Math.floor(st.playtime / 3600)} ч ${Math.floor(st.playtime / 60) % 60} мин · Смертей: ${st.deaths}`));
     col.appendChild(h("div.hint", {}, "Управление на клавиатуре (для проверки на компьютере): WASD — движение, J/пробел — атака, 1–6 — навыки, Q/E — зелья, F — действие."));
+    // обновления
+    const UPD = { idle: "ещё не проверялось", web: "версия для браузера — обновляется сама при открытии", checking: "проверяю…", latest: "у вас последняя версия", downloading: "скачиваю обновление", ready: "обновление скачано — перезапустите игру", error: "ошибка" };
+    const ustat = h("div.hint");
+    const draw = () => { ustat.textContent = `Версия ${APP_VERSION}. Обновления: ${UPD[updateState.state] || updateState.state}${updateState.detail ? " (" + updateState.detail + ")" : ""}`; restart.style.display = updateState.state === "ready" ? "" : "none"; };
+    const restart = h("button.btn.primary", { onclick: async () => { G.world && G.world.persist(); await applyUpdateNow(); } }, "Перезапустить с обновлением");
+    col.appendChild(h("div.box", {}, h("h3", {}, "Обновления"), ustat, h("div.row", { style: { marginTop: "6px" } }, h("button.btn.small", { onclick: () => { checkForUpdates().then(draw); draw(); } }, "Проверить обновления"), restart)));
+    onUpdateState(() => ustat.isConnected && draw());
+    draw();
     col.appendChild(h("button.btn.danger", { onclick: () => { G.world && G.world.persist(); this.close(); G.game.scene.stop("world"); this.ui.titleScreen(); } }, "Выйти в главное меню"));
     this.body.appendChild(col);
   }

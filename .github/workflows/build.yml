@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: build-${{ github.ref }}
@@ -19,6 +21,9 @@ jobs:
   android:
     name: APK и пакет обновления
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -36,7 +41,7 @@ jobs:
           mkdir -p dist
           (cd www && zip -qr ../dist/bundle.zip .)
           cat > dist/update.json <<JSON
-          {"version":"${APP_VERSION}","url":"https://github.com/${{ github.repository }}/releases/download/apk/bundle.zip?v=${APP_VERSION}","checksum":"$(sha256sum dist/bundle.zip | cut -d' ' -f1)","builtAt":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
+          {"version":"${APP_VERSION}","url":"https://wladie-wladie.github.io/dark-realm-rp/bundle.zip?v=${APP_VERSION}","fallback":"https://github.com/${{ github.repository }}/releases/download/apk/bundle.zip?v=${APP_VERSION}","checksum":"$(sha256sum dist/bundle.zip | cut -d' ' -f1)","builtAt":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
           JSON
       - run: npx cap sync android
       - name: Собрать APK
@@ -61,3 +66,15 @@ jobs:
             dist/update.json
           make_latest: true
           overwrite_files: true
+      - name: Сайт со скачиванием (GitHub Pages)
+        run: |
+          mkdir -p site
+          cp -r www/. site/
+          cp dist/dark-realm.apk dist/bundle.zip dist/update.json site/
+          cp tools-static/download.html site/download.html
+          touch site/.nojekyll
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4

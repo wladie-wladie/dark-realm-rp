@@ -1,7 +1,12 @@
-// Связь с Android: самообновление (как в «Где разместить») и кнопка «Назад».
+// Связь с Android: самообновление и кнопка «Назад».
+// Обновления берутся с GitHub Pages, запасной путь — релиз на GitHub.
+// Важно: модуль обновлений принимает пакет только с контрольной суммой SHA-256 (поле checksum в update.json).
 import { APP_VERSION } from "./version.js";
 
-const UPDATE_MANIFEST = "https://github.com/wladie-wladie/dark-realm-rp/releases/download/apk/update.json";
+const MANIFESTS = [
+  "https://wladie-wladie.github.io/dark-realm-rp/update.json",
+  "https://github.com/wladie-wladie/dark-realm-rp/releases/download/apk/update.json",
+];
 const cap = () => window.Capacitor;
 export const isNative = () => !!(cap() && cap().isNativePlatform && cap().isNativePlatform());
 const plugins = {};
@@ -13,31 +18,67 @@ const cmpVersion = (a, b) => {
   return 0;
 };
 
-let readyBundle = null, checking = null;
-async function check(onReady) {
-  if (readyBundle || checking) return;
-  checking = (async () => {
+export const updateState = { state: isNative() ? "idle" : "web", detail: "", version: APP_VERSION };
+const set = (state, detail = "") => { updateState.state = state; updateState.detail = detail; listeners.forEach(f => f(updateState)); };
+const listeners = [];
+export const onUpdateState = f => listeners.push(f);
+
+async function fetchManifest() {
+  let lastErr = "";
+  for (const u of MANIFESTS) {
     try {
+      const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), 12000);
+      const res = await fetch(u + "?t=" + Date.now(), { cache: "no-store", signal: ctl.signal });
+      clearTimeout(t);
+      if (!res.ok) { lastErr = "ответ " + res.status; continue; }
+      const j = await res.json();
+      if (j && j.version && j.url) return j;
+      lastErr = "непонятный ответ";
+    } catch (e) { lastErr = (e && e.message) || String(e); }
+  }
+  throw new Error(lastErr || "нет связи");
+}
+
+let readyBundle = null, checking = null, onReadyCb = null;
+export function checkForUpdates() {
+  if (!isNative()) { set("web"); return Promise.resolve(updateState); }
+  if (readyBundle) { set("ready", readyBundle.version); return Promise.resolve(updateState); }
+  if (checking) return checking;
+  checking = (async () => {
+    set("checking");
+    try {
+      const info = await fetchManifest();
+      if (cmpVersion(info.version, APP_VERSION) <= 0) { set("latest", info.version); return updateState; }
+      if (!info.checksum) { set("error", "в update.json нет контрольной суммы"); return updateState; }
+      set("downloading", info.version);
       const updater = plugin("CapacitorUpdater");
-      const res = await fetch(UPDATE_MANIFEST + "?t=" + Date.now(), { cache: "no-store" });
-      if (!res.ok) return;
-      const info = await res.json();
-      if (!info || !info.version || !info.url || cmpVersion(info.version, APP_VERSION) <= 0) return;
       let bundle = null;
       try { const list = await updater.list(); bundle = (list.bundles || []).find(b => b.version === info.version && b.status !== "error") || null; } catch (_) {}
-      if (!bundle) bundle = await updater.download({ url: info.url, version: info.version, checksum: info.checksum || "" });
+      if (!bundle) {
+        for (const url of [info.url, info.fallback].filter(Boolean)) {
+          try { bundle = await updater.download({ url, version: info.version, checksum: info.checksum }); break; }
+          catch (e) { set("downloading", info.version + " (запасной путь: " + ((e && e.message) || e) + ")"); }
+        }
+      }
+      if (!bundle) { set("error", "не удалось скачать обновление " + info.version); return updateState; }
       await updater.next({ id: bundle.id });
       readyBundle = bundle;
-      onReady && onReady(info);
-    } catch (e) { console.warn("update", e); } finally { checking = null; }
+      set("ready", info.version);
+      onReadyCb && onReadyCb(info);
+    } catch (e) { set("error", (e && e.message) || String(e)); }
+    finally { checking = null; }
+    return updateState;
   })();
+  return checking;
 }
 
 export async function initNative({ onUpdateReady, onBack }) {
   if (!isNative()) return;
-  try { await plugin("CapacitorUpdater").notifyAppReady(); } catch (_) {}
-  check(onUpdateReady);
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") check(onUpdateReady); });
+  onReadyCb = onUpdateReady;
+  // сообщаем модулю, что эта версия запустилась нормально, иначе он откатит её
+  try { await plugin("CapacitorUpdater").notifyAppReady(); } catch (e) { set("error", "модуль обновлений не отвечает"); }
+  checkForUpdates();
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") checkForUpdates(); });
   try { plugin("App").addListener("backButton", () => onBack && onBack()); } catch (_) {}
 }
 export async function applyUpdateNow() { if (readyBundle) await plugin("CapacitorUpdater").set({ id: readyBundle.id }); }
