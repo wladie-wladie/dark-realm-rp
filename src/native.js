@@ -59,7 +59,12 @@ export function checkForUpdates() {
       let bundle = null;
       try { const list = await updater.list(); bundle = (list.bundles || []).find(b => b.version === info.version && b.status !== "error") || null; } catch (_) {}
       if (!bundle) {
-        for (const url of [info.url, info.fallback].filter(Boolean)) {
+        // сначала — только изменившиеся файлы (быстро), если не вышло — целый архив
+        if (info.manifest && info.manifest.length) {
+          try { bundle = await updater.download({ url: info.url, version: info.version, manifest: info.manifest }); }
+          catch (e) { set("downloading", info.version + " (целиком: " + ((e && e.message) || e) + ")"); }
+        }
+        if (!bundle) for (const url of [info.url, info.fallback].filter(Boolean)) {
           try { bundle = await updater.download({ url, version: info.version, checksum: info.checksum }); break; }
           catch (e) { set("downloading", info.version + " (запасной путь: " + ((e && e.message) || e) + ")"); }
         }

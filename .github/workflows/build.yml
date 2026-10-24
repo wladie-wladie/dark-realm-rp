@@ -43,9 +43,7 @@ jobs:
         run: |
           mkdir -p dist
           (cd www && zip -qr ../dist/bundle.zip .)
-          cat > dist/update.json <<JSON
-          {"version":"${APP_VERSION}","url":"https://wladie-wladie.github.io/dark-realm-rp/bundle.zip?v=${APP_VERSION}","fallback":"https://github.com/${{ github.repository }}/releases/download/apk/bundle.zip?v=${APP_VERSION}","checksum":"$(sha256sum dist/bundle.zip | cut -d' ' -f1)","builtAt":"$(date -u +%Y-%m-%dT%H:%M:%SZ)"}
-          JSON
+          node scripts/make-update.mjs www dist/bundle.zip dist/update.json "${APP_VERSION}" "${{ github.repository }}"
       - run: npx cap sync android
       - name: Собрать APK
         working-directory: android
