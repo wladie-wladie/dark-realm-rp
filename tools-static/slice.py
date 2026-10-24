@@ -5,7 +5,9 @@ import numpy as np
 from scipy import ndimage
 
 def slice_sheet(path, min_px=400, dilate=6):
-    im = Image.open(path).convert("RGBA")
+    sys.path.insert(0, __import__("os").path.dirname(__file__))
+    from bg import to_rgba
+    im = to_rgba(path)
     a = np.array(im)[:, :, 3] > 24
     mask = ndimage.binary_dilation(a, iterations=dilate)
     lab, n = ndimage.label(mask)

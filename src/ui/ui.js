@@ -160,7 +160,7 @@ export class UI {
     act.appendChild(e.portal);
     e.ctx = h("button.ctx", { style: { display: "none" } });
     e.ctx.addEventListener("pointerdown", ev => { ev.preventDefault(); this.contextAction(); });
-    act.appendChild(e.ctx);
+    R.appendChild(e.ctx);
     R.appendChild(act);
   }
 

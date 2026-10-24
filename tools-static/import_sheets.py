@@ -4,36 +4,52 @@ import numpy as np
 from PIL import Image
 from scipy import ndimage
 
+sys.path.insert(0, os.path.dirname(__file__))
+from bg import to_rgba
+
+def _cuts(proj, n, span):
+    L = len(proj); cuts = [0]
+    for k in range(1, n):
+        e = int(k * L / n); lo, hi = max(1, e - span), min(L - 1, e + span)
+        cuts.append(lo + int(np.argmin(proj[lo:hi])))
+    return cuts + [L]
+
 def cells(path, rows, cols, dilate=5, min_px=300):
-    im = Image.open(path).convert("RGBA"); A = np.array(im)
+    # режем лист по «просветам» около равномерной сетки, затем в каждой ячейке берём фигуру
+    im = to_rgba(path); A = np.array(im)
     a = A[:, :, 3] > 24
-    lab, n = ndimage.label(ndimage.binary_dilation(a, iterations=dilate))
     H, W = a.shape
-    groups = {}
-    for i, sl in enumerate(ndimage.find_objects(lab)):
-        m = (lab == i + 1) & a
-        cnt = m.sum()
-        if cnt < min_px: continue
-        cy, cx = ndimage.center_of_mass(m)
-        r, c = min(rows - 1, int(cy / H * rows)), min(cols - 1, int(cx / W * cols))
-        groups.setdefault((r, c), []).append(m)
+    ry = _cuts(a.sum(1), rows, H // rows // 4); rx = _cuts(a.sum(0), cols, W // cols // 4)
     out = {}
-    for (r, c), ms in groups.items():
-        m = np.logical_or.reduce(ms)
-        ys, xs = np.where(m)
-        y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
-        crop = A[y0:y1, x0:x1].copy(); crop[:, :, 3] = np.where(m[y0:y1, x0:x1], crop[:, :, 3], 0)
-        # опорная точка: центр масс нижних 18% силуэта (ступни/лапы)
-        sub = m[y0:y1, x0:x1]; hh = sub.shape[0]; low = sub[int(hh * 0.82):]
-        fx = ndimage.center_of_mass(low)[1] if low.any() else sub.shape[1] / 2
-        out[(r, c)] = dict(img=Image.fromarray(crop), fx=fx, h=y1 - y0, w=x1 - x0)
+    for r in range(rows):
+        for c in range(cols):
+            y0c, y1c, x0c, x1c = ry[r], ry[r + 1], rx[c], rx[c + 1]
+            ac = a[y0c:y1c, x0c:x1c]
+            lab, n = ndimage.label(ndimage.binary_dilation(ac, iterations=dilate))
+            ms = [(lab == i + 1) & ac for i in range(n)]
+            ms = [x for x in ms if x.sum() >= min_px]
+            if not ms: continue
+            big = max(x.sum() for x in ms)
+            ms = [x for x in ms if x.sum() >= 0.1 * big]   # отбрасываем осколки и частицы
+            m = np.logical_or.reduce(ms)
+            ys, xs = np.where(m)
+            y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
+            crop = A[y0c + y0:y0c + y1, x0c + x0:x0c + x1].copy(); crop[:, :, 3] = np.where(m[y0:y1, x0:x1], crop[:, :, 3], 0)
+            # опорная точка: центр масс нижних 18% силуэта (ступни/лапы)
+            sub = m[y0:y1, x0:x1]; hh = sub.shape[0]; low = sub[int(hh * 0.82):]
+            fx = ndimage.center_of_mass(low)[1] if low.any() else sub.shape[1] / 2
+            out[(r, c)] = dict(img=Image.fromarray(crop), fx=fx, h=y1 - y0, w=x1 - x0)
     return out
 
 def pack(frames_order, cells_, fw, fh, foot_y, scale, flip=False):
     sheet = Image.new("RGBA", (fw * len(frames_order[0]), fh * len(frames_order)), (0, 0, 0, 0))
     for ri, row in enumerate(frames_order):
         for ci, key in enumerate(row):
-            if key not in cells_: print("missing", key); continue
+            if key not in cells_:
+                # нет кадра — берём «стоит» в той же строке или такой же кадр из соседней строки
+                alt = [(key[0], 0)] + [(r, key[1]) for r in range(3) if r != key[0]]
+                key = next((a for a in alt if a in cells_), None)
+                if key is None: continue
             c = cells_[key]; im = c["img"]
             im = im.resize((max(1, round(im.width * scale)), max(1, round(im.height * scale))), Image.LANCZOS)
             x = round(fw / 2 - c["fx"] * scale); y = round(foot_y - im.height)
@@ -89,38 +105,50 @@ def ground(src, names, cols=2, rows=2):
 NPC_IDS = ["elder", "smith", "trader", "alch", "mentor", "guard", "guard2"]
 
 def npcs(src):
-    # одна картинка с жителями в ряд → у каждого лист, где все кадры — стоящая фигура
-    from slice import slice_sheet
-    parts = sorted(slice_sheet(src, min_px=2000), key=lambda p: p["x"])
-    hs = [p["img"].height for p in parts]; med = float(np.median(hs))
+    # жители стоят в ряд: режем по «просветам» между фигурами около равных долей ширины
+    im = to_rgba(src); A = np.array(im); a = A[:, :, 3] > 24
+    W = a.shape[1]; n = len(NPC_IDS); colsum = a.sum(0)
+    cuts = [0]
+    for k in range(1, n):
+        e = int(k * W / n); lo, hi = max(1, e - 80), min(W - 1, e + 80)
+        cuts.append(lo + int(np.argmin(colsum[lo:hi])))
+    cuts.append(W)
+    figs = []
+    for i in range(n):
+        sub = A[:, cuts[i]:cuts[i + 1]]; m = sub[:, :, 3] > 24
+        ys, xs = np.where(m)
+        figs.append(Image.fromarray(sub[ys.min():ys.max() + 1, xs.min():xs.max() + 1]))
+    med = float(np.median([f.height for f in figs]))
     FW, FH, foot = 192, 240, 222
-    for p, nid in zip(parts, NPC_IDS):
-        im = p["img"]; sc = 176 / med; im = im.resize((round(im.width * sc), round(im.height * sc)), Image.LANCZOS)
-        frame = Image.new("RGBA", (FW, FH)); frame.alpha_composite(im, (max(0, (FW - im.width) // 2), max(0, foot - im.height)))
+    for im2, nid in zip(figs, NPC_IDS):
+        sc = 176 / med; im2 = im2.resize((round(im2.width * sc), round(im2.height * sc)), Image.LANCZOS)
+        frame = Image.new("RGBA", (FW, FH)); frame.alpha_composite(im2, (max(0, (FW - im2.width) // 2), max(0, foot - im2.height)))
         sheet = Image.new("RGBA", (FW * 8, FH * 3))
         for r in range(3):
             for c in range(8): sheet.alpha_composite(frame, (c * FW, r * FH))
         fn = f"chars/npc_{nid}.webp"; sheet.save("assets/" + fn, "WEBP", quality=90, method=6)
         man["npc_" + nid] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH}
-    print("npcs", len(parts))
-
-def icons(src, name, ids, cols, rows):
-    im = Image.open(src).convert("RGBA")
-    cell = 128
-    im = im.resize((cols * cell, rows * cell), Image.LANCZOS)
-    os.makedirs("assets/icons", exist_ok=True)
-    fn = f"icons/{name}.webp"; im.save("assets/" + fn, "WEBP", quality=88, method=6)
-    key = "iconsheet_" + name
-    man[key] = {"file": fn}
-    ic = man.setdefault("_icons", {})
-    for i, iid in enumerate(ids):
-        ic[iid] = [key, i % cols, i // cols, cols, rows]
-
-ICON_JOBS = {j["name"][:-4]: j for j in json.load(open("tools-static/icon_jobs.json"))} if os.path.exists("tools-static/icon_jobs.json") else {}
+    print("npcs", len(figs))
 
 TITLES = {}  # ключ листа → название облика в редакторе
 if os.path.exists("tools-static/titles.json"): TITLES = json.load(open("tools-static/titles.json"))
-BEASTS = {"wolf": 210}  # звери в профиль: ширина бега в кадре
+BEASTS = {"wolf": 210, "mobc_boar": 200, "mobc_spider": 175, "mobc_cavespider": 185, "mobc_toad": 190, "mobc_bat": 150}  # звери в профиль: ширина бега в кадре
+
+ICON_JOBS = {os.path.splitext(j["name"])[0]: j for j in json.load(open("tools-static/icon_jobs.json"))}
+
+def icons(src, name, ids, cols, rows):
+    # лист иконок: ровная сетка; срезаем внешние поля, приводим к 128 px на ячейку
+    im = Image.open(src).convert("RGB"); A = np.array(im).astype(int)
+    bgc = A[2, 2]; diff = np.abs(A - bgc).sum(2) > 40
+    ys, xs = np.where(diff)
+    if len(ys) and (ys.max() - ys.min()) > A.shape[0] * 0.8: im = im.crop((xs.min(), ys.min(), xs.max() + 1, ys.max() + 1))
+    im = im.resize((cols * 128, rows * 128), Image.LANCZOS)
+    os.makedirs("assets/icons", exist_ok=True)
+    fn = f"icons/{name}.webp"; im.save("assets/" + fn, "WEBP", quality=88, method=6)
+    man[name] = {"file": fn}
+    ic = man.setdefault("_icons", {})
+    for i, iid in enumerate(ids):
+        if iid: r, c = divmod(i, cols); ic[iid] = [name, c, r, cols, rows]
 
 if __name__ == "__main__":
     only = sys.argv[1:]

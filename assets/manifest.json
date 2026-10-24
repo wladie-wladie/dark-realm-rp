@@ -199,5 +199,342 @@
   "fw": 192,
   "fh": 240,
   "title": "Рыжая коса"
+ },
+ "hero_cleric_f": {
+  "file": "chars/hero_cleric_f.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Светлый пучок"
+ },
+ "hero_cleric_m": {
+  "file": "chars/hero_cleric_m.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Лысый с бородой"
+ },
+ "hero_mage_f": {
+  "file": "chars/hero_mage_f.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Тёмные волосы"
+ },
+ "hero_rogue_m": {
+  "file": "chars/hero_rogue_m.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "В маске"
+ },
+ "hero_warlock_m": {
+  "file": "chars/hero_warlock_m.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Под капюшоном"
+ },
+ "mob_pet_shade": {
+  "file": "chars/hero_rogue_m.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "hero_rogue_f": {
+  "file": "chars/hero_rogue_f.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Светлая стрижка"
+ },
+ "hero_warlock_f": {
+  "file": "chars/hero_warlock_f.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Чёрные волосы"
+ },
+ "mob_archer": {
+  "file": "chars/mob_archer.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_bandit": {
+  "file": "chars/mob_bandit.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_ghoul": {
+  "file": "chars/mob_ghoul.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_golem": {
+  "file": "chars/mob_golem.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_miner": {
+  "file": "chars/mob_miner.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_skeleton": {
+  "file": "chars/mob_skeleton.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_heartgolem": {
+  "file": "chars/mob_golem.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_pet_golem": {
+  "file": "chars/mob_golem.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_pet_skeleton": {
+  "file": "chars/mob_skeleton.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_bat": {
+  "file": "chars/mob_bat.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ },
+ "mob_boar": {
+  "file": "chars/mob_boar.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ },
+ "mob_cavespider": {
+  "file": "chars/mob_cavespider.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ },
+ "mob_spider": {
+  "file": "chars/mob_spider.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ },
+ "mob_toad": {
+  "file": "chars/mob_toad.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ },
+ "mob_ataman": {
+  "file": "chars/mob_ataman.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_witch": {
+  "file": "chars/mob_witch.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "npc_elder": {
+  "file": "chars/npc_elder.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "npc_smith": {
+  "file": "chars/npc_smith.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "npc_trader": {
+  "file": "chars/npc_trader.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "npc_alch": {
+  "file": "chars/npc_alch.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "npc_mentor": {
+  "file": "chars/npc_mentor.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "npc_guard": {
+  "file": "chars/npc_guard.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "npc_guard2": {
+  "file": "chars/npc_guard2.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "prop_fern_0": {
+  "file": "props/fern.webp",
+  "w": 70
+ },
+ "prop_fern_1": {
+  "file": "props/fern.webp",
+  "w": 62
+ },
+ "prop_tuft_0": {
+  "file": "props/tuft.webp",
+  "w": 44
+ },
+ "prop_tuft_1": {
+  "file": "props/tuft.webp",
+  "w": 40
+ },
+ "prop_tuft_2": {
+  "file": "props/tuft.webp",
+  "w": 48
+ },
+ "prop_drytuft_0": {
+  "file": "props/tuft.webp",
+  "w": 44
+ },
+ "prop_drytuft_1": {
+  "file": "props/tuft.webp",
+  "w": 40
+ },
+ "prop_mushrooms_0": {
+  "file": "props/mushrooms.webp",
+  "w": 50
+ },
+ "prop_mushrooms_1": {
+  "file": "props/mushrooms_glow.webp",
+  "w": 50
+ },
+ "prop_node_wood1_0": {
+  "file": "props/birch.webp",
+  "w": 110
+ },
+ "prop_node_wood2_0": {
+  "file": "props/ash.webp",
+  "w": 110
+ },
+ "prop_node_wood3_0": {
+  "file": "props/darkspruce.webp",
+  "w": 110
+ },
+ "prop_log_0": {
+  "file": "props/log.webp",
+  "w": 125
+ },
+ "prop_pebble_0": {
+  "file": "props/pebble.webp",
+  "w": 40
+ },
+ "prop_pebble_1": {
+  "file": "props/pebble.webp",
+  "w": 34
+ },
+ "prop_pebble_2": {
+  "file": "props/pebble.webp",
+  "w": 46
+ },
+ "prop_node_ore1_0": {
+  "file": "props/ore_copper.webp",
+  "w": 80
+ },
+ "prop_node_ore2_0": {
+  "file": "props/ore_iron.webp",
+  "w": 80
+ },
+ "prop_node_ore3_0": {
+  "file": "props/ore_silver.webp",
+  "w": 80
+ },
+ "prop_node_herb1_0": {
+  "file": "props/herb_red.webp",
+  "w": 60
+ },
+ "prop_node_herb2_0": {
+  "file": "props/herb_blue.webp",
+  "w": 60
+ },
+ "prop_node_herb3_0": {
+  "file": "props/herb_yellow.webp",
+  "w": 60
+ },
+ "prop_node_fiber2_0": {
+  "file": "props/hemp.webp",
+  "w": 60
+ },
+ "prop_portal_0": {
+  "file": "props/portal.webp",
+  "w": 150
+ },
+ "prop_signpost_0": {
+  "file": "props/signpost.webp",
+  "w": 70
+ },
+ "prop_node_fiber1_0": {
+  "file": "props/flax.webp",
+  "w": 60
+ },
+ "prop_campfire_0": {
+  "file": "props/campfire.webp",
+  "w": 70
+ },
+ "prop_swamptree_0": {
+  "file": "props/swamptree.webp",
+  "w": 175
+ },
+ "prop_swamptree_1": {
+  "file": "props/swamptree2.webp",
+  "w": 170
+ },
+ "prop_reeds_0": {
+  "file": "props/reeds.webp",
+  "w": 60
+ },
+ "prop_reeds_1": {
+  "file": "props/reeds.webp",
+  "w": 54
+ },
+ "prop_reeds_2": {
+  "file": "props/reeds.webp",
+  "w": 66
+ },
+ "prop_lily_0": {
+  "file": "props/lily.webp",
+  "w": 70
+ },
+ "prop_lily_1": {
+  "file": "props/lily.webp",
+  "w": 64
+ },
+ "prop_bones_0": {
+  "file": "props/bones.webp",
+  "w": 50
+ },
+ "prop_bones_1": {
+  "file": "props/bones.webp",
+  "w": 44
  }
 }
