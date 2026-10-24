@@ -110,8 +110,11 @@ export function generateZone(id, z) {
     for (const pr of props) if (pr.foot) {
       for (let y = pr.fy - 1; y < pr.fy + pr.foot[1] + 1; y++) for (let x = pr.fx - 1; x < pr.fx + pr.foot[0] + 1; x++) if (inb(x, y) && !walk[idx(x, y)]) lot[idx(x, y)] = 1;
     }
-    for (let i = 0; i < W * H; i++) if (water[i]) walk[i] = 0;
-    // перед проходом (ближе к камере) — полоса леса; за проходом — поднятые скалы
+    // вокруг домов можно ходить (кроме самого здания)
+    for (let i = 0; i < W * H; i++) if (lot[i] && !solidT[i]) walk[i] = 1;
+    for (let i = 0; i < W * H; i++) if (water[i] || solidT[i]) walk[i] = 0;
+    for (let i = 0; i < W * H; i++) if (solidT[i]) lot[i] = 1; else lot[i] = 0;
+    // перед проходом (ближе к камере) — обрыв вниз; за проходом — скала вверх
     const front = new Uint8Array(W * H), raised = new Uint8Array(W * H);
     const isW = (x, y) => inb(x, y) && walk[idx(x, y)];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
@@ -121,14 +124,7 @@ export function generateZone(id, z) {
       if (f) front[i] = 1; else raised[i] = 1;
     }
     // земля в проходах — из описания (дорожки/площади уже проставлены в ter), остальное — основа
-    // лес на передней полосе: плотно, но без месива
     const rr = rng;
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const i = idx(x, y); if (!front[i]) continue;
-      const nearWalk = isW(x - 1, y) || isW(x, y - 1);
-      if (nearWalk) { if (rr.chance(0.28)) place(rr.pick(z.walk.edge || ["bush"]), x + rr.range(0.3, 0.7), y + rr.range(0.5, 0.9)); }
-      else if (rr.chance(0.3)) place(rr.pick(z.walk.trees || ["oak"]), x + rr.range(0.3, 0.7), y + rr.range(0.5, 0.9));
-    }
     // деревья на скалах (поднятые)
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       if (!raised[idx(x, y)] || !rr.chance(z.walk.topTrees ?? 0.18)) continue;
@@ -162,7 +158,7 @@ export function generateZone(id, z) {
       for (let i = 0; i < s.n && pool.length; i++) { const [x, y] = rng.pick(pool); const [px, py] = tw(x + 0.5, y + 0.5); spawnPts.push({ m: s.m, x: px, y: py }); }
     }
     for (const p of props) if (p.elev) p.depthY = p.y; // глубина — по основанию на скале
-    return { id, W, H, ter, water, solidT: solid, walk, raised, props, nodes, spawnPts, rngSeed: z.seed };
+    return { id, W, H, ter, water, solidT: solid, walk, raised, lowered: front, props, nodes, spawnPts, rngSeed: z.seed };
   }
 
   // кромка из деревьев/камней по краям (кроме выходов)

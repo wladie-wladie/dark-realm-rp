@@ -33,31 +33,31 @@
  },
  "prop_pine_0": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 135
+  "w": 185
  },
  "prop_pine_1": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 135
+  "w": 185
  },
  "prop_pine_2": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 135
+  "w": 185
  },
  "prop_pine_3": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 135
+  "w": 185
  },
  "prop_oak_0": {
   "file": "props/iso_oak_s_0.webp",
-  "w": 190
+  "w": 260
  },
  "prop_oak_1": {
   "file": "props/iso_oak_s_1.webp",
-  "w": 150
+  "w": 200
  },
  "prop_oak_2": {
   "file": "props/iso_oak_s_2.webp",
-  "w": 160
+  "w": 215
  },
  "prop_deadtree_0": {
   "file": "props/deadtree.webp",
@@ -73,23 +73,23 @@
  },
  "prop_bush_0": {
   "file": "props/iso_bush_s_0.webp",
-  "w": 78
+  "w": 100
  },
  "prop_bush_1": {
   "file": "props/iso_bush_s_1.webp",
-  "w": 78
+  "w": 100
  },
  "prop_bush_2": {
   "file": "props/iso_bush_s_0.webp",
-  "w": 78
+  "w": 100
  },
  "prop_boulder_0": {
   "file": "props/iso_boulder_s_0.webp",
-  "w": 110
+  "w": 140
  },
  "prop_boulder_1": {
   "file": "props/iso_boulder_s_0.webp",
-  "w": 110
+  "w": 140
  },
  "prop_lantern_0": {
   "file": "props/lantern.webp",
@@ -109,15 +109,15 @@
  },
  "prop_rock_0": {
   "file": "props/iso_rock_s_0.webp",
-  "w": 80
+  "w": 100
  },
  "prop_rock_1": {
   "file": "props/iso_rock_s_0.webp",
-  "w": 80
+  "w": 100
  },
  "prop_rock_2": {
   "file": "props/iso_rock_s_0.webp",
-  "w": 80
+  "w": 100
  },
  "prop_cart_0": {
   "file": "props/cart.webp",
@@ -133,7 +133,7 @@
  },
  "prop_stump_0": {
   "file": "props/iso_stump_s_0.webp",
-  "w": 60
+  "w": 76
  },
  "hero_warrior_m": {
   "file": "chars/hero_warrior_m.webp",
@@ -395,23 +395,23 @@
  },
  "prop_fern_0": {
   "file": "props/iso_fern_s_0.webp",
-  "w": 64
+  "w": 82
  },
  "prop_fern_1": {
   "file": "props/iso_fern_s_0.webp",
-  "w": 64
+  "w": 82
  },
  "prop_tuft_0": {
   "file": "props/iso_tuft_s_0.webp",
-  "w": 44
+  "w": 54
  },
  "prop_tuft_1": {
   "file": "props/iso_tuft_s_0.webp",
-  "w": 44
+  "w": 54
  },
  "prop_tuft_2": {
   "file": "props/iso_tuft_s_0.webp",
-  "w": 44
+  "w": 54
  },
  "prop_drytuft_0": {
   "file": "props/tuft.webp",
@@ -443,7 +443,7 @@
  },
  "prop_log_0": {
   "file": "props/iso_log_s_0.webp",
-  "w": 120
+  "w": 150
  },
  "prop_pebble_0": {
   "file": "props/pebble.webp",
@@ -2177,74 +2177,74 @@
  "prop_house2_0": {
   "file": "props/iso_house3_0.webp",
   "foot": [
-   4,
-   3
+   6,
+   4
   ],
   "ox": 0.6
  },
  "prop_house2_1": {
   "file": "props/iso_house2_s_1.webp",
   "foot": [
-   4,
-   3
+   6,
+   4
   ],
   "ox": 0.6
  },
  "prop_smithy2_0": {
   "file": "props/iso_smithy2_s_0.webp",
   "foot": [
-   4,
-   3
+   6,
+   4
   ],
   "ox": 0.55
  },
  "prop_tavern2_0": {
   "file": "props/iso_tavern2_s_0.webp",
   "foot": [
-   6,
-   3
+   7,
+   5
   ],
   "ox": 0.62
  },
  "prop_stall2_0": {
   "file": "props/iso_stall2_s_0.webp",
-  "w": 210
+  "w": 270
  },
  "prop_stall2_1": {
   "file": "props/iso_stall2_s_0.webp",
-  "w": 210
+  "w": 270
  },
  "prop_well2_0": {
   "file": "props/iso_well2_s_0.webp",
-  "w": 135
+  "w": 170
  },
  "prop_lamp2_0": {
   "file": "props/iso_lamp2_s_0.webp",
-  "w": 44
+  "w": 60
  },
  "prop_board_0": {
   "file": "props/iso_board_s_0.webp",
-  "w": 84
+  "w": 115
  },
  "prop_barrels_0": {
   "file": "props/iso_barrels_s_0.webp",
-  "w": 76
+  "w": 100
  },
  "prop_crates_0": {
   "file": "props/iso_crates_s_0.webp",
-  "w": 80
+  "w": 105
  },
  "prop_cart2_0": {
   "file": "props/iso_cart2_s_0.webp",
-  "w": 140
+  "w": 190
  },
  "prop_banner_0": {
   "file": "props/iso_banner_s_0.webp",
-  "w": 50
+  "w": 66
  },
  "prop_signpost2_0": {
   "file": "props/iso_signpost2_s_0.webp",
-  "w": 66
+  "w": 90
  },
  "prop_bench_0": {
   "file": "props/iso_bench_0.webp",
@@ -2277,8 +2277,8 @@
  "prop_house3_0": {
   "file": "props/iso_house3_0.webp",
   "foot": [
-   4,
-   3
+   6,
+   4
   ],
   "ox": 0.6
  },
@@ -2287,6 +2287,6 @@
  },
  "prop_fence2_0": {
   "file": "props/iso_fence2_s_0.webp",
-  "w": 120
+  "w": 160
  }
 }

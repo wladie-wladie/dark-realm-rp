@@ -2,7 +2,7 @@
 import { style } from "../art/style.js";
 
 // Общий масштаб существ относительно мира (герой ~1/5 высоты экрана, как в Zenonia)
-export const ACTOR_SCALE = 1.45;
+export const ACTOR_SCALE = 1.1;
 
 export class Actor {
   constructor(scene, o) {

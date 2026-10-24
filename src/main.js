@@ -7,7 +7,7 @@ import { UI } from "./ui/ui.js";
 import { initNative, applyUpdateNow } from "./native.js";
 import { setStyle } from "./art/style.js";
 
-const DPR = Math.min(window.devicePixelRatio || 1, 2);
+const DPR = Math.min(window.devicePixelRatio || 1, 3);
 
 class BootScene extends Phaser.Scene {
   constructor() { super("boot"); }
@@ -40,7 +40,7 @@ window.addEventListener("load", () => {
     backgroundColor: "#000000",
     scale: { mode: Phaser.Scale.NONE, width: innerWidth * DPR, height: innerHeight * DPR, zoom: 1 / DPR },
     physics: { default: "arcade", arcade: { debug: false } },
-    render: { antialias: true, powerPreference: "high-performance" },
+    render: { antialias: true, roundPixels: true, mipmapFilter: "LINEAR_MIPMAP_LINEAR", powerPreference: "high-performance" },
     fps: { target: 60 },
     scene: [BootScene, WorldScene],
   });

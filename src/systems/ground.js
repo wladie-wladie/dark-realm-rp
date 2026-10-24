@@ -7,7 +7,8 @@ import { canvas } from "../art/paint.js";
 import { mulberry32, makeNoise } from "../core/rng.js";
 import { ZONES } from "../data/zones.js";
 
-const CH = 512, RES = 2;           // кусок мира и плотность пикселей (2 пикселя текстуры на пиксель мира)
+const CH = 512;                    // кусок мира; плотность пикселей = масштабу камеры (1 пиксель текстуры на пиксель экрана)
+let RES = 2;
 const PERIOD = 4 * TILE;           // текстура повторяется раз в 4 клетки
 const PER = { cobble: 2.6 * TILE, stone: 3 * TILE };  // мельче камни — ближе к образцу
 // порядок: что выше — то рисуется позже и нависает краем на соседей
@@ -196,8 +197,43 @@ export class Ground {
 
   // скалы: поднятые клетки — верх с травой и отвесная стена к проходу
   relief(ctx, cx, cy, x0, y0, x1, y1, base) {
-    const { W, H, raised } = this.gen, S = TILE;
+    const { W, H, raised, lowered } = this.gen, S = TILE;
     const R = (x, y) => x >= 0 && y >= 0 && x < W && y < H && raised[y * W + x];
+    const Lo = (x, y) => lowered && x >= 0 && y >= 0 && x < W && y < H && lowered[y * W + x];
+    // низина перед проходом: затемнённая земля и обрыв от края прохода вниз
+    if (lowered) {
+      const low = new Path2D(), dfaces = [];
+      for (let y = Math.max(0, y0 - 2); y <= Math.min(H - 1, y1 + 2); y++) for (let x = Math.max(0, x0 - 2); x <= Math.min(W - 1, x1 + 2); x++) {
+        if (Lo(x, y)) { low.rect(x * S - 0.5, y * S - 0.5, S + 1, S + 1); continue; }
+        if (R(x, y)) continue;
+        if (Lo(x + 1, y)) dfaces.push([tw(x + 1, y), tw(x + 1, y + 1), 1, x + y]);
+        if (Lo(x, y + 1)) dfaces.push([tw(x, y + 1), tw(x + 1, y + 1), 0, x + y]);
+      }
+      ctx.save(); ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES); ctx.transform(...this.M);
+      ctx.fillStyle = this.pattern(ctx, base); ctx.fill(low);
+      ctx.fillStyle = "rgba(14,20,10,0.55)"; ctx.fill(low);
+      ctx.restore();
+      ctx.save(); ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES);
+      // обрезаем стену по низине, чтобы не залезала на соседей
+      ctx.save(); ctx.transform(...this.M); ctx.clip(low); ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES);
+      const cp = this.cliffPattern(ctx);
+      dfaces.sort((a, b) => a[3] - b[3]);
+      for (const [A, B, side] of dfaces) {
+        ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.lineTo(B[0], B[1] + ELEV); ctx.lineTo(A[0], A[1] + ELEV); ctx.closePath();
+        ctx.fillStyle = cp; ctx.fill();
+        ctx.fillStyle = side ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"; ctx.fill();
+        // тень у подножия
+        ctx.beginPath(); ctx.moveTo(A[0], A[1] + ELEV); ctx.lineTo(B[0], B[1] + ELEV); ctx.lineTo(B[0], B[1] + ELEV + 16); ctx.lineTo(A[0], A[1] + ELEV + 16); ctx.closePath();
+        ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fill();
+      }
+      ctx.restore();
+      // кромка обрыва
+      ctx.strokeStyle = "rgba(255,240,200,0.35)"; ctx.lineWidth = 1.5;
+      for (const [A, B] of dfaces) { ctx.beginPath(); ctx.moveTo(A[0], A[1] - 1); ctx.lineTo(B[0], B[1] - 1); ctx.stroke(); }
+      ctx.strokeStyle = "rgba(20,14,8,0.7)"; ctx.lineWidth = 2.5;
+      for (const [A, B] of dfaces) { ctx.beginPath(); ctx.moveTo(A[0], A[1] + 1); ctx.lineTo(B[0], B[1] + 1); ctx.stroke(); }
+      ctx.restore();
+    }
     const faces = [], tops = new Path2D(), lips = new Path2D();
     let any = false;
     for (let y = Math.max(0, y0 - 2); y <= Math.min(H - 1, y1 + 2); y++) for (let x = Math.max(0, x0 - 2); x <= Math.min(W - 1, x1 + 2); x++) {
@@ -232,7 +268,11 @@ export class Ground {
   update(force = false) {
     const cam = this.s.cameras.main, v = cam.worldView;
     if (!v.width) return;
-    const m = CH * 0.5;
+    // плотность текстуры = масштаб камеры: пиксель в пиксель, без мыла и ряби
+    const want = Math.max(1.5, Math.min(3.2, Math.round(cam.zoom * 4) / 4));
+    if (want !== this.res) { this.res = want; RES = want; this.destroy(); force = true; }
+    RES = this.res;
+    const m = CH * 0.25;
     const ax = Math.max(0, Math.floor((v.x - m) / CH)), bx = Math.min(Math.ceil(this.Wpx / CH) - 1, Math.floor((v.right + m) / CH));
     const ay = Math.max(0, Math.floor((v.y - m) / CH)), by = Math.min(Math.ceil(this.Hpx / CH) - 1, Math.floor((v.bottom + m) / CH));
     let baked = 0;
