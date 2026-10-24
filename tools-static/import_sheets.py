@@ -5,7 +5,14 @@ from PIL import Image
 from scipy import ndimage
 
 sys.path.insert(0, os.path.dirname(__file__))
-from bg import to_rgba
+from bg import to_rgba as _to_rgba
+from chroma import key_magenta
+
+def to_rgba(path):
+    # пурпурный фон (#FF00FF) — чистая вырезка; иначе — старая очистка «шахматки»
+    im = Image.open(path).convert('RGB'); px = [im.getpixel(p) for p in [(3, 3), (im.width - 4, 3), (3, im.height - 4), (im.width - 4, im.height - 4)]]
+    if sum(1 for r, g, b in px if r > 180 and b > 180 and g < 90) >= 3: return key_magenta(path)
+    return _to_rgba(path)
 
 def _cuts(proj, n, span):
     L = len(proj); cuts = [0]
@@ -130,6 +137,22 @@ def npcs(src):
         man["npc_" + nid] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH}
     print("npcs", len(figs))
 
+def portraits(src, keys, cols, rows):
+    # портреты: ровная сетка, в каждой ячейке — голова и плечи; квадрат 256 по верху фигуры
+    im = to_rgba(src); W, H = im.size
+    os.makedirs("assets/portraits", exist_ok=True)
+    for i, key in enumerate(keys):
+        r, c = divmod(i, cols)
+        cell = im.crop((c * W // cols, r * H // rows, (c + 1) * W // cols, (r + 1) * H // rows))
+        bb = cell.getbbox()
+        if not bb: continue
+        cell = cell.crop(bb); side = min(cell.width, cell.height)
+        x0 = (cell.width - side) // 2
+        sq = cell.crop((x0, 0, x0 + side, side)).resize((256, 256), Image.LANCZOS)
+        fn = f"portraits/{key}.webp"; sq.save("assets/" + fn, "WEBP", quality=92, method=6)
+        man["pt_" + key] = {"file": fn}
+    print("портреты", len(keys))
+
 TITLES = {}  # ключ листа → название облика в редакторе
 if os.path.exists("tools-static/titles.json"): TITLES = json.load(open("tools-static/titles.json"))
 BEASTS = {"wolf": 210, "mobc_boar": 200, "mobc_spider": 175, "mobc_cavespider": 185, "mobc_toad": 190, "mobc_bat": 150}  # звери в профиль: ширина бега в кадре
@@ -159,8 +182,14 @@ if __name__ == "__main__":
         if name.startswith("hero_"):
             hero(src, name)
             if name in TITLES: man[name]["title"] = TITLES[name]
-        elif name == "npc_all":
+        elif name in ("npc_all", "c_npcs"):
             npcs(src)
+        elif name.startswith("c_mage_") or name.startswith("c_hero_"):
+            key = "hero_" + name.split("_", 1)[1].replace("hero_", "")
+            hero(src, key)
+            if key in TITLES: man[key]["title"] = TITLES[key]
+        elif name == "c_portraits":
+            portraits(src, ["hero_mage_m", "hero_mage_f", "npc_elder", "npc_smith", "npc_trader", "npc_alch", "npc_mentor", "npc_guard", "npc_guard2"], 3, 3)
         elif name.startswith("mobh_"):
             hero(src, "mob_" + name[5:])
         elif name in BEASTS or name.startswith("mobc_"):

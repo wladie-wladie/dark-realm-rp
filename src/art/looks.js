@@ -28,8 +28,12 @@ export function drawArtFrame(ctx, key, row, col, dx, dy, dh, flip = false) {
 }
 
 export function artPortrait(key, size) {
-  const meta = G.art[key]; const img = G.game.textures.get(key).getSourceImage();
   const c = canvas(size, size), ctx = c.getContext("2d");
+  // отдельный нарисованный портрет, если есть
+  if (G.art["pt_" + key] && G.game.textures.exists("pt_" + key)) {
+    ctx.imageSmoothingQuality = "high"; ctx.drawImage(G.game.textures.get("pt_" + key).getSourceImage(), 0, 0, size, size); return c;
+  }
+  const meta = G.art[key]; const img = G.game.textures.get(key).getSourceImage();
   // голова и плечи стоящего героя (кадр спереди)
   const sw = meta.fw * 0.5, sh = meta.fh * 0.36;
   ctx.drawImage(img, 4 * meta.fw + meta.fw * 0.25, meta.fh * 0.1, sw, sh, 0, 0, size, size * sh / sw);
