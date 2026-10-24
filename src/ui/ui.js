@@ -10,6 +10,7 @@ import { heroArtKey, artPortrait } from "../art/looks.js";
 const portraitOf = (st, size) => { const k = heroArtKey(st); return k ? artPortrait(k, size) : drawnPortrait(st.look, size); };
 import { skillIcon, itemIconUrl, artIcon } from "../art/icons.js";
 import { updateState, onUpdateState, applyUpdateNow } from "../native.js";
+import { playMusic, playZoneMusic } from "../audio/music.js";
 import { questById, progressText, isComplete, npcMarker } from "../systems/quests.js";
 import { CharacterCreator } from "./create.js";
 import { Panels } from "./panels.js";
@@ -27,6 +28,7 @@ export class UI {
   // ---------- титульный экран ----------
   titleScreen() {
     G.paused = true;
+    playMusic("title");
     clear(this.root);
     const saves = listSaves();
     const slots = h("div.slots");
@@ -189,6 +191,7 @@ export class UI {
   enterZone(W) {
     if (!this.el) return;
     const z = W.z, dz = DANGER[z.danger];
+    playZoneMusic(W.zoneId); this.musicZone = W.zoneId;
     this.el.zone.textContent = z.name;
     this.el.danger.textContent = dz.name + (z.lvl ? ` · ${z.lvl} ур.` : "") + (z.mood ? ` · ${z.mood.name.toLowerCase()}` : "");
     this.el.danger.style.color = dz.color; this.el.danger.style.border = "1px solid " + dz.color;
@@ -311,6 +314,7 @@ export class UI {
     if (!this.el) return;
     if (m === this.bossM) return;
     this.bossM = m;
+    if (m) playMusic("boss"); else if (this.musicZone) playZoneMusic(this.musicZone);
     const b = this.el.boss;
     if (!m) { b.style.display = "none"; return; }
     clear(b); b.style.display = "block";

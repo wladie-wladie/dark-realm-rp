@@ -11,7 +11,7 @@ const version = process.env.APP_VERSION || "0.0.0-dev";
 rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 cpSync(join(root, "web"), out, { recursive: true });
-if (existsSync(join(root, "assets"))) cpSync(join(root, "assets"), join(out, "assets"), { recursive: true });
+if (existsSync(join(root, "assets"))) cpSync(join(root, "assets"), join(out, "assets"), { recursive: true, filter: src => !/[\\/]assets[\\/]raw([\\/]|$)/.test(src) });
 writeFileSync(join(root, "src/version.js"), `export const APP_VERSION = ${JSON.stringify(version)};\n`);
 await build({
   entryPoints: [join(root, "src/main.js")],

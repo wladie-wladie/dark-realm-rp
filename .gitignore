@@ -8,3 +8,4 @@ dist/
 node_modules/
 tools/
 www/
+tools-static/music/build_music/

@@ -1,5 +1,6 @@
 // Окна героя: характеристики и снаряжение, сумка, навыки, задания, карта, меню.
 import { STYLES, styleId, setStyle } from "../art/style.js";
+import { musicVolume, setMusicVolume } from "../audio/music.js";
 import { G } from "../core/G.js";
 import { h, clear } from "./dom.js";
 import { CLASSES, STAT_NAMES, allSkills, STATUS } from "../data/classes.js";
@@ -249,6 +250,9 @@ export class Panels {
     col.appendChild(h("label.row", { style: { padding: "8px" } }, h("input", { type: "checkbox", checked: st.settings.showHelm, onchange: e => { st.settings.showHelm = e.target.checked; G.world && G.world.refreshPlayerLook(); } }), "Показывать шлем"));
     col.appendChild(h("div.hint", {}, `Время в игре: ${Math.floor(st.playtime / 3600)} ч ${Math.floor(st.playtime / 60) % 60} мин · Смертей: ${st.deaths}`));
     col.appendChild(h("div.hint", {}, "Управление на клавиатуре (для проверки на компьютере): WASD — движение, J/пробел — атака, 1–6 — навыки, Q/E — зелья, F — действие, T — портал в город."));
+    // музыка
+    const volIn = h("input", { type: "range", min: 0, max: 100, value: Math.round(musicVolume() * 100), style: { flex: "1" }, oninput: e => setMusicVolume(e.target.value / 100) });
+    col.appendChild(h("div.box", {}, h("h3", {}, "Звук"), h("div.row", {}, h("span", {}, "Музыка"), volIn)));
     // визуальный стиль (сравнение с Zenonia)
     const segS = h("div.seg", {}, Object.entries(STYLES).map(([id, v]) => h("button", { class: id === styleId() ? "on" : "", onclick: () => {
       setStyle(id); G.world && G.world.persist(); this.close();
