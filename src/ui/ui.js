@@ -8,7 +8,7 @@ import { xpToNext, listSaves, loadGame, deleteGame, countItem, skillValues, save
 import { portrait as drawnPortrait } from "../art/humanoid.js";
 import { heroArtKey, artPortrait } from "../art/looks.js";
 const portraitOf = (st, size) => { const k = heroArtKey(st); return k ? artPortrait(k, size) : drawnPortrait(st.look, size); };
-import { skillIcon, itemIconUrl } from "../art/icons.js";
+import { skillIcon, itemIconUrl, artIcon } from "../art/icons.js";
 import { questById, progressText, isComplete, npcMarker } from "../systems/quests.js";
 import { CharacterCreator } from "./create.js";
 import { Panels } from "./panels.js";
@@ -98,7 +98,7 @@ export class UI {
     e.zone = h("div.zone-name"); e.danger = h("div.danger"); e.boss = h("div.bossbar", { style: { display: "none" } });
     R.appendChild(h("div.hud-top", {}, e.zone, e.danger, e.boss));
     e.mini = h("div.minimap", { onclick: () => this.panels.open("map") }); e.miniC = document.createElement("canvas"); e.mini.appendChild(e.miniC);
-    const mb = (icon, tab, title) => { const b = h("button.mbtn", { title, onclick: () => this.panels.open(tab) }, icon); return b; };
+    const mb = (icon, tab, title) => { const art = artIcon("ui_" + tab, 88); const b = h("button.mbtn", { title, class: art ? "art" : "", onclick: () => this.panels.open(tab) }, art ? h("img", { src: art, alt: title }) : icon); return b; };
     e.bBag = mb("🎒", "bag", "Сумка"); e.bSkills = mb("✦", "skills", "Навыки"); e.bHero = mb("♜", "hero", "Герой"); e.bQuests = mb("☰", "quests", "Задания"); e.bMenu = mb("⚙", "menu", "Меню");
     e.gold = h("div.gold-line");
     R.appendChild(h("div.hud-tr", {}, e.mini, h("div.menu-btns", {}, e.bBag, e.bSkills, e.bHero, e.bQuests, e.bMenu), e.gold));
@@ -137,7 +137,8 @@ export class UI {
 
     // кнопки действий
     const act = h("div.actions");
-    const atk = h("div.abtn.atk", {}, "⚔");
+    const atkArt = artIcon("ui_attack", 160);
+    const atk = h("div.abtn.atk", { class: atkArt ? "art" : "" }, atkArt ? h("img", { src: atkArt, alt: "" }) : "⚔");
     atk.addEventListener("pointerdown", ev => { ev.preventDefault(); atk.setPointerCapture(ev.pointerId); G.input.attack = true; });
     const atkEnd = () => { G.input.attack = false; };
     atk.addEventListener("pointerup", atkEnd); atk.addEventListener("pointercancel", atkEnd);

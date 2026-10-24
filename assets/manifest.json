@@ -1335,6 +1335,748 @@
    3,
    4,
    4
+  ],
+  "head_plate": [
+   "icons_gear",
+   0,
+   0,
+   4,
+   4
+  ],
+  "chest_plate": [
+   "icons_gear",
+   1,
+   0,
+   4,
+   4
+  ],
+  "boots_plate": [
+   "icons_gear",
+   2,
+   0,
+   4,
+   4
+  ],
+  "head_cloth": [
+   "icons_gear",
+   3,
+   0,
+   4,
+   4
+  ],
+  "chest_cloth": [
+   "icons_gear",
+   0,
+   1,
+   4,
+   4
+  ],
+  "boots_cloth": [
+   "icons_gear",
+   1,
+   1,
+   4,
+   4
+  ],
+  "head_leather": [
+   "icons_gear",
+   2,
+   1,
+   4,
+   4
+  ],
+  "chest_leather": [
+   "icons_gear",
+   3,
+   1,
+   4,
+   4
+  ],
+  "boots_leather": [
+   "icons_gear",
+   0,
+   2,
+   4,
+   4
+  ],
+  "ring": [
+   "icons_gear",
+   1,
+   2,
+   4,
+   4
+  ],
+  "amulet": [
+   "icons_gear",
+   2,
+   2,
+   4,
+   4
+  ],
+  "hp1": [
+   "icons_gear",
+   3,
+   2,
+   4,
+   4
+  ],
+  "hp2": [
+   "icons_gear",
+   0,
+   3,
+   4,
+   4
+  ],
+  "mp1": [
+   "icons_gear",
+   1,
+   3,
+   4,
+   4
+  ],
+  "mp2": [
+   "icons_gear",
+   2,
+   3,
+   4,
+   4
+  ],
+  "town": [
+   "icons_gear",
+   3,
+   3,
+   4,
+   4
+  ],
+  "wood1": [
+   "icons_resources",
+   0,
+   0,
+   5,
+   4
+  ],
+  "wood2": [
+   "icons_resources",
+   1,
+   0,
+   5,
+   4
+  ],
+  "wood3": [
+   "icons_resources",
+   2,
+   0,
+   5,
+   4
+  ],
+  "ore1": [
+   "icons_resources",
+   3,
+   0,
+   5,
+   4
+  ],
+  "ore2": [
+   "icons_resources",
+   4,
+   0,
+   5,
+   4
+  ],
+  "ore3": [
+   "icons_resources",
+   0,
+   1,
+   5,
+   4
+  ],
+  "hide1": [
+   "icons_resources",
+   1,
+   1,
+   5,
+   4
+  ],
+  "hide2": [
+   "icons_resources",
+   2,
+   1,
+   5,
+   4
+  ],
+  "hide3": [
+   "icons_resources",
+   3,
+   1,
+   5,
+   4
+  ],
+  "herb1": [
+   "icons_resources",
+   4,
+   1,
+   5,
+   4
+  ],
+  "herb2": [
+   "icons_resources",
+   0,
+   2,
+   5,
+   4
+  ],
+  "herb3": [
+   "icons_resources",
+   1,
+   2,
+   5,
+   4
+  ],
+  "fiber1": [
+   "icons_resources",
+   2,
+   2,
+   5,
+   4
+  ],
+  "fiber2": [
+   "icons_resources",
+   3,
+   2,
+   5,
+   4
+  ],
+  "fiber3": [
+   "icons_resources",
+   4,
+   2,
+   5,
+   4
+  ],
+  "crystal": [
+   "icons_resources",
+   0,
+   3,
+   5,
+   4
+  ],
+  "fang": [
+   "icons_resources",
+   1,
+   3,
+   5,
+   4
+  ],
+  "ichor": [
+   "icons_resources",
+   2,
+   3,
+   5,
+   4
+  ],
+  "bone": [
+   "icons_resources",
+   3,
+   3,
+   5,
+   4
+  ],
+  "heart": [
+   "icons_resources",
+   4,
+   3,
+   5,
+   4
+  ],
+  "in_crit": [
+   "icons_skills_08",
+   0,
+   0,
+   4,
+   4
+  ],
+  "he_renew": [
+   "icons_skills_08",
+   1,
+   0,
+   4,
+   4
+  ],
+  "he_sanct": [
+   "icons_skills_08",
+   2,
+   0,
+   4,
+   4
+  ],
+  "he_aegis": [
+   "icons_skills_08",
+   3,
+   0,
+   4,
+   4
+  ],
+  "he_power": [
+   "icons_skills_08",
+   0,
+   1,
+   4,
+   4
+  ],
+  "he_life": [
+   "icons_skills_08",
+   1,
+   1,
+   4,
+   4
+  ],
+  "he_calm": [
+   "icons_skills_08",
+   2,
+   1,
+   4,
+   4
+  ],
+  "or_spirit": [
+   "icons_skills_08",
+   3,
+   1,
+   4,
+   4
+  ],
+  "or_rays": [
+   "icons_skills_08",
+   0,
+   2,
+   4,
+   4
+  ],
+  "or_judg": [
+   "icons_skills_08",
+   1,
+   2,
+   4,
+   4
+  ],
+  "or_vision": [
+   "icons_skills_08",
+   2,
+   2,
+   4,
+   4
+  ],
+  "or_comm": [
+   "icons_skills_08",
+   3,
+   2,
+   4,
+   4
+  ],
+  "or_star": [
+   "icons_skills_08",
+   0,
+   3,
+   4,
+   4
+  ],
+  "k_drain": [
+   "icons_skills_08",
+   1,
+   3,
+   4,
+   4
+  ],
+  "k_curse": [
+   "icons_skills_08",
+   2,
+   3,
+   4,
+   4
+  ],
+  "k_skel": [
+   "icons_skills_08",
+   3,
+   3,
+   4,
+   4
+  ],
+  "k_fear": [
+   "icons_skills_09",
+   0,
+   0,
+   4,
+   4
+  ],
+  "k_dark": [
+   "icons_skills_09",
+   1,
+   0,
+   4,
+   4
+  ],
+  "k_pact": [
+   "icons_skills_09",
+   2,
+   0,
+   4,
+   4
+  ],
+  "k_rot": [
+   "icons_skills_09",
+   3,
+   0,
+   4,
+   4
+  ],
+  "ne_army": [
+   "icons_skills_09",
+   0,
+   1,
+   4,
+   4
+  ],
+  "ne_explode": [
+   "icons_skills_09",
+   1,
+   1,
+   4,
+   4
+  ],
+  "ne_golem": [
+   "icons_skills_09",
+   2,
+   1,
+   4,
+   4
+  ],
+  "ne_master": [
+   "icons_skills_09",
+   3,
+   1,
+   4,
+   4
+  ],
+  "ne_bone": [
+   "icons_skills_09",
+   0,
+   2,
+   4,
+   4
+  ],
+  "ne_souls": [
+   "icons_skills_09",
+   1,
+   2,
+   4,
+   4
+  ],
+  "hx_plague": [
+   "icons_skills_09",
+   2,
+   2,
+   4,
+   4
+  ],
+  "hx_weak": [
+   "icons_skills_09",
+   3,
+   2,
+   4,
+   4
+  ],
+  "hx_doom": [
+   "icons_skills_09",
+   0,
+   3,
+   4,
+   4
+  ],
+  "hx_malice": [
+   "icons_skills_09",
+   1,
+   3,
+   4,
+   4
+  ],
+  "hx_long": [
+   "icons_skills_09",
+   2,
+   3,
+   4,
+   4
+  ],
+  "hx_soul": [
+   "icons_skills_09",
+   3,
+   3,
+   4,
+   4
+  ],
+  "bm_spear": [
+   "icons_skills_10",
+   0,
+   0,
+   3,
+   2
+  ],
+  "bm_boil": [
+   "icons_skills_10",
+   1,
+   0,
+   3,
+   2
+  ],
+  "bm_ritual": [
+   "icons_skills_10",
+   2,
+   0,
+   3,
+   2
+  ],
+  "bm_thirst": [
+   "icons_skills_10",
+   0,
+   1,
+   3,
+   2
+  ],
+  "bm_vigor": [
+   "icons_skills_10",
+   1,
+   1,
+   3,
+   2
+  ],
+  "bm_frenzy": [
+   "icons_skills_10",
+   2,
+   1,
+   3,
+   2
+  ],
+  "ui_bag": [
+   "icons_ui",
+   0,
+   0,
+   4,
+   2
+  ],
+  "ui_skills": [
+   "icons_ui",
+   1,
+   0,
+   4,
+   2
+  ],
+  "ui_hero": [
+   "icons_ui",
+   2,
+   0,
+   4,
+   2
+  ],
+  "ui_quests": [
+   "icons_ui",
+   3,
+   0,
+   4,
+   2
+  ],
+  "ui_menu": [
+   "icons_ui",
+   0,
+   1,
+   4,
+   2
+  ],
+  "ui_map": [
+   "icons_ui",
+   1,
+   1,
+   4,
+   2
+  ],
+  "ui_attack": [
+   "icons_ui",
+   2,
+   1,
+   4,
+   2
+  ],
+  "ui_gold": [
+   "icons_ui",
+   3,
+   1,
+   4,
+   2
+  ],
+  "warrior_1": [
+   "icons_weapons",
+   0,
+   0,
+   4,
+   6
+  ],
+  "warrior_2": [
+   "icons_weapons",
+   1,
+   0,
+   4,
+   6
+  ],
+  "warrior_3": [
+   "icons_weapons",
+   2,
+   0,
+   4,
+   6
+  ],
+  "warrior_4": [
+   "icons_weapons",
+   3,
+   0,
+   4,
+   6
+  ],
+  "ranger_1": [
+   "icons_weapons",
+   0,
+   1,
+   4,
+   6
+  ],
+  "ranger_2": [
+   "icons_weapons",
+   1,
+   1,
+   4,
+   6
+  ],
+  "ranger_3": [
+   "icons_weapons",
+   2,
+   1,
+   4,
+   6
+  ],
+  "ranger_4": [
+   "icons_weapons",
+   3,
+   1,
+   4,
+   6
+  ],
+  "rogue_1": [
+   "icons_weapons",
+   0,
+   2,
+   4,
+   6
+  ],
+  "rogue_2": [
+   "icons_weapons",
+   1,
+   2,
+   4,
+   6
+  ],
+  "rogue_3": [
+   "icons_weapons",
+   2,
+   2,
+   4,
+   6
+  ],
+  "rogue_4": [
+   "icons_weapons",
+   3,
+   2,
+   4,
+   6
+  ],
+  "mage_1": [
+   "icons_weapons",
+   0,
+   3,
+   4,
+   6
+  ],
+  "mage_2": [
+   "icons_weapons",
+   1,
+   3,
+   4,
+   6
+  ],
+  "mage_3": [
+   "icons_weapons",
+   2,
+   3,
+   4,
+   6
+  ],
+  "mage_4": [
+   "icons_weapons",
+   3,
+   3,
+   4,
+   6
+  ],
+  "cleric_1": [
+   "icons_weapons",
+   0,
+   4,
+   4,
+   6
+  ],
+  "cleric_2": [
+   "icons_weapons",
+   1,
+   4,
+   4,
+   6
+  ],
+  "cleric_3": [
+   "icons_weapons",
+   2,
+   4,
+   4,
+   6
+  ],
+  "cleric_4": [
+   "icons_weapons",
+   3,
+   4,
+   4,
+   6
+  ],
+  "warlock_1": [
+   "icons_weapons",
+   0,
+   5,
+   4,
+   6
+  ],
+  "warlock_2": [
+   "icons_weapons",
+   1,
+   5,
+   4,
+   6
+  ],
+  "warlock_3": [
+   "icons_weapons",
+   2,
+   5,
+   4,
+   6
+  ],
+  "warlock_4": [
+   "icons_weapons",
+   3,
+   5,
+   4,
+   6
   ]
  },
  "icons_skills_02": {
@@ -1406,5 +2148,26 @@
  "prop_cobweb_0": {
   "file": "props/cobweb.webp",
   "w": 60
+ },
+ "icons_gear": {
+  "file": "icons/icons_gear.webp"
+ },
+ "icons_resources": {
+  "file": "icons/icons_resources.webp"
+ },
+ "icons_skills_08": {
+  "file": "icons/icons_skills_08.webp"
+ },
+ "icons_skills_09": {
+  "file": "icons/icons_skills_09.webp"
+ },
+ "icons_skills_10": {
+  "file": "icons/icons_skills_10.webp"
+ },
+ "icons_ui": {
+  "file": "icons/icons_ui.webp"
+ },
+ "icons_weapons": {
+  "file": "icons/icons_weapons.webp"
  }
 }
