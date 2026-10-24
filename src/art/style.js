@@ -5,8 +5,12 @@ export const STYLES = {
   c: { name: "Как Zenonia", dark: 0, sat: 0.08, vignette: 0.15, mood: 0.25, zoom: 0.74, outline: 1, hud: "z", dmg: 1.45, contrast: 0.08 },
   d: { name: "Сумрачная Zenonia", dark: 0.65, sat: 0.06, vignette: 0.7, mood: 0.9, zoom: 0.84, outline: 1, hud: "z", dmg: 1.3 },
 };
-let cur = "a";
-try { cur = localStorage.getItem("visualStyle") || "a"; } catch (_) {}
+let cur = "c";
+try {
+  // новый простой стиль рассчитан на «Как Zenonia»: переводим один раз всех
+  if (localStorage.getItem("visualStyleV") !== "2") { localStorage.setItem("visualStyleV", "2"); localStorage.setItem("visualStyle", "c"); }
+  cur = localStorage.getItem("visualStyle") || "c";
+} catch (_) {}
 if (!STYLES[cur]) cur = "a";
 export const style = () => STYLES[cur];
 export const styleId = () => cur;
