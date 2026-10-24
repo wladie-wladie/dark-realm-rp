@@ -20,7 +20,7 @@ import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH, ELEV } from "../core/is
 import { questOnKill, questOnBoss } from "../systems/quests.js";
 
 const genCache = {};
-const TOWN_PORTAL = [17, 13.6]; // где в городе стоит обратный портал (клетки)
+const TOWN_PORTAL = [15, 15.1]; // где в городе стоит обратный портал (клетки)
 const HP_MUL = 2.2;
 const CHUNK = 1024, CHUNK_RES = 0.75;
 const NODE_VERB = { wood: "Рубить", ore: "Добыть руду", herb: "Сорвать", fiber: "Собрать", hide: "Освежевать" };
@@ -92,7 +92,7 @@ export class WorldScene extends Phaser.Scene {
     this.portalObj = null; this.portalArmed = false;
     const pt = st.portal;
     if (pt && pt.stage === "open" && pt.zone === this.zoneId) this.spawnPortal(pt.x, pt.y, "Портал в Серый Брод");
-    if (pt && pt.stage === "intown" && this.zoneId === "town") { const [px, py] = tw(...TOWN_PORTAL); this.spawnPortal(px, py, "Портал обратно: " + ZONES[pt.zone].name); }
+    if (pt && pt.stage === "intown" && this.zoneId === "town") { const [px, py] = tw(...TOWN_PORTAL); this.spawnPortal(px, py, "Портал: " + ZONES[pt.zone].name); }
     G.ui && G.ui.enterZone(this);
   }
 
@@ -315,7 +315,7 @@ export class WorldScene extends Phaser.Scene {
     this.player = new Actor(this, { kind: "player", sheet: "h", tex: art ? art.key : "hero", idleCol: art ? art.idleCol : 0, x, y, scale: 1.05, radius: 13, hp: 100 });
     this.player.sprite.setCollideWorldBounds(true);
     this.player.name = st.name;
-    this.nameTag = this.add.text(x, y, st.name, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#e8dcc0", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002);
+    this.nameTag = this.add.text(x, y, st.name, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#e8dcc0", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002).setVisible(false); // своё имя над героем не показываем — как в Zenonia
   }
   // нарисованный в ChatGPT лист героя для класса и пола, если он уже есть
   heroArt() {
@@ -717,7 +717,7 @@ export class WorldScene extends Phaser.Scene {
     const core = this.add.image(x, y - 30, "fx_ring").setBlendMode(Phaser.BlendModes.ADD).setTint(0x80b0ff).setScale(0.28, 0.42).setDepth(y + 2);
     this.tweens.add({ targets: core, angle: 360, duration: 3000, repeat: -1 });
     this.tweens.add({ targets: glow, alpha: 0.3, yoyo: true, repeat: -1, duration: 700 });
-    const text = this.add.text(x, y - 80, label, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#c8dcff", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002);
+    const text = this.add.text(x, y - 125, label, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#c8dcff", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002);
     const light = this.addLight(x, y - 30, 0x80b0ff, 0.9, 0.3, true);
     this.portalObj = { x, y, parts: [glow, core, text, light] };
     // нельзя сразу шагнуть обратно: сначала отойти
