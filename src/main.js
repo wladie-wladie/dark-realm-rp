@@ -7,7 +7,16 @@ import { UI } from "./ui/ui.js";
 import { initNative, applyUpdateNow } from "./native.js";
 import { setStyle } from "./art/style.js";
 
-const DPR = Math.min(window.devicePixelRatio || 1, 3);
+// качество графики: сколько пикселей экрана рисуем (баланс — до 2×, максимум — полная плотность)
+const QUALITY = { max: 3, balance: 2, eco: 1.5 };
+let gfx = "balance";
+try { gfx = localStorage.getItem("gfxQuality") || "balance"; } catch (_) {}
+let DPR = Math.min(window.devicePixelRatio || 1, QUALITY[gfx] || 2);
+export function setGfxQuality(q, reload = true) {
+  try { localStorage.setItem("gfxQuality", q); } catch (_) {}
+  if (reload) location.reload();
+}
+export const gfxQuality = () => gfx;
 
 class BootScene extends Phaser.Scene {
   constructor() { super("boot"); }
@@ -40,11 +49,26 @@ window.addEventListener("load", () => {
     backgroundColor: "#000000",
     scale: { mode: Phaser.Scale.NONE, width: innerWidth * DPR, height: innerHeight * DPR, zoom: 1 / DPR },
     physics: { default: "arcade", arcade: { debug: false } },
-    render: { antialias: true, roundPixels: true, mipmapFilter: "LINEAR_MIPMAP_LINEAR", powerPreference: "high-performance" },
+    render: { antialias: true, roundPixels: true, powerPreference: "high-performance" },
     fps: { target: 60 },
     scene: [BootScene, WorldScene],
   });
   const resize = () => G.game.scale.resize(innerWidth * DPR, innerHeight * DPR);
+  // если телефон не тянет — сами снижаем качество на шаг (один раз за запуск)
+  let slow = 0, lowered = false;
+  setInterval(() => {
+    if (lowered || !G.game || !G.st || G.paused || document.hidden) return;
+    const fps = G.game.loop.actualFps;
+    slow = fps < 42 ? slow + 1 : 0;
+    if (slow >= 4) {
+      const next = gfx === "max" ? "balance" : gfx === "balance" ? "eco" : null;
+      if (!next) { lowered = true; return; }
+      lowered = true; gfx = next; DPR = Math.min(window.devicePixelRatio || 1, QUALITY[gfx]);
+      try { localStorage.setItem("gfxQuality", gfx); } catch (_) {}
+      G.game.scale.setZoom(1 / DPR); resize();
+      G.ui && G.ui.toast && G.ui.toast("Качество графики снижено для плавности (Меню → Качество)", "#a0d0ff", 4000);
+    }
+  }, 1000);
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", () => setTimeout(resize, 200));
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && G.world && G.st && G.game.scene.isActive("world")) G.world.persist(); });

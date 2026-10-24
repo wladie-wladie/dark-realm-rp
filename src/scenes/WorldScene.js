@@ -102,6 +102,7 @@ export class WorldScene extends Phaser.Scene {
     cam.setSize(w, h);
     cam.setZoom(Math.max(0.45, Math.min(h / (TILE * 6.6), w / (TILE * 10)) * style().zoom));
     this.textRes = Math.min(5, Math.max(2, Math.ceil(cam.zoom * 1.25)));
+    if (this.grade || this.vignette) this.layoutOverlays();
   }
 
   // ---------- земля ----------
@@ -255,17 +256,28 @@ export class WorldScene extends Phaser.Scene {
     }
     // свет вокруг героя
     this.playerLight = this.add.image(0, 0, "fx_glow_warm").setBlendMode(Phaser.BlendModes.ADD).setScale(3.2).setAlpha(this.z.cave ? 0.32 : (mood.glow || 0.14)).setDepth(99000).setTint(0xffd0a0);
-    // постобработка: тёмная мрачная гамма + виньетка
-    if (cam.postFX) {
-      const cm = cam.postFX.addColorMatrix();
-      const vs = style();
-      const dark = (this.z.dark + (mood.extraDark || 0)) * vs.dark + (this.z.cave ? 0.15 * (1 - vs.dark) : 0);
-      cm.saturate((mood.sat != null ? mood.sat : -0.25) * vs.mood + vs.sat);
-      cm.brightness(1 - dark * 0.55, true);
-      if (vs.contrast) cm.contrast(vs.contrast, true);
-      if (mood.gain) { const k = vs.mood, [r, g, b] = mood.gain.map(v => 1 + (v - 1) * k); cm.multiply([r, 0, 0, 0, 0, 0, g, 0, 0, 0, 0, 0, b, 0, 0, 0, 0, 0, 1, 0], true); }
-      cam.postFX.addVignette(0.5, 0.5, 0.88, (0.32 + dark * 0.35) * vs.vignette);
+    // цвет земли и виньетка — дешёвыми наложениями вместо полноэкранной постобработки (сильно легче для телефона)
+    const vs = style();
+    const dark = (this.z.dark + (mood.extraDark || 0)) * vs.dark + (this.z.cave ? 0.15 * (1 - vs.dark) : 0);
+    let [r, g, b] = (mood.gain || [1, 1, 1]).map(v => 1 + (v - 1) * vs.mood);
+    const mx = Math.max(r, g, b); const br = 1 - dark * 0.55;
+    r = r / mx * br; g = g / mx * br; b = b / mx * br;
+    const col = (Math.round(r * 255) << 16) | (Math.round(g * 255) << 8) | Math.round(b * 255);
+    this.grade = (r < 0.995 || g < 0.995 || b < 0.995) ? this.add.rectangle(0, 0, 10, 10, col).setScrollFactor(0).setBlendMode(Phaser.BlendModes.MULTIPLY).setDepth(99700) : null;
+    if (!this.textures.exists("fx_vignette")) {
+      const c = canvas(256, 256), x = c.getContext("2d"), gr = x.createRadialGradient(128, 128, 60, 128, 128, 182);
+      gr.addColorStop(0, "rgba(0,0,0,0)"); gr.addColorStop(1, "rgba(0,0,0,1)"); x.fillStyle = gr; x.fillRect(0, 0, 256, 256);
+      this.textures.addCanvas("fx_vignette", c);
     }
+    const va = Math.min(0.9, (0.32 + dark * 0.35) * vs.vignette);
+    this.vignette = va > 0.02 ? this.add.image(0, 0, "fx_vignette").setScrollFactor(0).setAlpha(va).setDepth(99710) : null;
+    this.layoutOverlays();
+  }
+
+  layoutOverlays() {
+    const cam = this.cameras.main, w = cam.width / cam.zoom + 8, h = cam.height / cam.zoom + 8;
+    if (this.grade) this.grade.setPosition(cam.width / 2, cam.height / 2).setSize(w, h).setDisplaySize(w, h);
+    if (this.vignette) this.vignette.setPosition(cam.width / 2, cam.height / 2).setDisplaySize(w, h);
   }
 
   buildMinimap() {

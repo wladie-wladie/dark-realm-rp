@@ -7,7 +7,7 @@ import { canvas } from "../art/paint.js";
 import { mulberry32, makeNoise } from "../core/rng.js";
 import { ZONES } from "../data/zones.js";
 
-const CH = 512;                    // кусок мира; плотность пикселей = масштабу камеры (1 пиксель текстуры на пиксель экрана)
+const CH = 256;                    // кусок мира; плотность пикселей = масштабу камеры (1 пиксель текстуры на пиксель экрана)
 let RES = 2;
 const PERIOD = 4 * TILE;           // текстура повторяется раз в 4 клетки
 const PER = { cobble: 2.6 * TILE, stone: 3 * TILE };  // мельче камни — ближе к образцу
@@ -269,7 +269,7 @@ export class Ground {
     const cam = this.s.cameras.main, v = cam.worldView;
     if (!v.width) return;
     // плотность текстуры = масштаб камеры: пиксель в пиксель, без мыла и ряби
-    const want = Math.max(1.5, Math.min(3.2, Math.round(cam.zoom * 4) / 4));
+    const want = Math.max(1.25, Math.min(2.5, Math.round(cam.zoom * 4) / 4));
     if (want !== this.res) { this.res = want; RES = want; this.destroy(); force = true; }
     RES = this.res;
     const m = CH * 0.25;
