@@ -61,8 +61,12 @@ export function itemIconUrl(it, S = 64) {
   frame(ctx, S, qc);
   if (it.slot === "weapon") {
     const look = WEAPON_TYPES[it.cls].look;
-    ctx.save(); ctx.translate(S * 0.5, S * 0.55); ctx.scale(S / 30, S / 30); ctx.translate(0, look === "bow" ? 0 : 8);
-    drawWeapon(ctx, look, 0, 0, look === "bow" ? 0 : 0.7, ["#8a8e96", "#9aa8b4", "#c0ccd8", "#e0c070"][it.tier - 1] || "#9aa0a8");
+    const len = { sword: 28, greatsword: 36, axe: 26, dagger: 14, bow: 32, staff: 44, mace: 24, scythe: 44 }[look] || 30;
+    const k = S * 0.78 / len;
+    ctx.save(); ctx.translate(S / 2, S / 2);
+    if (look !== "bow") ctx.rotate(0.785);
+    ctx.scale(k, k);
+    drawWeapon(ctx, look, look === "bow" ? 6 : 0, look === "bow" ? 0 : len / 2 - 3, 0, ["#8a8e96", "#9aa8b4", "#c0ccd8", "#e0c070"][it.tier - 1] || "#9aa0a8");
     ctx.restore();
   } else drawArmorPiece(ctx, it.slot, it.type, S, qc);
   ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(S - 20, S - 16, 18, 14);
