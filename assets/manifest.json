@@ -536,5 +536,875 @@
  "prop_bones_1": {
   "file": "props/bones.webp",
   "w": 44
+ },
+ "ter_mud": {
+  "file": "ground/mud.webp"
+ },
+ "ter_swampgrass": {
+  "file": "ground/swampgrass.webp"
+ },
+ "ter_swampwater": {
+  "file": "ground/swampwater.webp"
+ },
+ "ter_water": {
+  "file": "ground/water.webp"
+ },
+ "ter_stone": {
+  "file": "ground/stone.webp"
+ },
+ "ter_ash": {
+  "file": "ground/ash.webp"
+ },
+ "icons_skills_01": {
+  "file": "icons/icons_skills_01.webp"
+ },
+ "_icons": {
+  "w_cleave": [
+   "icons_skills_01",
+   0,
+   0,
+   4,
+   4
+  ],
+  "w_charge": [
+   "icons_skills_01",
+   1,
+   0,
+   4,
+   4
+  ],
+  "w_warcry": [
+   "icons_skills_01",
+   2,
+   0,
+   4,
+   4
+  ],
+  "w_quake": [
+   "icons_skills_01",
+   3,
+   0,
+   4,
+   4
+  ],
+  "w_iron": [
+   "icons_skills_01",
+   0,
+   1,
+   4,
+   4
+  ],
+  "w_fury": [
+   "icons_skills_01",
+   1,
+   1,
+   4,
+   4
+  ],
+  "w_second": [
+   "icons_skills_01",
+   2,
+   1,
+   4,
+   4
+  ],
+  "b_whirl": [
+   "icons_skills_01",
+   3,
+   1,
+   4,
+   4
+  ],
+  "b_rage": [
+   "icons_skills_01",
+   0,
+   2,
+   4,
+   4
+  ],
+  "b_execute": [
+   "icons_skills_01",
+   1,
+   2,
+   4,
+   4
+  ],
+  "b_blood": [
+   "icons_skills_01",
+   2,
+   2,
+   4,
+   4
+  ],
+  "b_edge": [
+   "icons_skills_01",
+   3,
+   2,
+   4,
+   4
+  ],
+  "b_heavy": [
+   "icons_skills_01",
+   0,
+   3,
+   4,
+   4
+  ],
+  "g_bash": [
+   "icons_skills_01",
+   1,
+   3,
+   4,
+   4
+  ],
+  "g_bulwark": [
+   "icons_skills_01",
+   2,
+   3,
+   4,
+   4
+  ],
+  "g_taunt": [
+   "icons_skills_01",
+   3,
+   3,
+   4,
+   4
+  ],
+  "g_block": [
+   "icons_skills_02",
+   0,
+   0,
+   4,
+   4
+  ],
+  "g_spikes": [
+   "icons_skills_02",
+   1,
+   0,
+   4,
+   4
+  ],
+  "g_wall": [
+   "icons_skills_02",
+   2,
+   0,
+   4,
+   4
+  ],
+  "m_flurry": [
+   "icons_skills_02",
+   3,
+   0,
+   4,
+   4
+  ],
+  "m_step": [
+   "icons_skills_02",
+   0,
+   1,
+   4,
+   4
+  ],
+  "m_focus": [
+   "icons_skills_06",
+   1,
+   0,
+   4,
+   4
+  ],
+  "m_precise": [
+   "icons_skills_02",
+   2,
+   1,
+   4,
+   4
+  ],
+  "m_dance": [
+   "icons_skills_02",
+   3,
+   1,
+   4,
+   4
+  ],
+  "m_bleed": [
+   "icons_skills_02",
+   0,
+   2,
+   4,
+   4
+  ],
+  "r_power": [
+   "icons_skills_02",
+   1,
+   2,
+   4,
+   4
+  ],
+  "r_multi": [
+   "icons_skills_02",
+   2,
+   2,
+   4,
+   4
+  ],
+  "r_roll": [
+   "icons_skills_02",
+   3,
+   2,
+   4,
+   4
+  ],
+  "r_trap": [
+   "icons_skills_02",
+   0,
+   3,
+   4,
+   4
+  ],
+  "r_eagle": [
+   "icons_skills_02",
+   1,
+   3,
+   4,
+   4
+  ],
+  "r_light": [
+   "icons_skills_02",
+   2,
+   3,
+   4,
+   4
+  ],
+  "r_quick": [
+   "icons_skills_02",
+   3,
+   3,
+   4,
+   4
+  ],
+  "s_heart": [
+   "icons_skills_03",
+   0,
+   0,
+   4,
+   4
+  ],
+  "s_mark": [
+   "icons_skills_03",
+   1,
+   0,
+   4,
+   4
+  ],
+  "s_rain": [
+   "icons_skills_03",
+   2,
+   0,
+   4,
+   4
+  ],
+  "s_far": [
+   "icons_skills_03",
+   3,
+   0,
+   4,
+   4
+  ],
+  "s_crit": [
+   "icons_skills_03",
+   0,
+   1,
+   4,
+   4
+  ],
+  "s_calm": [
+   "icons_skills_03",
+   1,
+   1,
+   4,
+   4
+  ],
+  "z_wolf": [
+   "icons_skills_03",
+   2,
+   1,
+   4,
+   4
+  ],
+  "z_net": [
+   "icons_skills_03",
+   3,
+   1,
+   4,
+   4
+  ],
+  "z_poison": [
+   "icons_skills_03",
+   0,
+   2,
+   4,
+   4
+  ],
+  "z_bond": [
+   "icons_skills_03",
+   1,
+   2,
+   4,
+   4
+  ],
+  "z_hunter": [
+   "icons_skills_03",
+   2,
+   2,
+   4,
+   4
+  ],
+  "z_skin": [
+   "icons_skills_03",
+   3,
+   2,
+   4,
+   4
+  ],
+  "ww_gale": [
+   "icons_skills_03",
+   0,
+   3,
+   4,
+   4
+  ],
+  "ww_volley": [
+   "icons_skills_03",
+   1,
+   3,
+   4,
+   4
+  ],
+  "ww_haste": [
+   "icons_skills_03",
+   2,
+   3,
+   4,
+   4
+  ],
+  "ww_flow": [
+   "icons_skills_03",
+   3,
+   3,
+   4,
+   4
+  ],
+  "ww_swift": [
+   "icons_skills_04",
+   0,
+   0,
+   4,
+   4
+  ],
+  "ww_breath": [
+   "icons_skills_04",
+   1,
+   0,
+   4,
+   4
+  ],
+  "g_backstab": [
+   "icons_skills_04",
+   2,
+   0,
+   4,
+   4
+  ],
+  "g_dash": [
+   "icons_skills_04",
+   3,
+   0,
+   4,
+   4
+  ],
+  "g_fan": [
+   "icons_skills_04",
+   0,
+   1,
+   4,
+   4
+  ],
+  "g_smoke": [
+   "icons_skills_04",
+   1,
+   1,
+   4,
+   4
+  ],
+  "g_lethal": [
+   "icons_skills_04",
+   2,
+   1,
+   4,
+   4
+  ],
+  "g_agile": [
+   "icons_skills_04",
+   3,
+   1,
+   4,
+   4
+  ],
+  "g_twin": [
+   "icons_skills_04",
+   0,
+   2,
+   4,
+   4
+  ],
+  "as_mark": [
+   "icons_skills_04",
+   1,
+   2,
+   4,
+   4
+  ],
+  "as_blink": [
+   "icons_skills_04",
+   2,
+   2,
+   4,
+   4
+  ],
+  "as_frenzy": [
+   "icons_skills_04",
+   3,
+   2,
+   4,
+   4
+  ],
+  "as_cruel": [
+   "icons_skills_04",
+   0,
+   3,
+   4,
+   4
+  ],
+  "as_shadow": [
+   "icons_skills_04",
+   1,
+   3,
+   4,
+   4
+  ],
+  "as_kill": [
+   "icons_skills_04",
+   2,
+   3,
+   4,
+   4
+  ],
+  "po_cloud": [
+   "icons_skills_04",
+   3,
+   3,
+   4,
+   4
+  ],
+  "po_vial": [
+   "icons_skills_05",
+   0,
+   0,
+   4,
+   4
+  ],
+  "po_blades": [
+   "icons_skills_05",
+   1,
+   0,
+   4,
+   4
+  ],
+  "po_toxin": [
+   "icons_skills_05",
+   2,
+   0,
+   4,
+   4
+  ],
+  "po_immune": [
+   "icons_skills_05",
+   3,
+   0,
+   4,
+   4
+  ],
+  "po_venom": [
+   "icons_skills_05",
+   0,
+   1,
+   4,
+   4
+  ],
+  "sh_nova": [
+   "icons_skills_05",
+   1,
+   1,
+   4,
+   4
+  ],
+  "sh_clone": [
+   "icons_skills_05",
+   2,
+   1,
+   4,
+   4
+  ],
+  "sh_bolt": [
+   "icons_skills_05",
+   3,
+   1,
+   4,
+   4
+  ],
+  "sh_veil": [
+   "icons_skills_05",
+   0,
+   2,
+   4,
+   4
+  ],
+  "sh_mind": [
+   "icons_skills_05",
+   1,
+   2,
+   4,
+   4
+  ],
+  "sh_quick": [
+   "icons_skills_05",
+   2,
+   2,
+   4,
+   4
+  ],
+  "m_fireball": [
+   "icons_skills_05",
+   3,
+   2,
+   4,
+   4
+  ],
+  "m_frost": [
+   "icons_skills_05",
+   0,
+   3,
+   4,
+   4
+  ],
+  "m_blink": [
+   "icons_skills_05",
+   1,
+   3,
+   4,
+   4
+  ],
+  "m_nova": [
+   "icons_skills_05",
+   2,
+   3,
+   4,
+   4
+  ],
+  "m_arcane": [
+   "icons_skills_05",
+   3,
+   3,
+   4,
+   4
+  ],
+  "m_well": [
+   "icons_skills_06",
+   0,
+   0,
+   4,
+   4
+  ],
+  "py_meteor": [
+   "icons_skills_06",
+   2,
+   0,
+   4,
+   4
+  ],
+  "py_wall": [
+   "icons_skills_06",
+   3,
+   0,
+   4,
+   4
+  ],
+  "py_breath": [
+   "icons_skills_06",
+   0,
+   1,
+   4,
+   4
+  ],
+  "py_heat": [
+   "icons_skills_06",
+   1,
+   1,
+   4,
+   4
+  ],
+  "py_ignite": [
+   "icons_skills_06",
+   2,
+   1,
+   4,
+   4
+  ],
+  "py_fury": [
+   "icons_skills_06",
+   3,
+   1,
+   4,
+   4
+  ],
+  "cr_storm": [
+   "icons_skills_06",
+   0,
+   2,
+   4,
+   4
+  ],
+  "cr_armor": [
+   "icons_skills_06",
+   1,
+   2,
+   4,
+   4
+  ],
+  "cr_lance": [
+   "icons_skills_06",
+   2,
+   2,
+   4,
+   4
+  ],
+  "cr_cold": [
+   "icons_skills_06",
+   3,
+   2,
+   4,
+   4
+  ],
+  "cr_shatter": [
+   "icons_skills_06",
+   0,
+   3,
+   4,
+   4
+  ],
+  "cr_ice": [
+   "icons_skills_06",
+   1,
+   3,
+   4,
+   4
+  ],
+  "st_chain": [
+   "icons_skills_06",
+   2,
+   3,
+   4,
+   4
+  ],
+  "st_thunder": [
+   "icons_skills_06",
+   3,
+   3,
+   4,
+   4
+  ],
+  "st_storm": [
+   "icons_skills_07",
+   0,
+   0,
+   4,
+   4
+  ],
+  "st_charge": [
+   "icons_skills_07",
+   1,
+   0,
+   4,
+   4
+  ],
+  "st_static": [
+   "icons_skills_07",
+   2,
+   0,
+   4,
+   4
+  ],
+  "st_flow": [
+   "icons_skills_07",
+   3,
+   0,
+   4,
+   4
+  ],
+  "c_smite": [
+   "icons_skills_07",
+   0,
+   1,
+   4,
+   4
+  ],
+  "c_heal": [
+   "icons_skills_07",
+   1,
+   1,
+   4,
+   4
+  ],
+  "c_bless": [
+   "icons_skills_07",
+   2,
+   1,
+   4,
+   4
+  ],
+  "c_hammer": [
+   "icons_skills_07",
+   3,
+   1,
+   4,
+   4
+  ],
+  "c_faith": [
+   "icons_skills_07",
+   0,
+   2,
+   4,
+   4
+  ],
+  "c_armor": [
+   "icons_skills_07",
+   1,
+   2,
+   4,
+   4
+  ],
+  "c_grace": [
+   "icons_skills_07",
+   2,
+   2,
+   4,
+   4
+  ],
+  "in_purge": [
+   "icons_skills_07",
+   3,
+   2,
+   4,
+   4
+  ],
+  "in_verdict": [
+   "icons_skills_07",
+   0,
+   3,
+   4,
+   4
+  ],
+  "in_zeal": [
+   "icons_skills_07",
+   1,
+   3,
+   4,
+   4
+  ],
+  "in_hunt": [
+   "icons_skills_07",
+   2,
+   3,
+   4,
+   4
+  ],
+  "in_steel": [
+   "icons_skills_07",
+   3,
+   3,
+   4,
+   4
+  ]
+ },
+ "icons_skills_02": {
+  "file": "icons/icons_skills_02.webp"
+ },
+ "icons_skills_03": {
+  "file": "icons/icons_skills_03.webp"
+ },
+ "icons_skills_04": {
+  "file": "icons/icons_skills_04.webp"
+ },
+ "icons_skills_05": {
+  "file": "icons/icons_skills_05.webp"
+ },
+ "icons_skills_06": {
+  "file": "icons/icons_skills_06.webp"
+ },
+ "icons_skills_07": {
+  "file": "icons/icons_skills_07.webp"
+ },
+ "prop_grave_0": {
+  "file": "props/grave1.webp",
+  "w": 50
+ },
+ "prop_grave_1": {
+  "file": "props/grave2.webp",
+  "w": 50
+ },
+ "prop_grave_2": {
+  "file": "props/cross.webp",
+  "w": 46
+ },
+ "prop_ruinwall_0": {
+  "file": "props/ruinwall.webp",
+  "w": 165
+ },
+ "prop_ruinwall_1": {
+  "file": "props/ruinwall.webp",
+  "w": 150
+ },
+ "prop_pillar_0": {
+  "file": "props/pillar.webp",
+  "w": 60
+ },
+ "prop_pillar_1": {
+  "file": "props/pillar.webp",
+  "w": 56
+ },
+ "prop_mine_0": {
+  "file": "props/mineentrance.webp",
+  "w": 170
+ },
+ "prop_beam_0": {
+  "file": "props/beam.webp",
+  "w": 95
+ },
+ "prop_minecart_0": {
+  "file": "props/minecart.webp",
+  "w": 95
+ },
+ "prop_crystal_0": {
+  "file": "props/crystal_blue.webp",
+  "w": 70
+ },
+ "prop_crystal_1": {
+  "file": "props/crystal_purple.webp",
+  "w": 70
+ },
+ "prop_cobweb_0": {
+  "file": "props/cobweb.webp",
+  "w": 60
  }
 }
