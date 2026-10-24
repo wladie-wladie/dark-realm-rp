@@ -15,6 +15,7 @@ import { PROPS } from "../art/props.js";
 import { heroArtKey } from "../art/looks.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32 } from "../core/rng.js";
+import { Ground } from "../systems/ground.js";
 import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH } from "../core/iso.js";
 import { questOnKill, questOnBoss } from "../systems/quests.js";
 
@@ -70,6 +71,8 @@ export class WorldScene extends Phaser.Scene {
     cam.setBounds(0, 0, Wpx, Hpx);
     cam.startFollow(this.player.sprite, true, 0.12, 0.12, 0, 20);
     this.resize();
+    cam.centerOn(this.player.x, this.player.y); cam.preRender && cam.preRender();
+    this.ground.update(true);
     this.scale.on("resize", this.resize, this);
     this.events.once("shutdown", () => this.scale.off("resize", this.resize, this));
     cam.fadeIn(500, 0, 0, 0);
@@ -95,53 +98,7 @@ export class WorldScene extends Phaser.Scene {
 
   // ---------- земля ----------
   buildGround() {
-    const { W, H, ter } = this.gen;
-    const base = this.z.base;
-    const [Wpx, Hpx] = isoSize(W, H);
-    const cw = Math.ceil(Wpx / CHUNK), ch = Math.ceil(Hpx / CHUNK);
-    const order = ["grass", "forest", "swampgrass", "dirt", "mud", "ash", "road", "cobble", "stone", "water", "swampwater"];
-    const M = isoMatrix();
-    for (let cy = 0; cy < ch; cy++) for (let cx = 0; cx < cw; cx++) {
-      const key = `ground_${this.zoneId}_${cx}_${cy}`;
-      if (!this.textures.exists(key)) {
-        const size = CHUNK * CHUNK_RES;
-        const c = canvas(size, size), ctx = c.getContext("2d");
-        ctx.fillStyle = "#07060a"; ctx.fillRect(0, 0, size, size);
-        // мир «квадратный» (клетка 64 px) → ромбы
-        ctx.scale(CHUNK_RES, CHUNK_RES);
-        ctx.translate(-cx * CHUNK, -cy * CHUNK);
-        ctx.transform(...M);
-        ctx.fillStyle = ctx.createPattern(TERRAIN.tex[base], "repeat");
-        ctx.fillRect(0, 0, W * TILE, H * TILE);
-        for (const t of order) {
-          if (t === base) continue;
-          const isWater = t === "water" || t === "swampwater";
-          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-            if (ter[y * W + x] !== t) continue;
-            const r = mulberry32(y * 7919 + x * 104729 + t.length);
-            const brushes = TERRAIN.brushes[isWater ? "mud" : t];
-            const b = brushes[Math.floor(r() * brushes.length)];
-            const sz = (isWater ? 170 : 150) * (0.95 + r() * 0.3);
-            ctx.save(); ctx.translate((x + 0.5) * TILE, (y + 0.5) * TILE); ctx.rotate(r() * 6.28);
-            ctx.drawImage(b, -sz / 2, -sz / 2, sz, sz); ctx.restore();
-          }
-          if (isWater) {
-            for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-              if (ter[y * W + x] !== t) continue;
-              const r = mulberry32(y * 31 + x * 977);
-              const b = TERRAIN.brushes[t][Math.floor(r() * 3)];
-              const sz = 120 * (0.95 + r() * 0.25);
-              ctx.save(); ctx.translate((x + 0.5) * TILE, (y + 0.5) * TILE); ctx.rotate(r() * 6.28);
-              ctx.drawImage(b, -sz / 2, -sz / 2, sz, sz); ctx.restore();
-            }
-          }
-        }
-        // тёмная кромка по краю земли
-        ctx.strokeStyle = "rgba(0,0,0,0.55)"; ctx.lineWidth = 10; ctx.strokeRect(0, 0, W * TILE, H * TILE);
-        this.textures.addCanvas(key, c);
-      }
-      this.add.image(cx * CHUNK, cy * CHUNK, key).setOrigin(0).setScale(1 / CHUNK_RES).setDepth(-100000);
-    }
+    this.ground = new Ground(this, this.gen, this.zoneId);
   }
 
   buildObstacles() {
@@ -909,6 +866,7 @@ export class WorldScene extends Phaser.Scene {
         if (img.alpha !== target) img.setAlpha(img.alpha + (target - img.alpha) * 0.6);
       }
     }
+    this.ground.update();
     if (this.fog) { this.fog.tilePositionX += dt * 8; this.fog.tilePositionY += dt * 2; }
 
     this.hudT -= dt;

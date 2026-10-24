@@ -37,6 +37,7 @@ export function registerStatic(scene) {
   for (const [name, art] of Object.entries(map)) {
     if (!T.exists("ter_" + art)) continue;
     const img = T.get("ter_" + art).getSourceImage();
+    (TERRAIN.src = TERRAIN.src || {})[name] = img; // полное разрешение — для чёткой земли
     const S = 300; const c = canvas(S, S); const cx = c.getContext("2d"); cx.imageSmoothingQuality = "high"; cx.drawImage(img, 0, 0, S, S);
     TERRAIN.tex[name] = c;
     TERRAIN.brushes[name] = [0, 1, 2].map(i => softBrush(c, 160, seed++ * 11 + i, name === "cobble" ? 0.8 : 0.55));

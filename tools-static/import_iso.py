@@ -6,6 +6,7 @@ from PIL import Image
 sys.path.insert(0, os.path.dirname(__file__))
 from chroma import parts
 from import_sheets import seamless
+from quilt import seamless_quilt
 
 man_path = "assets/manifest.json"
 man = json.load(open(man_path))
@@ -41,8 +42,8 @@ for name in sys.argv[1:]:
     if name in TEX:
         t = Image.open(src).convert("RGB")
         w, h = t.size; m = int(min(w, h) * 0.04)
-        t = t.crop((m, m, w - m, h - m)).resize((512, 512), Image.LANCZOS)
-        t = seamless(t)
+        t = t.crop((m, m, w - m, h - m))
+        t = seamless_quilt(t).resize((1024, 1024), Image.LANCZOS)
         fn = f"ground/iso_{TEX[name]}.webp"; t.save("assets/" + fn, "WEBP", quality=90, method=6)
         man["ter_" + TEX[name]] = {"file": fn}
         print("texture", name); continue
