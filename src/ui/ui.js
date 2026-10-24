@@ -122,6 +122,7 @@ export class UI {
     e.bBag = mb("🎒", "bag", "Сумка"); e.bSkills = mb("✦", "skills", "Навыки"); e.bHero = mb("♜", "hero", "Герой"); e.bQuests = mb("☰", "quests", "Задания"); e.bMenu = mb("⚙", "menu", "Меню");
     e.gold = h("div.gold-line");
     R.appendChild(h("div.hud-tr", {}, e.mini, h("div.menu-btns", {}, e.bBag, e.bSkills, e.bHero, e.bQuests, e.bMenu), e.gold));
+    e.xpW = h("i"); e.xpT = h("span"); R.appendChild(h("div.xpwide", {}, e.xpW, e.xpT));
     e.toasts = h("div.toasts"); R.appendChild(e.toasts);
     e.gather = h("div.gatherbar", { style: { display: "none" } }); R.appendChild(e.gather);
     this.buildControls();
@@ -209,6 +210,7 @@ export class UI {
     e.mp.style.width = (W.mp / ps.mp * 100) + "%";
     e.mpT.textContent = `${Math.floor(W.mp)} / ${ps.mp}`;
     e.xp.style.width = (st.xp / xpToNext(st.level) * 100) + "%";
+    if (e.xpW) { e.xpW.style.width = e.xp.style.width; e.xpT.textContent = `Ур. ${st.level} · ${Math.floor(st.xp / xpToNext(st.level) * 1000) / 10}%`; }
     // кнопки навыков
     st.slots.forEach((id, i) => {
       const b = e.skillBtns[i];

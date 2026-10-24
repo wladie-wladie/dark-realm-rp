@@ -1,4 +1,5 @@
 // Сцена мира: локация, герой, монстры, жители, ресурсы, переходы между землями.
+import { style } from "../art/style.js";
 import Phaser from "phaser";
 import { G } from "../core/G.js";
 import { ZONES, TILE, DANGER } from "../data/zones.js";
@@ -87,7 +88,7 @@ export class WorldScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const h = this.scale.height, w = this.scale.width;
     cam.setSize(w, h);
-    cam.setZoom(Math.max(0.6, Math.min(h / (TILE * 6.6), w / (TILE * 10))));
+    cam.setZoom(Math.max(0.45, Math.min(h / (TILE * 6.6), w / (TILE * 10)) * style().zoom));
   }
 
   // ---------- земля ----------
@@ -208,7 +209,8 @@ export class WorldScene extends Phaser.Scene {
   }
 
   addLight(x, y, color, scale, alpha, flicker = false) {
-    alpha = Math.min(0.95, alpha * ((this.z.mood && this.z.mood.lights) || 1));
+    const vs = style(); // днём огни почти не видны
+    alpha = Math.min(0.95, alpha * (1 + (((this.z.mood && this.z.mood.lights) || 1) - 1) * vs.mood) * (0.3 + 0.7 * Math.max(vs.dark, this.z.cave ? 1 : 0)));
     const l = this.add.image(x, y, "fx_glow_warm").setTint(color).setBlendMode(Phaser.BlendModes.ADD).setScale(scale).setAlpha(alpha).setDepth(99000);
     if (flicker) this.tweens.add({ targets: l, alpha: alpha * 0.7, scale: scale * 0.94, yoyo: true, repeat: -1, duration: 160 + Math.random() * 120 });
     this.lights.push(l);
@@ -255,11 +257,13 @@ export class WorldScene extends Phaser.Scene {
     // постобработка: тёмная мрачная гамма + виньетка
     if (cam.postFX) {
       const cm = cam.postFX.addColorMatrix();
-      const dark = this.z.dark + (mood.extraDark || 0);
-      cm.saturate(mood.sat != null ? mood.sat : -0.25);
+      const vs = style();
+      const dark = (this.z.dark + (mood.extraDark || 0)) * vs.dark + (this.z.cave ? 0.15 * (1 - vs.dark) : 0);
+      cm.saturate((mood.sat != null ? mood.sat : -0.25) * vs.mood + vs.sat);
       cm.brightness(1 - dark * 0.55, true);
-      if (mood.gain) { const [r, g, b] = mood.gain; cm.multiply([r, 0, 0, 0, 0, 0, g, 0, 0, 0, 0, 0, b, 0, 0, 0, 0, 0, 1, 0], true); }
-      cam.postFX.addVignette(0.5, 0.5, 0.88, 0.32 + dark * 0.35);
+      if (vs.contrast) cm.contrast(vs.contrast, true);
+      if (mood.gain) { const k = vs.mood, [r, g, b] = mood.gain.map(v => 1 + (v - 1) * k); cm.multiply([r, 0, 0, 0, 0, 0, g, 0, 0, 0, 0, 0, b, 0, 0, 0, 0, 0, 1, 0], true); }
+      cam.postFX.addVignette(0.5, 0.5, 0.88, (0.32 + dark * 0.35) * vs.vignette);
     }
   }
 

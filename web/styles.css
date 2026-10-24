@@ -222,3 +222,22 @@ input { font-family: var(--serif); user-select: text; -webkit-user-select: text;
   .slot > .btn { grid-column: 1 / -1; }
   .slot.empty { display: flex; flex-direction: row; justify-content: space-between !important; align-items: center !important; }
 }
+
+/* ---------- интерфейс в духе Zenonia (пресеты «Как Zenonia») ---------- */
+.xpwide { display: none; }
+body.hud-z .xpwide { display: block; position: fixed; left: 0; right: 0; bottom: 0; height: 9px; background: rgba(0,0,0,.75); border-top: 1px solid #000; pointer-events: none; z-index: 4; }
+body.hud-z .xpwide i { display: block; height: 100%; background: linear-gradient(#ffe890, #d09a20 60%, #8a6010); box-shadow: 0 0 6px rgba(255,200,80,.6); }
+body.hud-z .xpwide span { position: absolute; left: 50%; top: -15px; transform: translateX(-50%); font-size: 11px; color: #ffe8a0; text-shadow: 0 1px 2px #000, 0 0 3px #000; }
+body.hud-z .bar.xp { display: none; }
+body.hud-z .actions { bottom: max(18px, env(safe-area-inset-bottom)); }
+body.hud-z .abtn.sk { border: 2px solid #e8c060; box-shadow: 0 0 0 2px #2a1a06, 0 0 10px rgba(255,190,80,.45), 0 4px 8px rgba(0,0,0,.8); }
+body.hud-z .abtn.empty { opacity: .6; background: radial-gradient(circle at 40% 30%, #4a3a20, #1a1206); }
+body.hud-z .abtn.atk { border: 3px solid #ffd070; box-shadow: 0 0 0 3px #2a1a06, 0 0 16px rgba(255,190,80,.6), 0 6px 12px rgba(0,0,0,.8); }
+body.hud-z .abtn.pot { border: 2px solid #e8c060; }
+body.hud-z .hud-portrait { border-color: #ffd070; box-shadow: 0 0 0 2px #2a1a06, 0 0 10px rgba(255,190,80,.45); }
+body.hud-z .bar { border-color: #c09040; }
+body.hud-z .bar.hp i { background: linear-gradient(#ff7a6a, #d02010 55%, #801008); }
+body.hud-z .bar.mp i { background: linear-gradient(#8ac0ff, #2060e0 55%, #102a80); }
+body.hud-z .minimap { width: 130px; height: 94px; border-color: #c09040; }
+body.hud-z .mbtn { border-color: #c09040; }
+body.hud-z .zone-name { color: #fff2c0; }

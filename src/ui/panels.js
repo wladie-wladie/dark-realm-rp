@@ -1,4 +1,5 @@
 // Окна героя: характеристики и снаряжение, сумка, навыки, задания, карта, меню.
+import { STYLES, styleId, setStyle } from "../art/style.js";
 import { G } from "../core/G.js";
 import { h, clear } from "./dom.js";
 import { CLASSES, STAT_NAMES, allSkills, STATUS } from "../data/classes.js";
@@ -248,6 +249,13 @@ export class Panels {
     col.appendChild(h("label.row", { style: { padding: "8px" } }, h("input", { type: "checkbox", checked: st.settings.showHelm, onchange: e => { st.settings.showHelm = e.target.checked; G.world && G.world.refreshPlayerLook(); } }), "Показывать шлем"));
     col.appendChild(h("div.hint", {}, `Время в игре: ${Math.floor(st.playtime / 3600)} ч ${Math.floor(st.playtime / 60) % 60} мин · Смертей: ${st.deaths}`));
     col.appendChild(h("div.hint", {}, "Управление на клавиатуре (для проверки на компьютере): WASD — движение, J/пробел — атака, 1–6 — навыки, Q/E — зелья, F — действие, T — портал в город."));
+    // визуальный стиль (сравнение с Zenonia)
+    const segS = h("div.seg", {}, Object.entries(STYLES).map(([id, v]) => h("button", { class: id === styleId() ? "on" : "", onclick: () => {
+      setStyle(id); G.world && G.world.persist(); this.close();
+      // контуры и камера применяются при пересоздании мира
+      const sc = G.game.scene.getScene("world"); sc.scene.restart({ zone: G.st.zone });
+    } }, v.name)));
+    col.appendChild(h("div.box", {}, h("h3", {}, "Визуальный стиль"), segS));
     // обновления
     const UPD = { idle: "ещё не проверялось", web: "версия для браузера — обновляется сама при открытии", checking: "проверяю…", latest: "у вас последняя версия", downloading: "скачиваю обновление", ready: "обновление скачано — перезапустите игру", error: "ошибка" };
     const ustat = h("div.hint");

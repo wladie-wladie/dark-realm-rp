@@ -1,4 +1,5 @@
 // Существа в мире: герой, монстры, союзники, жители. Спрайт + физическое тело + анимация.
+import { style } from "../art/style.js";
 
 // Общий масштаб существ относительно мира (герой ~1/5 высоты экрана, как в Zenonia)
 export const ACTOR_SCALE = 1.45;
@@ -23,6 +24,8 @@ export class Actor {
     sprite.body.setCircle(rSrc, footX - rSrc, footY - rSrc * 1.6);
     sprite.actor = this;
     this.sprite = sprite;
+    // тёмный контур, как у спрайтов Zenonia
+    if (style().outline && sprite.preFX) sprite.preFX.addGlow(0x080402, 4, 0, false, 0.1, 8);
     this.radius = rWorld;
     this.dir = 0; this.flip = false;
     this.walkPhase = 0; this.moving = false;

@@ -1,4 +1,5 @@
 // Бой: урон, эффекты, снаряды, области, применение навыков героя.
+import { style } from "../art/style.js";
 import Phaser from "phaser";
 import { G } from "../core/G.js";
 import { STATUS } from "../data/classes.js";
@@ -15,6 +16,7 @@ export class Combat {
 
   // ---------- эффекты ----------
   text(x, y, str, color = "#ffffff", size = 20, crit = false) {
+    size = Math.round(size * (style().dmg || 1));
     const t = this.W.add.text(x + rand(-8, 8), y, str, {
       fontFamily: "Georgia, serif", fontSize: (crit ? size * 1.35 : size) + "px", color, stroke: "#000000", strokeThickness: 4, fontStyle: crit ? "bold" : "normal",
     }).setOrigin(0.5).setDepth(100000);

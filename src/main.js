@@ -5,6 +5,7 @@ import { WorldScene } from "./scenes/WorldScene.js";
 import { registerStatic } from "./art/registry.js";
 import { UI } from "./ui/ui.js";
 import { initNative, applyUpdateNow } from "./native.js";
+import { setStyle } from "./art/style.js";
 
 const DPR = Math.min(window.devicePixelRatio || 1, 2);
 
@@ -57,4 +58,5 @@ window.addEventListener("load", () => {
   });
   window.__applyUpdate = applyUpdateNow;
   window.G = G; // для отладки
+  window.__setStyle = setStyle;
 });
