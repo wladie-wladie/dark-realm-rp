@@ -563,6 +563,7 @@ export const PROPS = {
   boulder:   { w: 130, h: 110, v: 2, col: 40, draw: (c, r) => rock(c, r, 130, 110, "#36332f") },
   pebble:    { w: 40, h: 30, v: 3, col: 0, draw: (c, r) => rock(c, r, 40, 30, "#3a3733", false) },
   log:       { w: 120, h: 50, v: 1, col: 18, draw: (c, r) => log(c, r, 120, 50) },
+  boat:      { w: 130, h: 60, v: 1, col: 22, draw: (c, r) => log(c, r, 130, 60) },
   stump:     { w: 50, h: 46, v: 1, col: 12, draw: (c, r) => stump(c, r, 50, 46) },
   grave:     { w: 50, h: 56, v: 3, col: 12, draw: (c, r, v) => gravestone(c, r, 50, 56, v) },
   house:     { w: 260, h: 220, v: 2, col: 0, block: [20, 104, 220, 92], draw: (c, r, v) => house(c, r, 260, 220, v ? { roof: "#3a2a22", wall: "#5e5444" } : {}) },

@@ -67,7 +67,7 @@ export const ZONES = {
 
   swamp: {
     name: "Гнилые топи", danger: "yellow", lvl: "5–10", size: [56, 42], base: "swampgrass", seed: 37,
-    mood: { name: "Ночь", gain: [0.78, 0.9, 1.1], sat: -0.3, lights: 1.9, glow: 0.3, extraDark: 0.1, weather: "fireflies" },
+    mood: { name: "Ночь", gain: [0.78, 0.9, 1.1], sat: -0.3, lights: 1.9, glow: 0.34, extraDark: 0.03, weather: "fireflies" },
     tint: 0x80907a, dark: 0.42, fog: 0.35, ambient: "swamp",
     paths: [{ pts: [[25, 0], [24, 10], [30, 18], [26, 28], [32, 36]], w: 1.4, t: "mud" }, { pts: [[30, 18], [44, 20]], w: 1.2, t: "mud" }],
     plazas: [{ x: 33, y: 36, rx: 6, ry: 4, t: "mud" }],
@@ -76,7 +76,7 @@ export const ZONES = {
     scatter: [{ p: "reeds", d: 0.06 }, { p: "drytuft", d: 0.05 }, { p: "mushrooms", d: 0.02, v: 1 }, { p: "bones", d: 0.004 }, { p: "log", d: 0.004 }],
     waterScatter: [{ p: "lily", d: 0.12 }],
     trees: { p: ["deadtree", "swamptree", "deadtree"], d: 0.08 },
-    fixed: [["portal", 25, 1], ["hut", 37, 33], ["bones", 30, 35]],
+    fixed: [["portal", 25, 1], ["hut", 37, 33], ["bones", 30, 35], ["boat", 19.5, 30.5], ["boat", 7, 16.5]],
     nodes: [["node_herb2", 10], ["node_fiber2", 8], ["node_wood2", 6], ["node_herb1", 4]],
     spawns: [{ m: "toad", n: 8 }, { m: "ghoul", n: 9 }, { m: "wisp", n: 6 }],
     boss: { m: "witch", x: 33, y: 37 },

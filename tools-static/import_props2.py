@@ -59,7 +59,19 @@ def dewhite(im):
 man_path = "assets/manifest.json"
 man = json.load(open(man_path))
 os.makedirs("assets/props", exist_ok=True)
+SINGLE = {"prop_stilthut": ("stilthut", [("hut_0", 230)]), "prop_boat": ("boat", [("boat_0", 130)])}
 for sheet in sys.argv[1:]:
+    if sheet in SINGLE:
+        parts = slice_sheet(f"assets/raw/{sheet}.png", min_px=600)
+        name, uses = SINGLE[sheet]
+        from PIL import Image
+        im = dewhite(parts[0]["img"]) if len(parts) == 1 else None
+        if im is None:  # склеиваем все куски в одну картинку по исходным координатам
+            src = __import__("bg").to_rgba(f"assets/raw/{sheet}.png"); bb = src.getbbox(); im = dewhite(src.crop(bb))
+        im.thumbnail((512, 512))
+        fn = f"props/{name}.webp"; im.save("assets/" + fn, "WEBP", quality=90, method=6)
+        for key, w in uses: man["prop_" + key] = {"file": fn, "w": w}
+        print(sheet, "ok", len(parts)); continue
     spec = SHEETS[sheet]
     parts = slice_sheet(f"assets/raw/{sheet}.png", min_px=600)
     if sheet in MANUAL and len(parts) != len(spec):

@@ -24,8 +24,8 @@
   "w": 240
  },
  "prop_hut_0": {
-  "file": "props/house_thatch.webp",
-  "w": 220
+  "file": "props/stilthut.webp",
+  "w": 230
  },
  "prop_well_0": {
   "file": "props/well.webp",
@@ -2169,5 +2169,9 @@
  },
  "icons_weapons": {
   "file": "icons/icons_weapons.webp"
+ },
+ "prop_boat_0": {
+  "file": "props/boat.webp",
+  "w": 130
  }
 }
