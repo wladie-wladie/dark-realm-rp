@@ -9,6 +9,14 @@ export const DANGER = {
   red:    { name: "Красная зона", color: "#e04030", durLoss: 20, bagLoss: 0.35, goldLoss: 0.15 },
 };
 
+// частокол по краю городка с проёмами под ворота (x, y — клетки)
+function palisadeRing(W, H, gates) {
+  const out = [], gap = (x, y) => gates.some(([gx, gy]) => Math.hypot(x - gx, y - gy) < 2.6);
+  for (let x = 1.6; x < W - 1; x += 2) { if (!gap(x, 0.9)) out.push(["palisade_a", x, 0.9]); if (!gap(x, H - 0.7)) out.push(["palisade_a", x, H - 0.7]); }
+  for (let y = 1.6; y < H - 1; y += 2) { if (!gap(0.9, y)) out.push(["palisade_b", 0.9, y]); if (!gap(W - 0.7, y)) out.push(["palisade_b", W - 0.7, y]); }
+  return out;
+}
+
 export const ZONES = {
   town: {
     name: "Серый Брод", danger: "safe", lvl: "", size: [46, 34], base: "grass", seed: 11,
@@ -21,7 +29,6 @@ export const ZONES = {
       { pts: [[0, 18], [16, 17]], w: 1.6, t: "dirt" },
     ],
     plazas: [{ x: 23, y: 16.5, rx: 8, ry: 5.5, t: "cobble" }],
-    border: { props: ["pine", "oak"], depth: 2 },
     scatter: [{ p: "tuft", d: 0.025 }, { p: "bush", d: 0.008 }],
     trees: { p: ["oak", "pine"], d: 0.012 },
     fixed: [
@@ -34,6 +41,8 @@ export const ZONES = {
       // ворота и дороги
       ["banner", 21.6, 2.2], ["banner", 24.6, 2.2], ["signpost2", 25.4, 4.4], ["signpost2", 42.4, 14.4], ["lamp2", 24.6, 30.2], ["lamp2", 40, 15],
       ["cart2", 41, 19], ["campfire", 9, 19], ["log", 7.5, 20.6], ["portal", 23, 1.3], ["portal", 44.6, 16], ["portal", 23, 32.8],
+      ["wpillar", 20.8, 1.1], ["wpillar", 25.2, 1.1],
+      ...palisadeRing(46, 34, [[23, 0], [46, 16], [23, 34]]),
     ],
     npcs: [
       { id: "elder", name: "Староста Годрик", role: "quests", x: 21, y: 15.4, look: { gender: "m", skin: 1, hair: 3, hairColor: 6, beard: 3, armor: "cloth", colors: { main: "#3a3428", trim: "#7a6a40" } } },

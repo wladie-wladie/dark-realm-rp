@@ -155,7 +155,7 @@
   "file": "ground/iso_cobble.webp"
  },
  "ter_dirt": {
-  "file": "ground/dirt.webp"
+  "file": "ground/iso_dirt.webp"
  },
  "ter_forest": {
   "file": "ground/forest.webp"
@@ -2189,5 +2189,89 @@
    3
   ],
   "ox": 0.57
+ },
+ "prop_smithy2_0": {
+  "file": "props/iso_smithy2_0.webp",
+  "foot": [
+   4,
+   3
+  ],
+  "ox": 0.5
+ },
+ "prop_tavern2_0": {
+  "file": "props/iso_tavern2_0.webp",
+  "foot": [
+   5,
+   4
+  ],
+  "ox": 0.6
+ },
+ "prop_stall2_0": {
+  "file": "props/iso_stall2_0.webp",
+  "w": 150
+ },
+ "prop_stall2_1": {
+  "file": "props/iso_stall2_1.webp",
+  "w": 150
+ },
+ "prop_well2_0": {
+  "file": "props/iso_well2_0.webp",
+  "w": 130
+ },
+ "prop_lamp2_0": {
+  "file": "props/iso_lamp2_0.webp",
+  "w": 46
+ },
+ "prop_board_0": {
+  "file": "props/iso_board_0.webp",
+  "w": 80
+ },
+ "prop_barrels_0": {
+  "file": "props/iso_barrels_0.webp",
+  "w": 80
+ },
+ "prop_crates_0": {
+  "file": "props/iso_crates_0.webp",
+  "w": 80
+ },
+ "prop_cart2_0": {
+  "file": "props/iso_cart2_0.webp",
+  "w": 150
+ },
+ "prop_banner_0": {
+  "file": "props/iso_banner_0.webp",
+  "w": 50
+ },
+ "prop_signpost2_0": {
+  "file": "props/iso_signpost2_0.webp",
+  "w": 70
+ },
+ "prop_bench_0": {
+  "file": "props/iso_bench_0.webp",
+  "w": 90
+ },
+ "prop_wall_a_0": {
+  "file": "props/iso_wall_a_0.webp",
+  "w": 140
+ },
+ "prop_wall_b_0": {
+  "file": "props/iso_wall_b_0.webp",
+  "w": 140
+ },
+ "prop_palisade_a_0": {
+  "file": "props/iso_palisade_a_0.webp",
+  "w": 140
+ },
+ "prop_palisade_b_0": {
+  "file": "props/iso_palisade_b_0.webp",
+  "w": 140
+ },
+ "prop_stairs_0": {
+  "file": "props/iso_stairs_0.webp",
+  "w": 170
+ },
+ "prop_wpillar_0": {
+  "file": "props/iso_wpillar_0.webp",
+  "w": 44
  }
 }

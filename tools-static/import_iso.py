@@ -19,11 +19,11 @@ SHEETS = {
     "town_bld3": [("stall2", 0, None, 150), ("stall2", 1, None, 150), ("well2", 0, None, 130)],
     "town_props": [("lamp2", 0, None, 46), ("board", 0, None, 80), ("barrels", 0, None, 80), ("crates", 0, None, 80),
                    ("cart2", 0, None, 150), ("banner", 0, None, 50), ("signpost2", 0, None, 70), ("bench", 0, None, 90)],
-    "town_walls": [("wall_a", 0, None, 140), ("wall_b", 0, None, 140), ("pillar", 0, None, 44), ("palisade_a", 0, None, 140), ("palisade_b", 0, None, 140), ("stairs", 0, None, 170)],
+    "town_walls": [("wall_a", 0, None, 140), ("wall_b", 0, None, 140), ("wpillar", 0, None, 44), ("palisade_a", 0, None, 140), ("palisade_b", 0, None, 140), ("stairs", 0, None, 170)],
 }
 
 # где на картинке нижний угол основания (доля ширины), если крыльцо/ступени сбивают автоматику
-OX = {("house2", 0): 0.58, ("house2", 1): 0.57}
+OX = {("house2", 0): 0.58, ("house2", 1): 0.57, ("smithy2", 0): 0.5, ("tavern2", 0): 0.6}
 
 def base_x(im):
     a = np.array(im)[..., 3] > 60
@@ -54,6 +54,6 @@ for name in sys.argv[1:]:
             ox = OX.get((key, v)) or base_x(im); fw = max(1, round(n * ox)); fh = max(1, n - fw)
             man[f"prop_{key}_{v}"] = {"file": fn, "foot": [fw, fh], "ox": round(ox, 3)}
         else:
-            man[f"prop_{key}_{v}"] = {"file": fn, "w": wworld, "ox": round(base_x(im), 3)}
+            man[f"prop_{key}_{v}"] = {"file": fn, "w": wworld}
     print(name, "ok")
 json.dump(man, open(man_path, "w"), ensure_ascii=False, indent=1)
