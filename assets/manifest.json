@@ -2177,50 +2177,50 @@
  "prop_house2_0": {
   "file": "props/iso_house3_0.webp",
   "foot": [
-   4,
-   3
+   3,
+   2
   ],
   "ox": 0.6,
-  "k": 1.035
+  "k": 0.999
  },
  "prop_house2_1": {
   "file": "props/iso_house2_s_1.webp",
   "foot": [
-   4,
-   3
+   3,
+   2
   ],
   "ox": 0.6,
-  "k": 1.071
+  "k": 0.961
  },
  "prop_smithy2_0": {
   "file": "props/iso_smithy2_s_0.webp",
   "foot": [
    2,
-   2
+   1
   ],
   "ox": 0.55,
-  "k": 1.029
+  "k": 1.164
  },
  "prop_tavern2_0": {
   "file": "props/iso_tavern2_s_0.webp",
   "foot": [
-   6,
+   4,
    3
   ],
   "ox": 0.62,
-  "k": 0.947
+  "k": 0.961
  },
  "prop_stall2_0": {
   "file": "props/iso_stall2_s_0.webp",
-  "h": 274.6
+  "h": 124.8
  },
  "prop_stall2_1": {
   "file": "props/iso_stall2_s_0.webp",
-  "h": 274.6
+  "h": 124.8
  },
  "prop_well2_0": {
   "file": "props/iso_well2_s_0.webp",
-  "h": 182.5
+  "h": 101.4
  },
  "prop_lamp2_0": {
   "file": "props/iso_lamp2_s_0.webp",
@@ -2281,11 +2281,11 @@
  "prop_house3_0": {
   "file": "props/iso_house3_0.webp",
   "foot": [
-   4,
-   3
+   3,
+   2
   ],
   "ox": 0.6,
-  "k": 1.035
+  "k": 0.999
  },
  "ter_cliff": {
   "file": "ground/simple_cliff.webp"

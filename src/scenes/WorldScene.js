@@ -20,7 +20,7 @@ import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH, ELEV } from "../core/is
 import { questOnKill, questOnBoss } from "../systems/quests.js";
 
 const genCache = {};
-const TOWN_PORTAL = [26, 19.4]; // где в городе стоит обратный портал (клетки)
+const TOWN_PORTAL = [17, 13.6]; // где в городе стоит обратный портал (клетки)
 const HP_MUL = 2.2;
 const CHUNK = 1024, CHUNK_RES = 0.75;
 const NODE_VERB = { wood: "Рубить", ore: "Добыть руду", herb: "Сорвать", fiber: "Собрать", hide: "Освежевать" };
@@ -310,7 +310,7 @@ export class WorldScene extends Phaser.Scene {
     if (!art) ensureHumanoid(this, "hero", this.playerLook());
     let x, y;
     if (this.arrive) { [x, y] = tw(this.arrive[0] + 0.5, this.arrive[1] + 0.5); }
-    else if (st.pos && st.pos.zone === this.zoneId) { x = st.pos.x; y = st.pos.y; }
+    else if (st.pos && st.pos.zone === this.zoneId && !this.blockedAt(st.pos.x, st.pos.y)) { x = st.pos.x; y = st.pos.y; } // старая точка могла оказаться в скале после перестройки карты
     else { const s = this.z.spawn || [this.gen.W / 2, this.gen.H / 2]; [x, y] = tw(s[0], s[1]); }
     this.player = new Actor(this, { kind: "player", sheet: "h", tex: art ? art.key : "hero", idleCol: art ? art.idleCol : 0, x, y, scale: 1.05, radius: 13, hp: 100 });
     this.player.sprite.setCollideWorldBounds(true);

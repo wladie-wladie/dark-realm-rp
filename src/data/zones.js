@@ -19,52 +19,47 @@ function palisadeRing(W, H, gates) {
 
 export const ZONES = {
   town: {
-    name: "Серый Брод", danger: "safe", lvl: "", size: [46, 34], base: "grass", seed: 11,
+    name: "Серый Брод", danger: "safe", lvl: "", size: [30, 24], base: "grass", seed: 11,
     mood: { name: "Вечер", gain: [1.07, 0.95, 0.84], sat: -0.15, lights: 1.6, glow: 0.2 },
     tint: 0x9aa0b0, dark: 0.25, ambient: "town",
-    // улицы-проходы: город зажат скалами, дома стоят вдоль улиц
+    // компактный городок: площадь и четыре улицы, вокруг — скалы и обрывы
     paths: [
-      { pts: [[23, 0], [23, 12]], w: 2.2, t: "road" },
-      { pts: [[23, 21], [23, 34]], w: 2.2, t: "road" },
-      { pts: [[30, 16.8], [46, 16.8]], w: 2.2, t: "road" },
-      { pts: [[3, 17], [16, 17]], w: 2.2, t: "road" },
+      { pts: [[15, 0], [15, 9]], w: 1.6, t: "road" }, { pts: [[15, 15], [15, 24]], w: 1.6, t: "road" },
+      { pts: [[19, 12], [30, 12]], w: 1.6, t: "road" }, { pts: [[2, 12.2], [11, 12.2]], w: 1.4, t: "road" },
     ],
-    plazas: [{ x: 23.5, y: 17, rx: 6, ry: 4.6, t: "cobble" }],
+    plazas: [{ x: 15, y: 12, rx: 4.2, ry: 3.3, t: "cobble" }],
     walk: {
       paths: [
-        { pts: [[23, 0], [23, 13]], w: 3.6 }, { pts: [[23, 21], [23, 34]], w: 3.6 },
-        { pts: [[29, 16.8], [46, 16.8]], w: 3.6 }, { pts: [[2, 17], [18, 17]], w: 3.6 },
+        { pts: [[15, 0], [15, 9]], w: 2.6 }, { pts: [[15, 15], [15, 24]], w: 2.6 },
+        { pts: [[18.5, 12], [30, 12]], w: 2.6 }, { pts: [[1.5, 12.2], [11.5, 12.2]], w: 2.6 },
       ],
-      rooms: [{ x: 5, y: 17.5, rx: 3, ry: 3 }],
-      trees: ["oak", "pine", "oak"], topTrees: 0.06,
+      rooms: [{ x: 3.2, y: 12.6, rx: 2, ry: 2 }],
+      trees: ["oak", "pine", "oak"], topTrees: 0.08,
     },
-    scatter: [{ p: "tuft", d: 0.015 }],
+    scatter: [{ p: "tuft", d: 0.02 }],
     fixed: [
-      // постройки вдоль улиц (x, y — верхняя клетка основания)
-      ["tavern2", 14, 9], ["smithy2", 30, 12], ["house2", 36, 11, 1], ["house3", 17, 3], ["house2", 6, 11, 1], ["house3", 17, 25],
-      // площадь
-      ["well2", 23.5, 17], ["stall2", 19.2, 20.6], ["stall2", 28, 20.6, 1], ["board", 20.4, 13.6], ["bench", 27, 13.4],
-      ["lamp2", 18.2, 14.6], ["lamp2", 29, 14.4], ["lamp2", 18.4, 19.4], ["lamp2", 28.8, 19.4],
-      ["barrels", 32.6, 14.6], ["crates", 29.2, 15.2],
-      // ворота и улицы
-      ["banner", 21.3, 1.8], ["banner", 24.7, 1.8], ["lamp2", 24.8, 7], ["lamp2", 25, 27], ["lamp2", 43.5, 18.6],
-      ["cart2", 44, 15], ["campfire", 4.6, 18.4], ["log", 3.6, 16.4], ["portal", 23, 1.3], ["portal", 44.6, 16.8], ["portal", 23, 32.8],
+      ["tavern2", 8, 6], ["smithy2", 20, 9], ["house2", 24, 8, 1], ["house3", 10, 2], ["house2", 4, 8, 1], ["house3", 10, 17],
+      ["well2", 15, 12], ["stall2", 12.4, 14.4], ["stall2", 17.8, 14.6, 1], ["board", 13.4, 9.4], ["bench", 17.6, 9.4],
+      ["lamp2", 11.8, 10.4], ["lamp2", 18.4, 10.2], ["lamp2", 11.4, 13.4],
+      ["barrels", 22.4, 10.4], ["crates", 19.4, 10.6],
+      ["banner", 14, 1.4], ["banner", 16.2, 1.4], ["lamp2", 16.4, 5], ["lamp2", 16.6, 19], ["lamp2", 27, 13.6],
+      ["cart2", 28, 10.6], ["campfire", 3.2, 13.6], ["log", 2.4, 11.2], ["portal", 15, 1.2], ["portal", 29.2, 12], ["portal", 15, 22.8],
     ],
     npcs: [
-      { id: "elder", name: "Староста Годрик", role: "quests", x: 21.6, y: 15.2, look: { gender: "m", skin: 1, hair: 3, hairColor: 6, beard: 3, armor: "cloth", colors: { main: "#3a3428", trim: "#7a6a40" } } },
-      { id: "smith", name: "Кузнец Бруно", role: "smith", x: 31.2, y: 15.2, look: { gender: "m", skin: 2, hair: 0, hairColor: 0, beard: 2, armor: "leather", colors: { main: "#3a2a1e", trim: "#1a1410" }, weapon: "mace" } },
-      { id: "trader", name: "Торговка Ирма", role: "shop", x: 20.8, y: 19.4, look: { gender: "f", skin: 0, hair: 7, hairColor: 3, armor: "cloth", colors: { main: "#4a2a2a", trim: "#a08040" } } },
-      { id: "alch", name: "Травница Вела", role: "alchemy", x: 26.6, y: 19.6, look: { gender: "f", skin: 1, hair: 1, hairColor: 7, armor: "cloth", colors: { main: "#2a3a2a", trim: "#6a8a4a" } } },
-      { id: "mentor", name: "Наставник Ольгерд", role: "mentor", x: 26, y: 14.6, look: { gender: "m", skin: 3, hair: 0, hairColor: 6, beard: 1, scar: 1, armor: "plate", colors: { main: "#4a4a50", trim: "#6a5a30" }, weapon: "sword" } },
-      { id: "guard", name: "Стражник", role: "talk", x: 24.6, y: 3.6, look: { gender: "m", skin: 2, hair: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" }, lines: ["К северу — Сумрачный лес. Волки там совсем озверели.", "Без зелий за ворота не ходи."] },
-      { id: "guard2", name: "Стражница", role: "talk", x: 41, y: 18.4, look: { gender: "f", skin: 3, hair: 2, hairColor: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" }, lines: ["На восток — Старый тракт. Разбойники да мертвецы на погосте.", "Дальше по тракту — заброшенная шахта. Это красная зона: умрёшь — потеряешь часть добра."] },
+      { id: "elder", name: "Староста Годрик", role: "quests", x: 13.6, y: 11, look: { gender: "m", skin: 1, hair: 3, hairColor: 6, beard: 3, armor: "cloth", colors: { main: "#3a3428", trim: "#7a6a40" } } },
+      { id: "smith", name: "Кузнец Бруно", role: "smith", x: 21.2, y: 11, look: { gender: "m", skin: 2, hair: 0, hairColor: 0, beard: 2, armor: "leather", colors: { main: "#3a2a1e", trim: "#1a1410" }, weapon: "mace" } },
+      { id: "trader", name: "Торговка Ирма", role: "shop", x: 13.2, y: 13.8, look: { gender: "f", skin: 0, hair: 7, hairColor: 3, armor: "cloth", colors: { main: "#4a2a2a", trim: "#a08040" } } },
+      { id: "alch", name: "Травница Вела", role: "alchemy", x: 17, y: 14, look: { gender: "f", skin: 1, hair: 1, hairColor: 7, armor: "cloth", colors: { main: "#2a3a2a", trim: "#6a8a4a" } } },
+      { id: "mentor", name: "Наставник Ольгерд", role: "mentor", x: 16.8, y: 10.6, look: { gender: "m", skin: 3, hair: 0, hairColor: 6, beard: 1, scar: 1, armor: "plate", colors: { main: "#4a4a50", trim: "#6a5a30" }, weapon: "sword" } },
+      { id: "guard", name: "Стражник", role: "talk", x: 16.4, y: 2.6, look: { gender: "m", skin: 2, hair: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" }, lines: ["К северу — Сумрачный лес. Волки там совсем озверели.", "Без зелий за ворота не ходи."] },
+      { id: "guard2", name: "Стражница", role: "talk", x: 27, y: 13.4, look: { gender: "f", skin: 3, hair: 2, hairColor: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" }, lines: ["На восток — Старый тракт. Разбойники да мертвецы на погосте.", "Дальше по тракту — заброшенная шахта. Это красная зона: умрёшь — потеряешь часть добра."] },
     ],
     exits: [
-      { to: "forest", x: 23, y: 0.4, w: 3, arrive: [27, 38] },
-      { to: "tract", x: 45.6, y: 16, w: 3, vertical: true, arrive: [2, 21] },
-      { to: "swamp", x: 23, y: 33.6, w: 3, arrive: [25, 2], minLvl: 5 },
+      { to: "forest", x: 15, y: 0.4, w: 2.6, arrive: [27, 38] },
+      { to: "tract", x: 29.6, y: 12, w: 2.6, vertical: true, arrive: [2, 21] },
+      { to: "swamp", x: 15, y: 23.6, w: 2.6, arrive: [25, 2], minLvl: 5 },
     ],
-    spawn: [23, 22],
+    spawn: [15, 14.6],
   },
 
   forest: {
@@ -81,7 +76,7 @@ export const ZONES = {
     nodes: [["node_wood1", 10], ["node_ore1", 6], ["node_herb1", 9], ["node_fiber1", 8]],
     spawns: [{ m: "wolf", n: 9 }, { m: "boar", n: 6 }, { m: "spider", n: 6, area: [10, 10, 10] }],
     boss: { m: "alpha", x: 38, y: 7 },
-    exits: [{ to: "town", x: 27, y: 39.6, w: 3, arrive: [23, 3] }],
+    exits: [{ to: "town", x: 27, y: 39.6, w: 3, arrive: [15, 2.4] }],
   },
 
   swamp: {
@@ -99,7 +94,7 @@ export const ZONES = {
     nodes: [["node_herb2", 10], ["node_fiber2", 8], ["node_wood2", 6], ["node_herb1", 4]],
     spawns: [{ m: "toad", n: 8 }, { m: "ghoul", n: 9 }, { m: "wisp", n: 6 }],
     boss: { m: "witch", x: 33, y: 37 },
-    exits: [{ to: "town", x: 25, y: 0.4, w: 3, arrive: [23, 31] }],
+    exits: [{ to: "town", x: 25, y: 0.4, w: 3, arrive: [15, 21.4] }],
   },
 
   tract: {
@@ -116,7 +111,7 @@ export const ZONES = {
     nodes: [["node_ore2", 8], ["node_wood2", 7], ["node_fiber2", 4], ["node_ore1", 4]],
     spawns: [{ m: "bandit", n: 9, area: [40, 26, 12] }, { m: "archer", n: 5, area: [40, 26, 12] }, { m: "skeleton", n: 8, area: [23, 32, 8] }, { m: "bat", n: 6 }],
     boss: { m: "ataman", x: 43, y: 31 },
-    exits: [{ to: "town", x: 0.4, y: 21, w: 3, vertical: true, arrive: [43, 16] }, { to: "mine", x: 56, y: 0.4, w: 3, arrive: [30, 36], minLvl: 11 }],
+    exits: [{ to: "town", x: 0.4, y: 21, w: 3, vertical: true, arrive: [27.4, 12] }, { to: "mine", x: 56, y: 0.4, w: 3, arrive: [30, 36], minLvl: 11 }],
   },
 
   mine: {
