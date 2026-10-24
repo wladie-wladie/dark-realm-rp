@@ -48,6 +48,13 @@ export class WorldScene extends Phaser.Scene {
     this.invuln = 0; this.dash = null; this.gathering = null; this.loot = []; this.allies = []; this.monsters = [];
     this.saveT = 0; this.hudT = 0; this.fadeT = 0; this.travelling = false; this.monsterGroup = null; this.allyGroup = null;
     this.combat = new Combat(this);
+    // надписи в мире рисуем сразу в разрешении экрана (иначе камера их растягивает и они мылятся)
+    this.textRes = Math.min(5, Math.max(2, Math.ceil(Math.min(this.scale.height / (TILE * 6.6), this.scale.width / (TILE * 10)) * style().zoom * 1.25)));
+    if (!this.add.__crisp) {
+      const orig = this.add.text.bind(this.add), sc = this;
+      this.add.text = (...a) => orig(...a).setResolution(sc.textRes || 3);
+      this.add.__crisp = true;
+    }
     this.classDef = CLASSES[st.cls];
 
     this.buildGround();
@@ -94,6 +101,7 @@ export class WorldScene extends Phaser.Scene {
     const h = this.scale.height, w = this.scale.width;
     cam.setSize(w, h);
     cam.setZoom(Math.max(0.45, Math.min(h / (TILE * 6.6), w / (TILE * 10)) * style().zoom));
+    this.textRes = Math.min(5, Math.max(2, Math.ceil(cam.zoom * 1.25)));
   }
 
   // ---------- земля ----------
