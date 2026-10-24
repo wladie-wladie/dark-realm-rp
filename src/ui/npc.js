@@ -5,6 +5,7 @@ import { CLASSES } from "../data/classes.js";
 import { POTIONS, RESOURCES, ARMOR_TYPES, WEAPON_TYPES, QUALITY, TIER_NAMES, gearRecipe, POTION_RECIPES, makeGear, itemValue } from "../data/items.js";
 import { MONSTERS } from "../data/monsters.js";
 import { portrait } from "../art/humanoid.js";
+import { artPortrait } from "../art/looks.js";
 import { skillIcon } from "../art/icons.js";
 import { countItem, removeItem, addItem, gatherLevel, BAG_SIZE } from "../systems/state.js";
 import { availableQuests, accept, isComplete, turnIn, questById, newBounty, progressText } from "../systems/quests.js";
@@ -14,7 +15,7 @@ export class NpcUI {
 
   frame(npc, build) {
     const say = h("div.say");
-    const box = h("div.frame.dlg", {}, h("div.who", {}, portrait(npc.look, 120)), say);
+    const box = h("div.frame.dlg", {}, h("div.who", {}, G.art && G.art["npc_" + npc.id] && G.game.textures.exists("npc_" + npc.id) ? artPortrait("npc_" + npc.id, 120) : portrait(npc.look, 120)), say);
     const close = this.ui.modal(box);
     const api = {
       close,
@@ -151,7 +152,7 @@ export class NpcUI {
       say.appendChild(h("div.gold-line", {}, `◉ ${st.gold} зол.`));
       const list = h("div.scroll", { style: { maxHeight: "50vh" } });
       if (tab === "buy") {
-        const goods = [...["hp1", "mp1", "town"].map(id => ({ cat: "potion", id, n: 1 })), ...(st.level >= 6 ? ["hp2", "mp2"].map(id => ({ cat: "potion", id, n: 1 })) : [])];
+        const goods = [...["hp1", "mp1"].map(id => ({ cat: "potion", id, n: 1 })), ...(st.level >= 6 ? ["hp2", "mp2"].map(id => ({ cat: "potion", id, n: 1 })) : [])];
         const cls = CLASSES[st.cls];
         goods.push(makeGear({ slot: "weapon", tier: 1, quality: 1, cls: st.cls }));
         for (const s of ["head", "chest", "boots"]) goods.push(makeGear({ slot: s, type: cls.armor, tier: 1, quality: 1, cls: st.cls }));
@@ -166,7 +167,7 @@ export class NpcUI {
             } }, `${price} зол.`)));
         }
       } else {
-        const sellable = st.bag.filter(i => i.cat !== "potion" || i.id !== "town");
+        const sellable = st.bag;
         if (!sellable.length) list.appendChild(h("p.muted", {}, "Тебе нечего мне предложить."));
         for (const it of sellable) {
           const price = Math.max(1, Math.round(itemValue(it) * 0.35));

@@ -38,7 +38,6 @@ export const POTIONS = {
   hp2: { name: "Зелье здоровья", icon: ["⚱", "#ff3030"], heal: 0.55, value: 45, desc: "Восстанавливает 55% здоровья." },
   mp1: { name: "Малое зелье маны", icon: ["⚱", "#3050d0"], mana: 0.35, value: 15, desc: "Восстанавливает 35% маны." },
   mp2: { name: "Зелье маны", icon: ["⚱", "#4070ff"], mana: 0.6, value: 45, desc: "Восстанавливает 60% маны." },
-  town: { name: "Свиток возвращения", icon: ["✉", "#d0c080"], recall: true, value: 30, desc: "Переносит в Серый Брод." },
 };
 
 // Типы оружия по классам: внешний вид и характеристика
@@ -83,7 +82,6 @@ export function gearRecipe(slot, type, tier) {
 export const POTION_RECIPES = {
   hp1: { herb1: 2 }, mp1: { herb1: 1, fiber1: 1 },
   hp2: { herb2: 2, herb1: 1 }, mp2: { herb2: 2, fiber2: 1 },
-  town: { fiber1: 2, herb1: 1 },
 };
 
 // Построение предмета снаряжения
@@ -141,3 +139,6 @@ export function itemTitle(it) {
   if (it.cat === "potion") return POTIONS[it.id].name;
   return "?";
 }
+
+for (const [id, r] of Object.entries(RESOURCES)) r.icon.id = id;
+for (const [id, p] of Object.entries(POTIONS)) p.icon.id = id;

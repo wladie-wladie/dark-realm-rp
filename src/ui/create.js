@@ -3,6 +3,7 @@ import { h, clear } from "./dom.js";
 import { CLASSES, CLASS_ORDER } from "../data/classes.js";
 import { drawHumanoid, SKIN, HAIR_COLORS, EYE_COLORS, HAIR_STYLES_M, BEARDS, SCARS } from "../art/humanoid.js";
 import { canvas } from "../art/paint.js";
+import { artLooks, drawArtFrame } from "../art/looks.js";
 
 const NAMES_M = ["Ратмир", "Всеслав", "Годослав", "Ярополк", "Остромир", "Велимир", "Бранко", "Ольгерд"];
 const NAMES_F = ["Злата", "Ведана", "Мирослава", "Ярина", "Белослава", "Огняна", "Влада", "Рогнеда"];
@@ -35,9 +36,23 @@ export class CharacterCreator {
     loop();
   }
 
+  artKey() {
+    const looks = artLooks(this.cls, this.look.gender);
+    if (this.look.art === null || !looks.length) return null;
+    const f = looks.find(l => l.key === this.look.art);
+    return (f || looks[0]).key;
+  }
+
   draw() {
     const ctx = this.cv.getContext("2d");
     ctx.clearRect(0, 0, 320, 400);
+    const ak = this.artKey();
+    if (ak) {
+      const row = this.dir === 0 ? 0 : this.dir === 1 ? 1 : 2;
+      const col = this.anim ? Math.floor(this.walk * 4) % 4 : 4;
+      drawArtFrame(ctx, ak, row, col, 0, 0, 400, this.dir === 2 && this.flip);
+      return;
+    }
     ctx.save();
     const s = 4.4;
     ctx.translate(160 - 32 * s, 380 - 76 * s);
@@ -59,19 +74,28 @@ export class CharacterCreator {
     const c = CLASSES[this.cls];
     f.appendChild(h("h2.title-deco", {}, "Создание героя"));
     f.appendChild(h("div.opt", {}, h("label", {}, "Имя"), nameIn, h("button.btn.small", { onclick: () => { const pool = L.gender === "f" ? NAMES_F : NAMES_M; this.name = pool[Math.floor(Math.random() * pool.length)]; this.render(); } }, "🎲")));
-    f.appendChild(h("div.opt", {}, h("label", {}, "Пол"), seg([["m", "Мужской"], ["f", "Женский"]], L.gender, v => { L.gender = v; if (v === "f") L.beard = 0; const pool = v === "f" ? NAMES_F : NAMES_M; if ((v === "f" ? NAMES_M : NAMES_F).includes(this.name)) this.name = pool[Math.floor(Math.random() * pool.length)]; this.render(); this.draw(); })));
+    f.appendChild(h("div.opt", {}, h("label", {}, "Пол"), seg([["m", "Мужской"], ["f", "Женский"]], L.gender, v => { L.gender = v; if (L.art !== null) delete L.art; if (v === "f") L.beard = 0; const pool = v === "f" ? NAMES_F : NAMES_M; if ((v === "f" ? NAMES_M : NAMES_F).includes(this.name)) this.name = pool[Math.floor(Math.random() * pool.length)]; this.render(); this.draw(); })));
     f.appendChild(h("div", { class: "muted", style: { fontSize: "14px" } }, "Класс"));
     f.appendChild(h("div.classes", {}, CLASS_ORDER.map(id => {
       const cc = CLASSES[id];
-      return h("button.cls", { class: id === this.cls ? "on" : "", onclick: () => { this.cls = id; this.render(); this.draw(); } }, h("b", {}, cc.name), h("small", {}, cc.desc));
+      return h("button.cls", { class: id === this.cls ? "on" : "", onclick: () => { this.cls = id; if (L.art !== null) delete L.art; this.render(); this.draw(); } }, h("b", {}, cc.name), h("small", {}, cc.desc));
     })));
     f.appendChild(h("div.subs", {}, "С 10-го уровня — подкласс: ", Object.values(c.subclasses).map(s => s.name).join(", ")));
+    const looks = artLooks(this.cls, L.gender);
+    const custom = !looks.length || L.art === null;
+    if (looks.length) {
+      const opts = [...looks.map(l => [l.key, l.name]), [null, "Свой (упрощённый)"]];
+      const cur = custom ? null : (looks.find(l => l.key === L.art) || looks[0]).key;
+      f.appendChild(h("div.opt", {}, h("label", {}, "Облик"), seg(opts, cur, v => { L.art = v; this.render(); this.draw(); })));
+    }
+    if (custom) {
     f.appendChild(h("div.opt", {}, h("label", {}, "Кожа"), swatches(SKIN, "skin")));
     f.appendChild(h("div.opt", {}, h("label", {}, "Причёска"), stepper(HAIR_STYLES_M, "hair")));
     f.appendChild(h("div.opt", {}, h("label", {}, "Цвет волос"), swatches(HAIR_COLORS, "hairColor")));
     f.appendChild(h("div.opt", {}, h("label", {}, "Глаза"), swatches(EYE_COLORS, "eyes")));
     if (L.gender === "m") f.appendChild(h("div.opt", {}, h("label", {}, "Борода"), stepper(BEARDS, "beard")));
     f.appendChild(h("div.opt", {}, h("label", {}, "Особые приметы"), stepper(SCARS, "scar")));
+    }
     f.appendChild(h("div.row", { style: { marginTop: "6px" } },
       h("button.btn", { onclick: () => this.ui.titleScreen() }, "Назад"),
       h("div.grow"),
@@ -82,7 +106,8 @@ export class CharacterCreator {
   finish() {
     const name = (this.name || "").trim();
     if (!name) { alert("Введите имя героя"); return; }
-    this.ui.createNew(this.slot, { name, cls: this.cls, look: { ...this.look } });
+    const look = { ...this.look }; if (look.art !== null) look.art = this.artKey();
+    this.ui.createNew(this.slot, { name, cls: this.cls, look });
   }
 }
 const rnd = n => Math.floor(Math.random() * n);

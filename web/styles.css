@@ -192,3 +192,4 @@ input { font-family: var(--serif); user-select: text; -webkit-user-select: text;
   .classes { grid-template-columns: repeat(3, 1fr); }
   .cls small { display: none; }
 }
+.abtn.portal { color: #a8c8ff; font-size: 26px; border-color: #5a7ab0; background: radial-gradient(circle at 40% 30%, #2a3a5a, #0a0e18); }

@@ -23,7 +23,6 @@ export function newCharacter({ name, cls, look }) {
   st.equip.boots = makeGear({ slot: "boots", type: c.armor, tier: 1, quality: 0, cls });
   addItem(st, { cat: "potion", id: "hp1", n: 5 });
   addItem(st, { cat: "potion", id: "mp1", n: 3 });
-  addItem(st, { cat: "potion", id: "town", n: 1 });
   // первый навык класса сразу изучен и стоит на панели
   const first = c.skills[0];
   st.skills[first.id] = 1; st.skillPoints = 0; st.slots[0] = first.id;

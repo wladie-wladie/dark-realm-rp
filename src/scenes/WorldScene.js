@@ -11,11 +11,13 @@ import { Combat } from "../systems/combat.js";
 import { derive, gainXp, addItem, rollGear, saveGame, skillValues, gatherLevel, countItem, removeItem } from "../systems/state.js";
 import { TERRAIN, ensureHumanoid, ensureCreature, propLook, PROP_RES, artSheet } from "../art/registry.js";
 import { PROPS } from "../art/props.js";
+import { heroArtKey } from "../art/looks.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32 } from "../core/rng.js";
 import { questOnKill, questOnBoss } from "../systems/quests.js";
 
 const genCache = {};
+const TOWN_PORTAL = [26, 22.5]; // где в городе стоит обратный портал (клетки)
 const HP_MUL = 2.2;
 const CHUNK = 1024, CHUNK_RES = 0.75;
 const NODE_VERB = { wood: "Рубить", ore: "Добыть руду", herb: "Сорвать", fiber: "Собрать", hide: "Освежевать" };
@@ -74,6 +76,10 @@ export class WorldScene extends Phaser.Scene {
     this.player.hp = Math.min(st.hp, this.player.maxHp); this.mp = Math.min(st.mp ?? this.pstats.mp, this.pstats.mp);
     if (this.player.hp <= 0) this.player.hp = this.player.maxHp;
     this.setupKeys();
+    this.portalObj = null; this.portalArmed = false;
+    const pt = st.portal;
+    if (pt && pt.stage === "open" && pt.zone === this.zoneId) this.spawnPortal(pt.x, pt.y, "Портал в Серый Брод");
+    if (pt && pt.stage === "intown" && this.zoneId === "town") { const [tx, ty] = TOWN_PORTAL; this.spawnPortal(tx * TILE, ty * TILE, "Портал обратно: " + ZONES[pt.zone].name); }
     G.ui && G.ui.enterZone(this);
   }
 
@@ -287,8 +293,8 @@ export class WorldScene extends Phaser.Scene {
   }
   // нарисованный в ChatGPT лист героя для класса и пола, если он уже есть
   heroArt() {
-    const st = G.st;
-    return artSheet(this, `hero_${st.sub || st.cls}_${st.look.gender}`) || artSheet(this, `hero_${st.cls}_${st.look.gender}`);
+    const key = heroArtKey(G.st);
+    return key ? artSheet(this, key) : null;
   }
   refreshPlayerLook() {
     const art = this.heroArt();
@@ -327,8 +333,9 @@ export class WorldScene extends Phaser.Scene {
     this.npcs = [];
     for (const n of this.z.npcs || []) {
       const key = "npc_" + n.id;
-      if (!this.textures.exists(key)) ensureHumanoid(this, key, n.look);
-      const a = new Actor(this, { kind: "npc", sheet: "h", tex: key, x: n.x * TILE, y: n.y * TILE, scale: 1.05 });
+      const art = artSheet(this, key);
+      if (!art && !this.textures.exists(key)) ensureHumanoid(this, key, n.look);
+      const a = new Actor(this, { kind: "npc", sheet: "h", tex: key, idleCol: art ? art.idleCol : 0, x: n.x * TILE, y: n.y * TILE, scale: 1.05 });
       a.sprite.body.setImmovable(true); a.sprite.body.moves = false;
       a.npc = n; a.dir = 0;
       a.label = this.add.text(a.x, a.y - 92, n.name, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#f0d890", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002);
@@ -375,7 +382,7 @@ export class WorldScene extends Phaser.Scene {
     const [tex, sheet, idleCol] = this.monsterTex(id);
     const ps = this.pstats;
     const a = new Actor(this, { kind: "ally", sheet, tex, idleCol, x, y, scale: d.scale, radius: 12, hp: Math.round(this.player.maxHp * d.hp * (1 + ps.summon / 100)), flying: d.flying, def: d, alpha: d.alpha });
-    a.dmg = baseDmg * d.atk * (1 + ps.summon / 100); a.speed = d.speed; a.defense = ps.def * 0.6; a.cd = 0; a.expire = this.clock + dur;
+    a.dmg = baseDmg * d.atk * (1 + ps.summon / 100) * 0.5; // приспешник ~ половина удара героя a.speed = d.speed; a.defense = ps.def * 0.6; a.cd = 0; a.expire = this.clock + dur;
     a.sprite.setCollideWorldBounds(true);
     this.allyGroup.add(a.sprite);
     this.allies.push(a);
@@ -588,12 +595,13 @@ export class WorldScene extends Phaser.Scene {
   // ---------- управление ----------
   setupKeys() {
     const kb = this.input.keyboard; if (!kb) return;
-    this.keys = kb.addKeys("W,A,S,D,UP,DOWN,LEFT,RIGHT,J,SPACE,ONE,TWO,THREE,FOUR,FIVE,SIX,Q,E,F");
+    this.keys = kb.addKeys("W,A,S,D,UP,DOWN,LEFT,RIGHT,J,SPACE,ONE,TWO,THREE,FOUR,FIVE,SIX,Q,E,F,T");
     const map = { ONE: 0, TWO: 1, THREE: 2, FOUR: 3, FIVE: 4, SIX: 5 };
     for (const [k, i] of Object.entries(map)) this.keys[k].on("down", () => this.useSlot(i));
     this.keys.Q.on("down", () => this.usePotion(0));
     this.keys.E.on("down", () => this.usePotion(1));
     this.keys.F.on("down", () => G.ui.contextAction());
+    this.keys.T.on("down", () => this.openPortal());
   }
 
   useSlot(i) {
@@ -615,7 +623,6 @@ export class WorldScene extends Phaser.Scene {
     if ((this.cds["pot_" + i] || 0) > 0) return;
     if (!countItem(st, id)) { G.ui.toast("Зелья закончились", "#c0a080", 1000); return; }
     const pd = POTIONS[id];
-    if (pd.recall) { if (this.zoneId === "town") { G.ui.toast("Вы уже в городе", "#c0c0c0"); return; } removeItem(st, id, 1); this.travel("town", null); return; }
     removeItem(st, id, 1);
     if (pd.heal) this.healPlayer(this.player.maxHp * pd.heal);
     if (pd.mana) { this.mp = Math.min(this.pstats.mp, this.mp + this.pstats.mp * pd.mana); this.combat.text(this.player.x, this.player.cy - 40, "+мана", "#80a0ff", 15); }
@@ -660,6 +667,48 @@ export class WorldScene extends Phaser.Scene {
       const newLvl = gatherLevel(st, n.kind);
       if (newLvl > lvl) G.ui.toast(`Мастерство «${NODE_VERB[n.kind]}» выросло до ${newLvl}`, "#a0e0a0");
       G.ui.refresh();
+    }
+  }
+
+  // ---------- портал в город (бесплатный, туда и обратно, потом закрывается) ----------
+  openPortal() {
+    const st = G.st, p = this.player;
+    if (p.dead || this.travelling) return;
+    if (this.zoneId === "town") { G.ui.toast("В городе портал не открыть", "#c0c0c0"); return; }
+    const [fx, fy] = p.faceVec();
+    let x = p.x + fx * 70, y = p.y + fy * 50;
+    if (this.blockedAt(x, y)) { x = p.x; y = p.y + 40; }
+    if (this.portalObj) this.closePortalSprite();
+    st.portal = { zone: this.zoneId, x, y, stage: "open" };
+    this.spawnPortal(x, y, "Портал в Серый Брод");
+    this.portalArmed = true;
+    this.combat.ringFx(x, y, 80, "#80b0ff", 600);
+    G.ui.toast("Портал открыт: войдите в него", "#a0c8ff");
+  }
+  spawnPortal(x, y, label) {
+    const glow = this.add.image(x, y - 30, "fx_glow_cold").setBlendMode(Phaser.BlendModes.ADD).setScale(0.38, 0.55).setAlpha(0.55).setDepth(y + 1);
+    const core = this.add.image(x, y - 30, "fx_ring").setBlendMode(Phaser.BlendModes.ADD).setTint(0x80b0ff).setScale(0.28, 0.42).setDepth(y + 2);
+    this.tweens.add({ targets: core, angle: 360, duration: 3000, repeat: -1 });
+    this.tweens.add({ targets: glow, alpha: 0.3, yoyo: true, repeat: -1, duration: 700 });
+    const text = this.add.text(x, y - 80, label, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#c8dcff", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002);
+    const light = this.addLight(x, y - 30, 0x80b0ff, 0.9, 0.3, true);
+    this.portalObj = { x, y, parts: [glow, core, text, light] };
+    // нельзя сразу шагнуть обратно: сначала отойти
+    this.portalArmed = Math.hypot(this.player ? this.player.x - x : 999, this.player ? this.player.y - y : 999) > 90;
+  }
+  closePortalSprite() { if (!this.portalObj) return; for (const o of this.portalObj.parts) o.destroy(); this.portalObj = null; }
+  checkPortal() {
+    const po = this.portalObj, p = this.player, st = G.st;
+    if (!po || !st.portal) return;
+    const d = Math.hypot(p.x - po.x, p.y - po.y);
+    if (!this.portalArmed) { if (d > 90) this.portalArmed = true; return; }
+    if (d > 42) return;
+    if (st.portal.stage === "open") {
+      st.portal.stage = "intown";
+      this.travel("town", [TOWN_PORTAL[0], TOWN_PORTAL[1] + 1.2]);
+    } else if (st.portal.stage === "intown" && this.zoneId === "town") {
+      const back = st.portal; st.portal = null;
+      this.travel(back.zone, [back.x / TILE - 0.5, back.y / TILE + 0.6]);
     }
   }
 
@@ -761,6 +810,7 @@ export class WorldScene extends Phaser.Scene {
       this.updateGather(dt);
       this.pickupLoot();
       this.checkExits();
+      this.checkPortal();
     }
     p.animate(dt);
     if (p.dead) p.sprite.clearTint();

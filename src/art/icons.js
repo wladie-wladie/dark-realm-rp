@@ -12,7 +12,24 @@ function frame(ctx, S, col) {
   ctx.strokeStyle = rgba(col, 0.55); ctx.lineWidth = 2; ctx.stroke();
 }
 
-export function skillIcon([glyph, col], S = 64) {
+import { G } from "../core/G.js";
+// Иконка из листов ChatGPT: G.art._icons[id] = [ключ листа, столбец, строка, столбцов, строк]
+export function artIcon(id, S = 64) {
+  const ref = id && G.art && G.art._icons && G.art._icons[id];
+  if (!ref || !G.game || !G.game.textures.exists(ref[0])) return null;
+  const key = "a" + id + S;
+  if (cache.has(key)) return cache.get(key);
+  const img = G.game.textures.get(ref[0]).getSourceImage();
+  const cw = img.width / ref[3], ch = img.height / ref[4], inset = cw * 0.02;
+  const c = canvas(S, S), ctx = c.getContext("2d"); ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(img, ref[1] * cw + inset, ref[2] * ch + inset, cw - inset * 2, ch - inset * 2, 0, 0, S, S);
+  const url = c.toDataURL(); cache.set(key, url); return url;
+}
+
+export function skillIcon(icon, S = 64) {
+  const art = artIcon(icon.id, S);
+  if (art) return art;
+  const [glyph, col] = icon;
   const key = "s" + glyph + col + S;
   if (cache.has(key)) return cache.get(key);
   const c = canvas(S, S), ctx = c.getContext("2d");
@@ -58,6 +75,19 @@ export function itemIconUrl(it, S = 64) {
   if (cache.has(key)) return cache.get(key);
   const c = canvas(S, S), ctx = c.getContext("2d");
   const qc = QUALITY[it.quality].color;
+  const artId = it.slot === "weapon" ? `${it.cls}_${Math.min(4, it.tier)}` : it.slot === "ring" || it.slot === "amulet" ? it.slot : `${it.slot}_${it.type}`;
+  const art = artIcon(artId, S);
+  if (art) {
+    const im = new Image(); im.src = art;
+    // картинка из data-URL доступна сразу после загрузки; рисуем синхронно через кэш листа
+    const ref = G.art._icons[artId]; const img = G.game.textures.get(ref[0]).getSourceImage();
+    const cw = img.width / ref[3], ch = img.height / ref[4], inset = cw * 0.02;
+    ctx.drawImage(img, ref[1] * cw + inset, ref[2] * ch + inset, cw - inset * 2, ch - inset * 2, 0, 0, S, S);
+    ctx.strokeStyle = qc; ctx.lineWidth = Math.max(2, S * 0.05); ctx.strokeRect(1, 1, S - 2, S - 2);
+    ctx.fillStyle = "rgba(0,0,0,0.6)"; ctx.fillRect(S - 20, S - 16, 18, 14);
+    ctx.fillStyle = "#e8dcc0"; ctx.font = `bold ${Math.round(S * 0.17)}px serif`; ctx.textAlign = "center"; ctx.fillText(["", "I", "II", "III", "IV"][it.tier], S - 11, S - 5);
+    const url = c.toDataURL(); cache.set(key, url); return url;
+  }
   frame(ctx, S, qc);
   if (it.slot === "weapon") {
     const look = WEAPON_TYPES[it.cls].look;

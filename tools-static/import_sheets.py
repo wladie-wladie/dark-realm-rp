@@ -104,6 +104,20 @@ def npcs(src):
         man["npc_" + nid] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH}
     print("npcs", len(parts))
 
+def icons(src, name, ids, cols, rows):
+    im = Image.open(src).convert("RGBA")
+    cell = 128
+    im = im.resize((cols * cell, rows * cell), Image.LANCZOS)
+    os.makedirs("assets/icons", exist_ok=True)
+    fn = f"icons/{name}.webp"; im.save("assets/" + fn, "WEBP", quality=88, method=6)
+    key = "iconsheet_" + name
+    man[key] = {"file": fn}
+    ic = man.setdefault("_icons", {})
+    for i, iid in enumerate(ids):
+        ic[iid] = [key, i % cols, i // cols, cols, rows]
+
+ICON_JOBS = {j["name"][:-4]: j for j in json.load(open("tools-static/icon_jobs.json"))} if os.path.exists("tools-static/icon_jobs.json") else {}
+
 TITLES = {}  # ключ листа → название облика в редакторе
 if os.path.exists("tools-static/titles.json"): TITLES = json.load(open("tools-static/titles.json"))
 BEASTS = {"wolf": 210}  # звери в профиль: ширина бега в кадре
@@ -124,6 +138,8 @@ if __name__ == "__main__":
         elif name in BEASTS or name.startswith("mobc_"):
             key = "mob_" + (name[5:] if name.startswith("mobc_") else name)
             beast(src, key, BEASTS.get(name, 210))
+        elif name in ICON_JOBS:
+            j = ICON_JOBS[name]; icons(src, name, j["ids"], j["grid"][0], j["grid"][1])
         elif name.startswith("ground_01"):
             ground(src, ["grass", "cobble", "dirt", "forest"])
         elif name.startswith("ground_02"):

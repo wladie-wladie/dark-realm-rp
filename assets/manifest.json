@@ -139,7 +139,8 @@
   "file": "chars/hero_warrior_m.webp",
   "type": "hsheet",
   "fw": 192,
-  "fh": 240
+  "fh": 240,
+  "title": "Светловолосый"
  },
  "mob_wolf": {
   "file": "chars/mob_wolf.webp",
@@ -170,5 +171,33 @@
   "type": "csheet",
   "fw": 240,
   "fh": 192
+ },
+ "hero_mage_m": {
+  "file": "chars/hero_mage_m.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Седой мудрец"
+ },
+ "hero_ranger_f": {
+  "file": "chars/hero_ranger_f.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Тёмный хвост"
+ },
+ "hero_ranger_m": {
+  "file": "chars/hero_ranger_m.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Бородатый"
+ },
+ "hero_warrior_f": {
+  "file": "chars/hero_warrior_f.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240,
+  "title": "Рыжая коса"
  }
 }

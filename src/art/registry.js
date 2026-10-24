@@ -32,7 +32,7 @@ export function registerStatic(scene) {
   for (const [k, c] of Object.entries(fx)) if (!T.exists("fx_" + k)) T.addCanvas("fx_" + k, c);
   TERRAIN = buildTerrainTextures();
   // земля из ChatGPT заменяет процедурную (дорога — той же утоптанной землёй)
-  const map = { grass: "grass", cobble: "cobble", dirt: "dirt", road: "dirt", forest: "forest" };
+  const map = { grass: "grass", cobble: "cobble", dirt: "dirt", road: "dirt", forest: "forest", mud: "mud", swampgrass: "swampgrass", swampwater: "swampwater", water: "water", stone: "stone", ash: "ash" };
   let seed = 3;
   for (const [name, art] of Object.entries(map)) {
     if (!T.exists("ter_" + art)) continue;

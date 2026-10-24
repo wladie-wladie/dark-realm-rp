@@ -18,7 +18,7 @@ class BootScene extends Phaser.Scene {
       for (const [k, v] of Object.entries(data || {})) {
         const meta = typeof v === "string" ? { file: v } : v;
         G.art[k] = meta;
-        this.load.image(k, "assets/" + meta.file);
+        if (meta && meta.file) this.load.image(k, "assets/" + meta.file);
       }
     });
     this.load.on("loaderror", () => {});

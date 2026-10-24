@@ -5,7 +5,9 @@ import { CLASSES, findSkill } from "../data/classes.js";
 import { QUALITY, POTIONS, itemTitle } from "../data/items.js";
 import { ZONES, DANGER } from "../data/zones.js";
 import { xpToNext, listSaves, loadGame, deleteGame, countItem, skillValues, saveGame, newCharacter } from "../systems/state.js";
-import { portrait } from "../art/humanoid.js";
+import { portrait as drawnPortrait } from "../art/humanoid.js";
+import { heroArtKey, artPortrait } from "../art/looks.js";
+const portraitOf = (st, size) => { const k = heroArtKey(st); return k ? artPortrait(k, size) : drawnPortrait(st.look, size); };
 import { skillIcon, itemIconUrl } from "../art/icons.js";
 import { questById, progressText, isComplete, npcMarker } from "../systems/quests.js";
 import { CharacterCreator } from "./create.js";
@@ -29,7 +31,7 @@ export class UI {
     const slots = h("div.slots");
     saves.forEach((s, i) => {
       if (s) {
-        const pc = portrait(s.look, 84);
+        const pc = portraitOf(s, 84);
         const card = h("div.slot.frame", {},
           pc,
           h("div.nm", {}, s.name),
@@ -62,6 +64,9 @@ export class UI {
     // миграция старых сохранений
     G.st.settings = G.st.settings || { showHelm: true };
     G.st.gather = G.st.gather || {};
+    // свиток возвращения заменён бесплатным порталом
+    G.st.bag = G.st.bag.filter(i => !(i.cat === "potion" && i.id === "town"));
+    G.st.potionSlots = G.st.potionSlots.map(id => (id === "town" ? null : id));
     clear(this.root);
     this.buildHud();
     G.paused = false;
@@ -149,6 +154,10 @@ export class UI {
       btn.addEventListener("pointerdown", ev => { ev.preventDefault(); G.world && G.world.usePotion(i); });
       act.appendChild(btn); return btn;
     });
+    // портал в город
+    e.portal = h("div.abtn.pot.portal", { style: { right: "240px", bottom: "118px" }, title: "Портал в город" }, "◎");
+    e.portal.addEventListener("pointerdown", ev => { ev.preventDefault(); G.world && G.world.openPortal(); });
+    act.appendChild(e.portal);
     e.ctx = h("button.ctx", { style: { display: "none" } });
     e.ctx.addEventListener("pointerdown", ev => { ev.preventDefault(); this.contextAction(); });
     act.appendChild(e.ctx);
@@ -163,6 +172,7 @@ export class UI {
     this.el.danger.style.color = dz.color; this.el.danger.style.border = "1px solid " + dz.color;
     const mc = this.el.miniC; mc.width = W.minimap.width; mc.height = W.minimap.height;
     this.bossBar(null);
+    this.el.portal.style.display = W.zoneId === "town" ? "none" : "flex";
     this.toast(z.name, dz.color, 2200);
     if (z.danger === "red") this.toast("Красная зона: при смерти теряется часть сумки!", "#ff6050", 4000);
     this.refresh();
@@ -250,7 +260,7 @@ export class UI {
     e.name.innerHTML = "";
     e.name.appendChild(h("span", {}, st.name));
     e.name.appendChild(h("span.muted", { style: { fontSize: "12px" } }, (st.sub ? CLASSES[st.cls].subclasses[st.sub].name : CLASSES[st.cls].name)));
-    if (!e.portraitC || e.portraitKey !== JSON.stringify(st.look)) { clear(e.portrait); e.portraitC = portrait(st.look, 64); e.portrait.appendChild(e.portraitC); e.portrait.appendChild(e.lvl); e.portraitKey = JSON.stringify(st.look); }
+    if (!e.portraitC || e.portraitKey !== JSON.stringify(st.look)) { clear(e.portrait); e.portraitC = portraitOf(st, 64); e.portrait.appendChild(e.portraitC); e.portrait.appendChild(e.lvl); e.portraitKey = JSON.stringify(st.look); }
     e.gold.textContent = `◉ ${st.gold} зол.`;
     // точки-уведомления
     const dot = (b, on) => { const d = b.querySelector(".dot"); if (on && !d) b.appendChild(h("i.dot")); if (!on && d) d.remove(); };

@@ -247,7 +247,7 @@ export class Panels {
     col.appendChild(h("button.btn", { onclick: () => { G.world && G.world.persist(); this.ui.toast("Игра сохранена"); } }, "Сохранить игру"));
     col.appendChild(h("label.row", { style: { padding: "8px" } }, h("input", { type: "checkbox", checked: st.settings.showHelm, onchange: e => { st.settings.showHelm = e.target.checked; G.world && G.world.refreshPlayerLook(); } }), "Показывать шлем"));
     col.appendChild(h("div.hint", {}, `Время в игре: ${Math.floor(st.playtime / 3600)} ч ${Math.floor(st.playtime / 60) % 60} мин · Смертей: ${st.deaths}`));
-    col.appendChild(h("div.hint", {}, "Управление на клавиатуре (для проверки на компьютере): WASD — движение, J/пробел — атака, 1–6 — навыки, Q/E — зелья, F — действие."));
+    col.appendChild(h("div.hint", {}, "Управление на клавиатуре (для проверки на компьютере): WASD — движение, J/пробел — атака, 1–6 — навыки, Q/E — зелья, F — действие, T — портал в город."));
     // обновления
     const UPD = { idle: "ещё не проверялось", web: "версия для браузера — обновляется сама при открытии", checking: "проверяю…", latest: "у вас последняя версия", downloading: "скачиваю обновление", ready: "обновление скачано — перезапустите игру", error: "ошибка" };
     const ustat = h("div.hint");

@@ -309,3 +309,9 @@ export function findSkill(id) {
   }
   return null;
 }
+
+// у каждой иконки навыка — id навыка (для картинок из листов иконок)
+for (const c of Object.values(CLASSES)) {
+  for (const s of c.skills) s.icon.id = s.id;
+  for (const sc of Object.values(c.subclasses)) for (const s of sc.skills) s.icon.id = s.id;
+}
