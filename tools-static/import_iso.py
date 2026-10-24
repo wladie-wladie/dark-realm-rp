@@ -12,9 +12,10 @@ man_path = "assets/manifest.json"
 man = json.load(open(man_path))
 os.makedirs("assets/props", exist_ok=True); os.makedirs("assets/ground", exist_ok=True)
 
-TEX = {"tex_cobble": "cobble", "tex_grass": "grass", "tex_dirt": "dirt"}
+TEX = {"tex_cobble": "cobble", "tex_grass": "grass", "tex_dirt": "dirt", "s_cobble": "cobble", "s_grass": "grass", "s_dirt": "dirt"}
 # лист → [(ключ объекта, вариант, сумма сторон основания в клетках | None для мелочи, ширина в мире для мелочи)]
 SHEETS = {
+    "s_house": [("house3", 0, 7, None)],
     "town_bld1": [("house2", 0, 7, None), ("house2", 1, 7, None)],
     "town_bld2": [("smithy2", 0, 7, None), ("tavern2", 0, 9, None)],
     "town_bld3": [("stall2", 0, None, 150), ("stall2", 1, None, 150), ("well2", 0, None, 130)],
@@ -24,7 +25,7 @@ SHEETS = {
 }
 
 # где на картинке нижний угол основания (доля ширины), если крыльцо/ступени сбивают автоматику
-OX = {("house2", 0): 0.58, ("house2", 1): 0.57, ("smithy2", 0): 0.5, ("tavern2", 0): 0.6}
+OX = {("house3", 0): 0.6, ("house2", 0): 0.58, ("house2", 1): 0.57, ("smithy2", 0): 0.5, ("tavern2", 0): 0.6}
 
 def base_x(im):
     a = np.array(im)[..., 3] > 60
@@ -44,7 +45,7 @@ for name in sys.argv[1:]:
         w, h = t.size; m = int(min(w, h) * 0.04)
         t = t.crop((m, m, w - m, h - m))
         t = seamless_quilt(t).resize((1024, 1024), Image.LANCZOS)
-        fn = f"ground/iso_{TEX[name]}.webp"; t.save("assets/" + fn, "WEBP", quality=90, method=6)
+        fn = f"ground/{'simple' if name.startswith('s_') else 'iso'}_{TEX[name]}.webp"; t.save("assets/" + fn, "WEBP", quality=90, method=6)
         man["ter_" + TEX[name]] = {"file": fn}
         print("texture", name); continue
     spec = SHEETS[name]; ps = parts(src)

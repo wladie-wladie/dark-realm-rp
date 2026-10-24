@@ -551,6 +551,7 @@ function crystal(ctx, rnd, W, H, col = "#5a8ab0") {
 // Каталог: размеры, точка опоры и радиус столкновения (0 — проходимо).
 export const PROPS = {
   // изометрический набор (картинки из assets/manifest.json; рисунок ниже — только запасной)
+  house3:    { w: 300, h: 300, v: 1, col: 0, foot: [4, 3], draw: (c, r) => house(c, r, 300, 300, {}) },
   house2:    { w: 300, h: 300, v: 2, col: 0, foot: [4, 3], draw: (c, r) => house(c, r, 300, 300, {}) },
   smithy2:   { w: 300, h: 300, v: 1, col: 0, foot: [4, 3], draw: (c, r) => house(c, r, 300, 300, {}) },
   tavern2:   { w: 400, h: 340, v: 1, col: 0, foot: [5, 4], draw: (c, r) => house(c, r, 400, 340, {}) },

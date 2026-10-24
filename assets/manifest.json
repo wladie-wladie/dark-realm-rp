@@ -149,13 +149,13 @@
   "fh": 192
  },
  "ter_grass": {
-  "file": "ground/iso_grass.webp"
+  "file": "ground/simple_grass.webp"
  },
  "ter_cobble": {
-  "file": "ground/iso_cobble.webp"
+  "file": "ground/simple_cobble.webp"
  },
  "ter_dirt": {
-  "file": "ground/iso_dirt.webp"
+  "file": "ground/simple_dirt.webp"
  },
  "ter_forest": {
   "file": "ground/forest.webp"
@@ -2273,5 +2273,13 @@
  "prop_wpillar_0": {
   "file": "props/iso_wpillar_0.webp",
   "w": 44
+ },
+ "prop_house3_0": {
+  "file": "props/iso_house3_0.webp",
+  "foot": [
+   4,
+   3
+  ],
+  "ox": 0.6
  }
 }

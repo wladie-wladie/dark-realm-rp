@@ -2,7 +2,7 @@
 // Рисуется кусками вокруг камеры (чтобы хватало памяти телефона), лишние куски выгружаются.
 import { TERRAIN } from "../art/registry.js";
 import { TILE } from "../data/zones.js";
-import { isoMatrix, isoSize, tt } from "../core/iso.js";
+import { isoMatrix, isoSize, tt, tw, ELEV } from "../core/iso.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32, makeNoise } from "../core/rng.js";
 import { ZONES } from "../data/zones.js";
@@ -130,6 +130,12 @@ export class Ground {
     }
     // кромка земли
     ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 6; ctx.strokeRect(0, 0, W * TILE, H * TILE);
+    if (this.gen.raised) {
+      const pts = [[cx * CH, cy * CH], [(cx + 1) * CH, cy * CH], [cx * CH, (cy + 1) * CH + ELEV], [(cx + 1) * CH, (cy + 1) * CH + ELEV]].map(([x, y]) => tt(x, y));
+      const x0 = Math.floor(Math.min(...pts.map(p => p[0]))) - 1, x1 = Math.ceil(Math.max(...pts.map(p => p[0]))) + 1;
+      const y0 = Math.floor(Math.min(...pts.map(p => p[1]))) - 1, y1 = Math.ceil(Math.max(...pts.map(p => p[1]))) + 1;
+      this.relief(ctx, cx, cy, x0, y0, x1, y1, base);
+    }
     return c;
   }
 
@@ -175,6 +181,52 @@ export class Ground {
       ctx.strokeStyle = "rgba(210,190,150,0.35)"; ctx.lineWidth = 1.5; ctx.translate(-1.2, -1.2); ctx.stroke(edges);
       ctx.restore();
     }
+  }
+
+  cliffPattern(ctx) {
+    let src = TERRAIN.src && TERRAIN.src.cliff;
+    if (!src) {
+      // запасная скала, пока нет картинки
+      src = this._cliff || (this._cliff = (() => { const c = canvas(256, 128), g = c.getContext("2d"); const gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, "#8a7a62"); gr.addColorStop(1, "#4a3e30"); g.fillStyle = gr; g.fillRect(0, 0, 256, 128); g.strokeStyle = "rgba(30,22,14,0.5)"; g.lineWidth = 3; for (let i = 0; i < 9; i++) { g.beginPath(); g.moveTo(i * 30 + 8, 0); g.lineTo(i * 30 + 14, 70); g.lineTo(i * 30 + 6, 128); g.stroke(); } return c; })());
+    }
+    const p = ctx.createPattern(src, "repeat"), k = (ELEV * 1.0) / src.height;
+    if (p.setTransform) p.setTransform(new DOMMatrix([k, 0, 0, k, 0, 0]));
+    return p;
+  }
+
+  // скалы: поднятые клетки — верх с травой и отвесная стена к проходу
+  relief(ctx, cx, cy, x0, y0, x1, y1, base) {
+    const { W, H, raised } = this.gen, S = TILE;
+    const R = (x, y) => x >= 0 && y >= 0 && x < W && y < H && raised[y * W + x];
+    const faces = [], tops = new Path2D(), lips = new Path2D();
+    let any = false;
+    for (let y = Math.max(0, y0 - 2); y <= Math.min(H - 1, y1 + 2); y++) for (let x = Math.max(0, x0 - 2); x <= Math.min(W - 1, x1 + 2); x++) {
+      if (!R(x, y)) continue;
+      any = true;
+      tops.rect(x * S - 0.5, y * S - 0.5, S + 1, S + 1);
+      if (!R(x + 1, y)) { faces.push([tw(x + 1, y), tw(x + 1, y + 1), 1, x + y]); lips.moveTo((x + 1) * S, y * S); lips.lineTo((x + 1) * S, (y + 1) * S); }
+      if (!R(x, y + 1)) { faces.push([tw(x, y + 1), tw(x + 1, y + 1), 0, x + y]); lips.moveTo(x * S, (y + 1) * S); lips.lineTo((x + 1) * S, (y + 1) * S); }
+    }
+    if (!any) return;
+    ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES);
+    // тень у подножия
+    ctx.fillStyle = "rgba(10,8,4,0.32)";
+    for (const [A, B] of faces) { ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.lineTo(B[0] + 10, B[1] + 12); ctx.lineTo(A[0] + 10, A[1] + 12); ctx.closePath(); ctx.fill(); }
+    // стены
+    const cp = this.cliffPattern(ctx);
+    faces.sort((a, b) => a[3] - b[3]);
+    for (const [A, B, side] of faces) {
+      ctx.beginPath(); ctx.moveTo(A[0], A[1] - ELEV); ctx.lineTo(B[0], B[1] - ELEV); ctx.lineTo(B[0], B[1]); ctx.lineTo(A[0], A[1]); ctx.closePath();
+      ctx.fillStyle = cp; ctx.fill();
+      ctx.fillStyle = side ? "rgba(0,0,0,0.28)" : "rgba(255,230,190,0.05)"; ctx.fill();
+      ctx.strokeStyle = "rgba(20,14,8,0.55)"; ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    // верх скал
+    ctx.save(); ctx.translate(0, -ELEV); ctx.transform(...this.M);
+    ctx.fillStyle = this.pattern(ctx, base); ctx.fill(tops);
+    ctx.strokeStyle = "rgba(24,18,10,0.85)"; ctx.lineWidth = 3.5; ctx.stroke(lips);
+    ctx.strokeStyle = "rgba(255,240,200,0.25)"; ctx.lineWidth = 1.2; ctx.translate(-1.5, -1.5); ctx.stroke(lips);
+    ctx.restore();
   }
 
   update(force = false) {

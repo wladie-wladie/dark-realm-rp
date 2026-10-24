@@ -16,11 +16,11 @@ import { heroArtKey } from "../art/looks.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32 } from "../core/rng.js";
 import { Ground } from "../systems/ground.js";
-import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH } from "../core/iso.js";
+import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH, ELEV } from "../core/iso.js";
 import { questOnKill, questOnBoss } from "../systems/quests.js";
 
 const genCache = {};
-const TOWN_PORTAL = [26, 22.5]; // где в городе стоит обратный портал (клетки)
+const TOWN_PORTAL = [26, 19.4]; // где в городе стоит обратный портал (клетки)
 const HP_MUL = 2.2;
 const CHUNK = 1024, CHUNK_RES = 0.75;
 const NODE_VERB = { wood: "Рубить", ore: "Добыть руду", herb: "Сорвать", fiber: "Собрать", hide: "Освежевать" };
@@ -164,6 +164,7 @@ export class WorldScene extends Phaser.Scene {
         this.buildings.push({ img, B, L, R });
       }
       img.setDepth(p.flat ? -50000 + p.y : p.y);
+      if (p.elev) img.y -= ELEV; // стоит на скале
       if (lk.h > 120) this.propSprites.push(img);
       if (p.node) {
         const kind = p.node.replace(/[0-9]/g, "");
