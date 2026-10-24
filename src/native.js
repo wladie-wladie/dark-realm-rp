@@ -7,10 +7,11 @@ const MANIFESTS = [
   "https://wladie-wladie.github.io/dark-realm-rp/update.json",
   "https://github.com/wladie-wladie/dark-realm-rp/releases/download/apk/update.json",
 ];
-const cap = () => window.Capacitor;
-export const isNative = () => !!(cap() && cap().isNativePlatform && cap().isNativePlatform());
+import { Capacitor, registerPlugin } from "@capacitor/core";
+// Плагины берём через @capacitor/core (в окне приложения есть только мост без registerPlugin)
+export const isNative = () => Capacitor.isNativePlatform();
 const plugins = {};
-const plugin = name => (plugins[name] = plugins[name] || cap().registerPlugin(name));
+const plugin = name => (plugins[name] = plugins[name] || registerPlugin(name));
 
 const cmpVersion = (a, b) => {
   const pa = String(a).split(".").map(n => parseInt(n, 10) || 0), pb = String(b).split(".").map(n => parseInt(n, 10) || 0);
