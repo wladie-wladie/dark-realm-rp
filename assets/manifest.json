@@ -33,31 +33,31 @@
  },
  "prop_pine_0": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 185
+  "h": 312.0
  },
  "prop_pine_1": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 185
+  "h": 331.5
  },
  "prop_pine_2": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 185
+  "h": 292.5
  },
  "prop_pine_3": {
   "file": "props/iso_pine_s_0.webp",
-  "w": 185
+  "h": 312.0
  },
  "prop_oak_0": {
   "file": "props/iso_oak_s_0.webp",
-  "w": 260
+  "h": 273.0
  },
  "prop_oak_1": {
   "file": "props/iso_oak_s_1.webp",
-  "w": 200
+  "h": 163.8
  },
  "prop_oak_2": {
   "file": "props/iso_oak_s_2.webp",
-  "w": 215
+  "h": 273.0
  },
  "prop_deadtree_0": {
   "file": "props/deadtree.webp",
@@ -73,23 +73,23 @@
  },
  "prop_bush_0": {
   "file": "props/iso_bush_s_0.webp",
-  "w": 100
+  "h": 42.9
  },
  "prop_bush_1": {
   "file": "props/iso_bush_s_1.webp",
-  "w": 100
+  "h": 39.0
  },
  "prop_bush_2": {
   "file": "props/iso_bush_s_0.webp",
-  "w": 100
+  "h": 46.8
  },
  "prop_boulder_0": {
   "file": "props/iso_boulder_s_0.webp",
-  "w": 140
+  "h": 58.5
  },
  "prop_boulder_1": {
   "file": "props/iso_boulder_s_0.webp",
-  "w": 140
+  "h": 50.7
  },
  "prop_lantern_0": {
   "file": "props/lantern.webp",
@@ -109,15 +109,15 @@
  },
  "prop_rock_0": {
   "file": "props/iso_rock_s_0.webp",
-  "w": 100
+  "h": 31.2
  },
  "prop_rock_1": {
   "file": "props/iso_rock_s_0.webp",
-  "w": 100
+  "h": 27.3
  },
  "prop_rock_2": {
   "file": "props/iso_rock_s_0.webp",
-  "w": 100
+  "h": 35.1
  },
  "prop_cart_0": {
   "file": "props/cart.webp",
@@ -133,7 +133,7 @@
  },
  "prop_stump_0": {
   "file": "props/iso_stump_s_0.webp",
-  "w": 76
+  "h": 23.4
  },
  "hero_warrior_m": {
   "file": "chars/hero_warrior_m.webp",
@@ -395,23 +395,23 @@
  },
  "prop_fern_0": {
   "file": "props/iso_fern_s_0.webp",
-  "w": 82
+  "h": 27.3
  },
  "prop_fern_1": {
   "file": "props/iso_fern_s_0.webp",
-  "w": 82
+  "h": 25.4
  },
  "prop_tuft_0": {
   "file": "props/iso_tuft_s_0.webp",
-  "w": 54
+  "h": 19.5
  },
  "prop_tuft_1": {
   "file": "props/iso_tuft_s_0.webp",
-  "w": 54
+  "h": 17.6
  },
  "prop_tuft_2": {
   "file": "props/iso_tuft_s_0.webp",
-  "w": 54
+  "h": 21.5
  },
  "prop_drytuft_0": {
   "file": "props/tuft.webp",
@@ -443,7 +443,7 @@
  },
  "prop_log_0": {
   "file": "props/iso_log_s_0.webp",
-  "w": 150
+  "h": 27.3
  },
  "prop_pebble_0": {
   "file": "props/pebble.webp",
@@ -2177,78 +2177,82 @@
  "prop_house2_0": {
   "file": "props/iso_house3_0.webp",
   "foot": [
-   6,
-   4
+   4,
+   3
   ],
-  "ox": 0.6
+  "ox": 0.6,
+  "k": 1.035
  },
  "prop_house2_1": {
   "file": "props/iso_house2_s_1.webp",
   "foot": [
-   6,
-   4
+   4,
+   3
   ],
-  "ox": 0.6
+  "ox": 0.6,
+  "k": 1.071
  },
  "prop_smithy2_0": {
   "file": "props/iso_smithy2_s_0.webp",
   "foot": [
-   6,
-   4
+   2,
+   2
   ],
-  "ox": 0.55
+  "ox": 0.55,
+  "k": 1.029
  },
  "prop_tavern2_0": {
   "file": "props/iso_tavern2_s_0.webp",
   "foot": [
-   7,
-   5
+   6,
+   3
   ],
-  "ox": 0.62
+  "ox": 0.62,
+  "k": 0.947
  },
  "prop_stall2_0": {
   "file": "props/iso_stall2_s_0.webp",
-  "w": 270
+  "h": 274.6
  },
  "prop_stall2_1": {
   "file": "props/iso_stall2_s_0.webp",
-  "w": 270
+  "h": 274.6
  },
  "prop_well2_0": {
   "file": "props/iso_well2_s_0.webp",
-  "w": 170
+  "h": 182.5
  },
  "prop_lamp2_0": {
   "file": "props/iso_lamp2_s_0.webp",
-  "w": 60
+  "h": 117.0
  },
  "prop_board_0": {
   "file": "props/iso_board_s_0.webp",
-  "w": 115
+  "h": 81.9
  },
  "prop_barrels_0": {
   "file": "props/iso_barrels_s_0.webp",
-  "w": 100
+  "h": 39.0
  },
  "prop_crates_0": {
   "file": "props/iso_crates_s_0.webp",
-  "w": 105
+  "h": 35.1
  },
  "prop_cart2_0": {
   "file": "props/iso_cart2_s_0.webp",
-  "w": 190
+  "h": 50.7
  },
  "prop_banner_0": {
   "file": "props/iso_banner_s_0.webp",
-  "w": 66
+  "h": 156.0
  },
  "prop_signpost2_0": {
   "file": "props/iso_signpost2_s_0.webp",
-  "w": 90
+  "h": 85.8
  },
  "prop_bench_0": {
   "file": "props/iso_bench_0.webp",
-  "w": 90
+  "h": 35.1
  },
  "prop_wall_a_0": {
   "file": "props/iso_wall_a_0.webp",
@@ -2277,16 +2281,17 @@
  "prop_house3_0": {
   "file": "props/iso_house3_0.webp",
   "foot": [
-   6,
-   4
+   4,
+   3
   ],
-  "ox": 0.6
+  "ox": 0.6,
+  "k": 1.035
  },
  "ter_cliff": {
   "file": "ground/simple_cliff.webp"
  },
  "prop_fence2_0": {
   "file": "props/iso_fence2_s_0.webp",
-  "w": 160
+  "h": 46.8
  }
 }

@@ -74,7 +74,8 @@ export function propLook(scene, key, def) {
   const src = scene.textures.get("prop_" + key).getSourceImage();
   if (meta && src && src.width) {
     // изо-постройка: ширина = сумма сторон основания в клетках, опора — нижний угол основания
-    const w = meta.foot ? (meta.foot[0] + meta.foot[1]) * 64 * (meta.k || 1) : (meta.w || def.w);
+    // размер: по основанию (постройки), по высоте в мире (реальные метры) или по ширине
+    const w = meta.foot ? (meta.foot[0] + meta.foot[1]) * 64 * (meta.k || 1) : meta.h ? meta.h * src.width / src.height : (meta.w || def.w);
     return { scale: w / src.width, originY: meta.oy ?? (meta.foot ? 1 : 0.96), originX: meta.ox ?? 0.5, w, h: src.height * w / src.width, foot: meta.foot };
   }
   return { scale: 1 / PROP_RES, originY: (def.h - 10) / def.h, w: def.w, h: def.h };
