@@ -76,19 +76,63 @@ def beast(src, key, width_px=210):
     fn = f"chars/{key}.webp"; s.save("assets/" + fn, "WEBP", quality=90, method=6)
     man[key] = {"file": fn, "type": "csheet", "fw": FW, "fh": FH}
 
-def ground(src, names):
+def ground(src, names, cols=2, rows=2):
     im = Image.open(src).convert("RGB"); W, H = im.size
     for i, name in enumerate(names):
         if not name: continue
-        r, c = divmod(i, 2)
-        q = im.crop((c * W // 2 + 6, r * H // 2 + 6, (c + 1) * W // 2 - 6, (r + 1) * H // 2 - 6)).resize((512, 512), Image.LANCZOS)
+        r, c = divmod(i, cols)
+        q = im.crop((c * W // cols + 6, r * H // rows + 6, (c + 1) * W // cols - 6, (r + 1) * H // rows - 6)).resize((512, 512), Image.LANCZOS)
         q = seamless(q)
         fn = f"ground/{name}.webp"; q.save("assets/" + fn, "WEBP", quality=88, method=6)
         man["ter_" + name] = {"file": fn}
 
+NPC_IDS = ["elder", "smith", "trader", "alch", "mentor", "guard", "guard2"]
+
+def npcs(src):
+    # одна картинка с жителями в ряд → у каждого лист, где все кадры — стоящая фигура
+    from slice import slice_sheet
+    parts = sorted(slice_sheet(src, min_px=2000), key=lambda p: p["x"])
+    hs = [p["img"].height for p in parts]; med = float(np.median(hs))
+    FW, FH, foot = 192, 240, 222
+    for p, nid in zip(parts, NPC_IDS):
+        im = p["img"]; sc = 176 / med; im = im.resize((round(im.width * sc), round(im.height * sc)), Image.LANCZOS)
+        frame = Image.new("RGBA", (FW, FH)); frame.alpha_composite(im, (max(0, (FW - im.width) // 2), max(0, foot - im.height)))
+        sheet = Image.new("RGBA", (FW * 8, FH * 3))
+        for r in range(3):
+            for c in range(8): sheet.alpha_composite(frame, (c * FW, r * FH))
+        fn = f"chars/npc_{nid}.webp"; sheet.save("assets/" + fn, "WEBP", quality=90, method=6)
+        man["npc_" + nid] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH}
+    print("npcs", len(parts))
+
+TITLES = {}  # ключ листа → название облика в редакторе
+if os.path.exists("tools-static/titles.json"): TITLES = json.load(open("tools-static/titles.json"))
+BEASTS = {"wolf": 210}  # звери в профиль: ширина бега в кадре
+
 if __name__ == "__main__":
-    hero("assets/raw/hero_warrior_m.png", "hero_warrior_m")
-    beast("assets/raw/wolf.png", "mob_wolf")
-    ground("assets/raw/ground_01.png", ["grass", "cobble", "dirt", "forest"])
+    only = sys.argv[1:]
+    for f in sorted(os.listdir("assets/raw")):
+        name, ext = os.path.splitext(f)
+        if ext != ".png" or (only and name not in only): continue
+        src = "assets/raw/" + f
+        if name.startswith("hero_"):
+            hero(src, name)
+            if name in TITLES: man[name]["title"] = TITLES[name]
+        elif name == "npc_all":
+            npcs(src)
+        elif name.startswith("mobh_"):
+            hero(src, "mob_" + name[5:])
+        elif name in BEASTS or name.startswith("mobc_"):
+            key = "mob_" + (name[5:] if name.startswith("mobc_") else name)
+            beast(src, key, BEASTS.get(name, 210))
+        elif name.startswith("ground_01"):
+            ground(src, ["grass", "cobble", "dirt", "forest"])
+        elif name.startswith("ground_02"):
+            ground(src, ["mud", "swampgrass", "swampwater", "water", "stone", "ash"], 3, 2)
+        else:
+            continue
+        print("imported", name)
+    # одни и те же картинки для родственных существ
+    ALIAS = {"mob_alpha": "mob_wolf", "mob_pet_wolf": "mob_wolf", "mob_heartgolem": "mob_golem", "mob_pet_golem": "mob_golem", "mob_pet_skeleton": "mob_skeleton", "mob_pet_shade": "hero_rogue_m"}
+    for a, b in ALIAS.items():
+        if b in man: man[a] = dict(man[b]); man[a].pop("title", None)
     json.dump(man, open(man_path, "w"), ensure_ascii=False, indent=1)
-    print("ok")
