@@ -1,19 +1,25 @@
 // Существа в мире: герой, монстры, союзники, жители. Спрайт + физическое тело + анимация.
-import { CHAR_RES } from "../art/registry.js";
+
+// Общий масштаб существ относительно мира (герой ~1/5 высоты экрана, как в Zenonia)
+export const ACTOR_SCALE = 1.45;
 
 export class Actor {
   constructor(scene, o) {
     this.scene = scene;
     this.kind = o.kind;           // player | monster | ally | npc
     this.sheet = o.sheet;         // 'h' — человекоподобный, 'c' — существо
-    this.scale = o.scale || 1;
+    this.scale = (o.scale || 1) * ACTOR_SCALE;
     this.id = o.id; this.def = o.def || null; this.name = o.name || "";
     const sprite = scene.physics.add.sprite(o.x, o.y, o.tex, 0);
-    sprite.setScale(this.scale / CHAR_RES);
+    // разрешение листа: процедурный рисуется в CHAR_RES, картинки из ChatGPT — крупнее
+    const fw = sprite.frame.width;
+    const res = fw / (this.sheet === "h" ? 64 : 80);
+    this.idleCol = o.idleCol ?? 0;
+    sprite.setScale(this.scale / res);
     if (this.sheet === "h") sprite.setOrigin(0.5, 74 / 80); else sprite.setOrigin(0.5, 54 / 64);
-    const rWorld = (o.radius || 13) * Math.min(this.scale, 1.6);
+    const rWorld = (o.radius || 13) * Math.min(this.scale / ACTOR_SCALE, 1.6) * 1.15;
     const rSrc = rWorld / sprite.scaleX;
-    const footX = this.sheet === "h" ? 32 * CHAR_RES : 40 * CHAR_RES, footY = this.sheet === "h" ? 74 * CHAR_RES : 54 * CHAR_RES;
+    const footX = this.sheet === "h" ? 32 * res : 40 * res, footY = this.sheet === "h" ? 74 * res : 54 * res;
     sprite.body.setCircle(rSrc, footX - rSrc, footY - rSrc * 1.6);
     sprite.actor = this;
     this.sprite = sprite;
@@ -60,7 +66,7 @@ export class Actor {
     if (this.castT >= 0) col = this.sheet === "h" ? 7 : 5;
     else if (this.attackT >= 0) col = 4 + Math.min(2, Math.floor((this.attackT / this.attackDur) * 3));
     else if (this.moving || this.flying) col = Math.floor((this.flying && !this.moving ? (this.scene.time.now / 1000 * 1.5) % 1 : this.walkPhase) * 4) % 4;
-    else col = 0;
+    else col = this.idleCol;
     if (this.sheet === "h") {
       s.setFrame(this.dir * 8 + col);
       s.setFlipX(this.dir === 2 && this.flip);

@@ -234,7 +234,7 @@ export class UI {
     mc.style.left = Math.min(0, Math.max(vw - mc.width, vw / 2 - p.x * s)) + "px";
     mc.style.top = Math.min(0, Math.max(vh - mc.height, vh / 2 - p.y * s)) + "px";
     // метки над жителями
-    for (const n of W.npcs) { const mk = npcMarker(st, n.npc.id); if (n.mark.text !== mk) n.mark.setText(mk); n.mark.setPosition(n.x, n.y - 114 + Math.sin(W.clock * 4) * 3); n.label.setPosition(n.x, n.y - 94); }
+    for (const n of W.npcs) { const mk = npcMarker(st, n.npc.id); if (n.mark.text !== mk) n.mark.setText(mk); n.mark.setPosition(n.x, n.y - 62 * n.scale - 36 + Math.sin(W.clock * 4) * 3); n.label.setPosition(n.x, n.y - 62 * n.scale - 14); }
     // эффекты
     const bkey = W.buffs.map(b => b.id).join(",");
     if (e.buffs.dataset.k !== bkey) { clear(e.buffs); e.buffs.dataset.k = bkey; for (const b of W.buffs) e.buffs.appendChild(h("img", { src: skillIcon(b.icon, 32), title: b.name })); }

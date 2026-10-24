@@ -3,6 +3,9 @@ name: Сборка APK и обновления
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "assets/raw/**"
+      - "tools-static/**"
   workflow_dispatch:
 
 permissions:

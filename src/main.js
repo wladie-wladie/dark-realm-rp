@@ -14,7 +14,12 @@ class BootScene extends Phaser.Scene {
     // своя графика (например, из GPT): assets/manifest.json → { "ключ_текстуры": "путь.png" }
     this.load.json("manifest", "assets/manifest.json");
     this.load.on("filecomplete-json-manifest", (key, type, data) => {
-      for (const [k, path] of Object.entries(data || {})) this.load.image(k, "assets/" + path);
+      G.art = {};
+      for (const [k, v] of Object.entries(data || {})) {
+        const meta = typeof v === "string" ? { file: v } : v;
+        G.art[k] = meta;
+        this.load.image(k, "assets/" + meta.file);
+      }
     });
     this.load.on("loaderror", () => {});
   }

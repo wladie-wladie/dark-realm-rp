@@ -1,1 +1,174 @@
-{}
+{
+ "prop_tavern_0": {
+  "file": "props/house_big.webp",
+  "w": 360
+ },
+ "prop_smithy_0": {
+  "file": "props/house_big.webp",
+  "w": 300
+ },
+ "prop_shop_0": {
+  "file": "props/house_big.webp",
+  "w": 280
+ },
+ "prop_house_0": {
+  "file": "props/house_big.webp",
+  "w": 270
+ },
+ "prop_house_1": {
+  "file": "props/house_thatch.webp",
+  "w": 260
+ },
+ "prop_herbhut_0": {
+  "file": "props/house_thatch.webp",
+  "w": 240
+ },
+ "prop_hut_0": {
+  "file": "props/house_thatch.webp",
+  "w": 220
+ },
+ "prop_well_0": {
+  "file": "props/well.webp",
+  "w": 110
+ },
+ "prop_pine_0": {
+  "file": "props/pine.webp",
+  "w": 150
+ },
+ "prop_pine_1": {
+  "file": "props/pine.webp",
+  "w": 135
+ },
+ "prop_pine_2": {
+  "file": "props/pine.webp",
+  "w": 160
+ },
+ "prop_pine_3": {
+  "file": "props/pine.webp",
+  "w": 145
+ },
+ "prop_oak_0": {
+  "file": "props/oak.webp",
+  "w": 200
+ },
+ "prop_oak_1": {
+  "file": "props/oak.webp",
+  "w": 185
+ },
+ "prop_oak_2": {
+  "file": "props/oak.webp",
+  "w": 215
+ },
+ "prop_deadtree_0": {
+  "file": "props/deadtree.webp",
+  "w": 150
+ },
+ "prop_deadtree_1": {
+  "file": "props/deadtree.webp",
+  "w": 140
+ },
+ "prop_deadtree_2": {
+  "file": "props/deadtree.webp",
+  "w": 165
+ },
+ "prop_bush_0": {
+  "file": "props/bush.webp",
+  "w": 80
+ },
+ "prop_bush_1": {
+  "file": "props/bush.webp",
+  "w": 72
+ },
+ "prop_bush_2": {
+  "file": "props/bush.webp",
+  "w": 88
+ },
+ "prop_boulder_0": {
+  "file": "props/boulder.webp",
+  "w": 130
+ },
+ "prop_boulder_1": {
+  "file": "props/boulder.webp",
+  "w": 115
+ },
+ "prop_lantern_0": {
+  "file": "props/lantern.webp",
+  "w": 52
+ },
+ "prop_fence_0": {
+  "file": "props/fence.webp",
+  "w": 95
+ },
+ "prop_barrel_0": {
+  "file": "props/barrel.webp",
+  "w": 40
+ },
+ "prop_crate_0": {
+  "file": "props/crate.webp",
+  "w": 50
+ },
+ "prop_rock_0": {
+  "file": "props/rock.webp",
+  "w": 75
+ },
+ "prop_rock_1": {
+  "file": "props/rock.webp",
+  "w": 65
+ },
+ "prop_rock_2": {
+  "file": "props/rock.webp",
+  "w": 85
+ },
+ "prop_cart_0": {
+  "file": "props/cart.webp",
+  "w": 150
+ },
+ "prop_stall_0": {
+  "file": "props/stall.webp",
+  "w": 150
+ },
+ "prop_stall_1": {
+  "file": "props/stall.webp",
+  "w": 150
+ },
+ "prop_stump_0": {
+  "file": "props/stump.webp",
+  "w": 60
+ },
+ "hero_warrior_m": {
+  "file": "chars/hero_warrior_m.webp",
+  "type": "hsheet",
+  "fw": 192,
+  "fh": 240
+ },
+ "mob_wolf": {
+  "file": "chars/mob_wolf.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ },
+ "ter_grass": {
+  "file": "ground/grass.webp"
+ },
+ "ter_cobble": {
+  "file": "ground/cobble.webp"
+ },
+ "ter_dirt": {
+  "file": "ground/dirt.webp"
+ },
+ "ter_forest": {
+  "file": "ground/forest.webp"
+ },
+ "mob_alpha": {
+  "file": "chars/mob_wolf.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ },
+ "mob_pet_wolf": {
+  "file": "chars/mob_wolf.webp",
+  "type": "csheet",
+  "fw": 240,
+  "fh": 192
+ }
+}

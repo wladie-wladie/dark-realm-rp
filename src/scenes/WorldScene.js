@@ -9,7 +9,7 @@ import { generateZone } from "../systems/mapgen.js";
 import { Actor } from "../systems/entities.js";
 import { Combat } from "../systems/combat.js";
 import { derive, gainXp, addItem, rollGear, saveGame, skillValues, gatherLevel, countItem, removeItem } from "../systems/state.js";
-import { TERRAIN, ensureHumanoid, ensureCreature, propScale, PROP_RES } from "../art/registry.js";
+import { TERRAIN, ensureHumanoid, ensureCreature, propLook, PROP_RES, artSheet } from "../art/registry.js";
 import { PROPS } from "../art/props.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32 } from "../core/rng.js";
@@ -81,7 +81,7 @@ export class WorldScene extends Phaser.Scene {
     const cam = this.cameras.main;
     const h = this.scale.height, w = this.scale.width;
     cam.setSize(w, h);
-    cam.setZoom(Math.max(0.6, Math.min(h / (TILE * 7.2), w / (TILE * 11))));
+    cam.setZoom(Math.max(0.6, Math.min(h / (TILE * 6.6), w / (TILE * 10))));
   }
 
   // ---------- земля ----------
@@ -176,11 +176,11 @@ export class WorldScene extends Phaser.Scene {
     for (const p of this.gen.props) {
       const key = `${p.key}_${p.v}`;
       const img = this.add.image(p.x, p.y, "prop_" + key);
-      const sc = propScale(this, key);
-      img.setScale(sc);
-      img.setOrigin(0.5, (p.h - 10) / p.h);
+      const lk = propLook(this, key, p);
+      img.setScale(lk.scale);
+      img.setOrigin(0.5, lk.originY);
       img.setDepth(p.flat ? -50000 + p.y : p.y);
-      if (p.h > 120) this.propSprites.push(img);
+      if (lk.h > 120) this.propSprites.push(img);
       if (p.node) {
         const kind = p.node.replace(/[0-9]/g, "");
         const tier = parseInt(p.node.replace(/\D/g, "")) || 1;
@@ -274,17 +274,25 @@ export class WorldScene extends Phaser.Scene {
   }
   buildPlayer() {
     const st = G.st;
-    ensureHumanoid(this, "hero", this.playerLook());
+    const art = this.heroArt();
+    if (!art) ensureHumanoid(this, "hero", this.playerLook());
     let x, y;
     if (this.arrive) { x = (this.arrive[0] + 0.5) * TILE; y = (this.arrive[1] + 0.5) * TILE; }
     else if (st.pos && st.pos.zone === this.zoneId) { x = st.pos.x; y = st.pos.y; }
     else { const s = this.z.spawn || [this.gen.W / 2, this.gen.H / 2]; x = s[0] * TILE; y = s[1] * TILE; }
-    this.player = new Actor(this, { kind: "player", sheet: "h", tex: "hero", x, y, scale: 1.05, radius: 13, hp: 100 });
+    this.player = new Actor(this, { kind: "player", sheet: "h", tex: art ? art.key : "hero", idleCol: art ? art.idleCol : 0, x, y, scale: 1.05, radius: 13, hp: 100 });
     this.player.sprite.setCollideWorldBounds(true);
     this.player.name = st.name;
     this.nameTag = this.add.text(x, y, st.name, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#e8dcc0", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002);
   }
+  // нарисованный в ChatGPT лист героя для класса и пола, если он уже есть
+  heroArt() {
+    const st = G.st;
+    return artSheet(this, `hero_${st.sub || st.cls}_${st.look.gender}`) || artSheet(this, `hero_${st.cls}_${st.look.gender}`);
+  }
   refreshPlayerLook() {
+    const art = this.heroArt();
+    if (art) { this.recalc(); return; }
     ensureHumanoid(this, "hero", this.playerLook());
     this.player.sprite.setTexture("hero", 0);
     this.recalc();
@@ -334,14 +342,16 @@ export class WorldScene extends Phaser.Scene {
   monsterTex(id) {
     const d = MONSTERS[id];
     const key = "mob_" + id;
+    const art = artSheet(this, key);
+    if (art) return [art.key, art.sheet, art.idleCol];
     if (this.textures.exists(key)) return [key, d.sprite.humanoid ? "h" : "c"];
     if (d.sprite.humanoid) { ensureHumanoid(this, key, d.sprite.humanoid); return [key, "h"]; }
     ensureCreature(this, key, d.sprite.creature, d.sprite.opts || {}); return [key, "c"];
   }
   spawnMonster(id, x, y, opts = {}) {
     const d = MONSTERS[id];
-    const [tex, sheet] = this.monsterTex(id);
-    const m = new Actor(this, { kind: "monster", sheet, tex, x, y, scale: d.scale, radius: d.boss ? 22 : 14, hp: Math.round(d.hp * HP_MUL), flying: d.flying, def: d });
+    const [tex, sheet, idleCol] = this.monsterTex(id);
+    const m = new Actor(this, { kind: "monster", sheet, tex, idleCol, x, y, scale: d.scale, radius: d.boss ? 22 : 14, hp: Math.round(d.hp * HP_MUL), flying: d.flying, def: d });
     m.mid = id; m.lvl = d.lvl; m.atk = d.atk; m.defense = d.def; m.speed = d.speed;
     m.home = { x, y }; m.state = "idle"; m.cd = Math.random(); m.wander = 0; m.sp1 = d.special ? d.special.cd * 0.6 : 0; m.sp2 = d.special2 ? d.special2.cd * 0.8 : 0;
     m.spawnIdx = opts.spawnIdx; m.minion = !!opts.minion;
@@ -362,9 +372,9 @@ export class WorldScene extends Phaser.Scene {
   }
   spawnAlly(id, x, y, dur, baseDmg) {
     const d = MONSTERS[id];
-    const [tex, sheet] = this.monsterTex(id);
+    const [tex, sheet, idleCol] = this.monsterTex(id);
     const ps = this.pstats;
-    const a = new Actor(this, { kind: "ally", sheet, tex, x, y, scale: d.scale, radius: 12, hp: Math.round(this.player.maxHp * d.hp * (1 + ps.summon / 100)), flying: d.flying, def: d, alpha: d.alpha });
+    const a = new Actor(this, { kind: "ally", sheet, tex, idleCol, x, y, scale: d.scale, radius: 12, hp: Math.round(this.player.maxHp * d.hp * (1 + ps.summon / 100)), flying: d.flying, def: d, alpha: d.alpha });
     a.dmg = baseDmg * d.atk * (1 + ps.summon / 100); a.speed = d.speed; a.defense = ps.def * 0.6; a.cd = 0; a.expire = this.clock + dur;
     a.sprite.setCollideWorldBounds(true);
     this.allyGroup.add(a.sprite);
@@ -754,7 +764,7 @@ export class WorldScene extends Phaser.Scene {
     }
     p.animate(dt);
     if (p.dead) p.sprite.clearTint();
-    this.nameTag.setPosition(p.x, p.y - 96);
+    this.nameTag.setPosition(p.x, p.y - 62 * p.scale - 14);
     this.playerLight.setPosition(p.x, p.y - 30);
 
     for (const k of Object.keys(this.cds)) if (this.cds[k] > 0) this.cds[k] -= dt;
