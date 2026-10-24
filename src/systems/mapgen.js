@@ -126,8 +126,8 @@ export function generateZone(id, z) {
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       const i = idx(x, y); if (!front[i]) continue;
       const nearWalk = isW(x - 1, y) || isW(x, y - 1);
-      if (nearWalk) { if (rr.chance(0.45)) place(rr.pick(z.walk.edge || ["bush"]), x + rr.range(0.3, 0.7), y + rr.range(0.5, 0.9)); }
-      else if (rr.chance(0.55)) place(rr.pick(z.walk.trees || ["oak"]), x + rr.range(0.3, 0.7), y + rr.range(0.5, 0.9));
+      if (nearWalk) { if (rr.chance(0.28)) place(rr.pick(z.walk.edge || ["bush"]), x + rr.range(0.3, 0.7), y + rr.range(0.5, 0.9)); }
+      else if (rr.chance(0.3)) place(rr.pick(z.walk.trees || ["oak"]), x + rr.range(0.3, 0.7), y + rr.range(0.5, 0.9));
     }
     // деревья на скалах (поднятые)
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {

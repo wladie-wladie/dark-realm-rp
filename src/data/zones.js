@@ -36,7 +36,7 @@ export const ZONES = {
         { pts: [[29, 16.5], [46, 16.5]], w: 5 }, { pts: [[2, 17], [17, 17]], w: 5 },
       ],
       rooms: [{ x: 5, y: 17.5, rx: 3.5, ry: 3.5 }],
-      trees: ["oak", "pine"], edge: ["bush", "bush", "fern"], topTrees: 0.14,
+      trees: ["oak", "pine"], edge: ["bush", "bush", "fern", "rock"], topTrees: 0.07,
     },
     scatter: [{ p: "tuft", d: 0.02 }],
     fixed: [
