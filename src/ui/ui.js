@@ -9,6 +9,7 @@ import { portrait as drawnPortrait } from "../art/humanoid.js";
 import { heroArtKey, artPortrait } from "../art/looks.js";
 const portraitOf = (st, size) => { const k = heroArtKey(st); return k ? artPortrait(k, size) : drawnPortrait(st.look, size); };
 import { skillIcon, itemIconUrl, artIcon } from "../art/icons.js";
+import { updateState, onUpdateState, applyUpdateNow } from "../native.js";
 import { questById, progressText, isComplete, npcMarker } from "../systems/quests.js";
 import { CharacterCreator } from "./create.js";
 import { Panels } from "./panels.js";
@@ -47,11 +48,30 @@ export class UI {
           h("button.btn", { onclick: () => this.createScreen(i) }, "Новый герой")));
       }
     });
-    this.root.appendChild(h("div.screen.title-screen", {},
+    const upd = h("div.upd");
+    const scr = h("div.screen.title-screen", {},
       h("div.logo", {}, "Тёмные земли"),
       h("div.logo-sub", {}, "Серый Брод и окрестные земли"),
-      slots,
-      h("div.version", {}, "версия " + APP_VERSION)));
+      upd, slots,
+      h("div.version", {}, "версия " + APP_VERSION));
+    this.root.appendChild(scr);
+    // обновление проверяется и ставится прямо на стартовом экране
+    const drawUpd = u => {
+      if (!scr.isConnected) return;
+      upd.className = "upd " + u.state;
+      if (u.state === "checking") upd.textContent = "Проверка обновлений…";
+      else if (u.state === "downloading") { clear(upd); upd.append(`Загрузка обновления ${String(u.detail).split(" ")[0]}… ${u.progress || 0}%`, h("div.bar", {}, h("i", { style: { width: (u.progress || 0) + "%" } }))); }
+      else if (u.state === "ready") { upd.textContent = `Установка обновления ${u.detail}…`; setTimeout(() => { if (scr.isConnected) applyUpdateNow(); }, 600); }
+      else if (u.state === "latest") upd.textContent = "Установлена последняя версия";
+      else if (u.state === "error") upd.textContent = "Не удалось проверить обновления: " + u.detail;
+      else upd.textContent = "";
+      const busy = u.state === "checking" || u.state === "downloading" || u.state === "ready";
+      scr.querySelectorAll(".slots button").forEach(b => (b.disabled = busy && !this.skipUpd));
+      if (busy && !this.skipUpd && !upd.querySelector(".skip")) upd.appendChild(h("button.btn.small.skip", { onclick: () => { this.skipUpd = true; drawUpd(updateState); } }, "Играть без обновления"));
+    };
+    if (!this.updHooked) { this.updHooked = true; onUpdateState(u => this.updDraw && this.updDraw(u)); }
+    this.updDraw = drawUpd;
+    drawUpd(updateState);
   }
 
   createScreen(slot) {

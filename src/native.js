@@ -19,7 +19,7 @@ const cmpVersion = (a, b) => {
   return 0;
 };
 
-export const updateState = { state: isNative() ? "idle" : "web", detail: "", version: APP_VERSION };
+export const updateState = { state: isNative() ? "idle" : "web", detail: "", version: APP_VERSION, progress: 0 };
 const set = (state, detail = "") => { updateState.state = state; updateState.detail = detail; listeners.forEach(f => f(updateState)); };
 const listeners = [];
 export const onUpdateState = f => listeners.push(f);
@@ -51,8 +51,11 @@ export function checkForUpdates() {
       const info = await fetchManifest();
       if (cmpVersion(info.version, APP_VERSION) <= 0) { set("latest", info.version); return updateState; }
       if (!info.checksum) { set("error", "в update.json нет контрольной суммы"); return updateState; }
+      updateState.progress = 0;
       set("downloading", info.version);
       const updater = plugin("CapacitorUpdater");
+      let progL = null;
+      try { progL = await updater.addListener("download", e => { updateState.progress = Math.max(0, Math.min(100, Math.round((e && e.percent) || 0))); set("downloading", info.version); }); } catch (_) {}
       let bundle = null;
       try { const list = await updater.list(); bundle = (list.bundles || []).find(b => b.version === info.version && b.status !== "error") || null; } catch (_) {}
       if (!bundle) {
@@ -61,6 +64,7 @@ export function checkForUpdates() {
           catch (e) { set("downloading", info.version + " (запасной путь: " + ((e && e.message) || e) + ")"); }
         }
       }
+      try { progL && progL.remove && progL.remove(); } catch (_) {}
       if (!bundle) { set("error", "не удалось скачать обновление " + info.version); return updateState; }
       await updater.next({ id: bundle.id });
       readyBundle = bundle;

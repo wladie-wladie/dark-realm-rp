@@ -48,7 +48,7 @@ window.addEventListener("load", () => {
   window.addEventListener("orientationchange", () => setTimeout(resize, 200));
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && G.world && G.st && G.game.scene.isActive("world")) G.world.persist(); });
   initNative({
-    onUpdateReady: info => G.ui.toast && G.ui.toast(`Скачано обновление ${info.version}. Перезапустите игру или нажмите «Меню → Перезапустить с обновлением»`, "#a0d0ff", 7000),
+    onUpdateReady: info => G.st && G.ui.el && G.ui.toast(`Скачано обновление ${info.version}. Перезапустите игру или нажмите «Меню → Перезапустить с обновлением»`, "#a0d0ff", 7000),
     onBack: () => {
       const m = document.querySelectorAll(".modal-bg");
       if (m.length) { const close = m[m.length - 1].querySelector(".close"); if (close) close.click(); else m[m.length - 1].dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })); return; }

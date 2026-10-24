@@ -196,3 +196,11 @@ input { font-family: var(--serif); user-select: text; -webkit-user-select: text;
 .mbtn.art, .abtn.atk.art { padding: 0; overflow: hidden; }
 .mbtn.art img, .abtn.atk.art img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; display: block; }
 .abtn.atk.art img { border-radius: 50%; }
+
+.upd { min-height: 20px; margin: 4px auto 8px; font-size: 14px; color: #c8bca0; text-align: center; max-width: 420px; }
+.upd.downloading, .upd.ready { color: #a8d0ff; }
+.upd.error { color: #c08070; font-size: 12px; }
+.upd.web, .upd.idle { display: none; }
+.upd .bar { height: 6px; margin: 5px auto 0; width: 260px; background: rgba(0,0,0,.6); border: 1px solid #4a4030; border-radius: 4px; overflow: hidden; }
+.upd .bar i { display: block; height: 100%; background: linear-gradient(90deg, #4a7ab0, #a8d0ff); transition: width .3s; }
+.upd .skip { display: block; margin: 6px auto 0; }
