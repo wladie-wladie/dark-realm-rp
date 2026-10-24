@@ -2293,5 +2293,32 @@
  "prop_fence2_0": {
   "file": "props/iso_fence2_s_0.webp",
   "h": 46.8
+ },
+ "pt_hero_mage_m": {
+  "file": "portraits/hero_mage_m.webp"
+ },
+ "pt_hero_mage_f": {
+  "file": "portraits/hero_mage_f.webp"
+ },
+ "pt_npc_elder": {
+  "file": "portraits/npc_elder.webp"
+ },
+ "pt_npc_smith": {
+  "file": "portraits/npc_smith.webp"
+ },
+ "pt_npc_trader": {
+  "file": "portraits/npc_trader.webp"
+ },
+ "pt_npc_alch": {
+  "file": "portraits/npc_alch.webp"
+ },
+ "pt_npc_mentor": {
+  "file": "portraits/npc_mentor.webp"
+ },
+ "pt_npc_guard": {
+  "file": "portraits/npc_guard.webp"
+ },
+ "pt_npc_guard2": {
+  "file": "portraits/npc_guard2.webp"
  }
 }

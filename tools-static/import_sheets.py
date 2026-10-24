@@ -38,6 +38,9 @@ def cells(path, rows, cols, dilate=5, min_px=300):
             if not ms: continue
             big = max(x.sum() for x in ms)
             ms = [x for x in ms if x.sum() >= 0.1 * big]   # отбрасываем осколки и частицы
+            # куски соседнего кадра (край плаща и т.п.) не перекрываются с главной фигурой по горизонтали
+            main = max(ms, key=lambda x: x.sum()); mx = np.where(main.any(0))[0]; ml, mr = mx.min(), mx.max()
+            ms = [x for x in ms if (lambda xs: xs.min() <= mr + 6 and xs.max() >= ml - 6)(np.where(x.any(0))[0])]
             m = np.logical_or.reduce(ms)
             ys, xs = np.where(m)
             y0, y1, x0, x1 = ys.min(), ys.max() + 1, xs.min(), xs.max() + 1
