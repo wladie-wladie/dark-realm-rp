@@ -77,7 +77,7 @@ export class Actor {
       s.setFrame(col);
       s.setFlipX(this.flip);
     }
-    s.setDepth(s.y);
+    s.setDepth(this.scene.buildings && this.scene.buildings.length ? this.scene.isoDepth(this) : s.y);
     // окраска от эффектов
     if (this.hurtT > 0) { this.hurtT -= dt; s.setTintFill(0xffffff); if (this.hurtT <= 0.05) s.clearTint(); }
     else {

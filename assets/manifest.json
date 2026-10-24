@@ -149,10 +149,10 @@
   "fh": 192
  },
  "ter_grass": {
-  "file": "ground/grass.webp"
+  "file": "ground/iso_grass.webp"
  },
  "ter_cobble": {
-  "file": "ground/cobble.webp"
+  "file": "ground/iso_cobble.webp"
  },
  "ter_dirt": {
   "file": "ground/dirt.webp"
@@ -2173,5 +2173,21 @@
  "prop_boat_0": {
   "file": "props/boat.webp",
   "w": 130
+ },
+ "prop_house2_0": {
+  "file": "props/iso_house2_0.webp",
+  "foot": [
+   4,
+   3
+  ],
+  "ox": 0.58
+ },
+ "prop_house2_1": {
+  "file": "props/iso_house2_1.webp",
+  "foot": [
+   4,
+   3
+  ],
+  "ox": 0.57
  }
 }

@@ -15,6 +15,7 @@ import { PROPS } from "../art/props.js";
 import { heroArtKey } from "../art/looks.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32 } from "../core/rng.js";
+import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH } from "../core/iso.js";
 import { questOnKill, questOnBoss } from "../systems/quests.js";
 
 const genCache = {};
@@ -39,7 +40,8 @@ export class WorldScene extends Phaser.Scene {
     this.danger = DANGER[this.z.danger];
     this.gen = genCache[this.zoneId] || (genCache[this.zoneId] = generateZone(this.zoneId, this.z));
     this.zoneLvl = parseInt(this.z.lvl) || 1;
-    const Wpx = this.gen.W * TILE, Hpx = this.gen.H * TILE;
+    setIsoZone(this.gen.W, this.gen.H);
+    const [Wpx, Hpx] = isoSize(this.gen.W, this.gen.H);
     this.physics.world.setBounds(0, 0, Wpx, Hpx);
     this.clock = 0; this.buffs = []; this.cds = {}; this.attackCd = 0; this.shield = 0; this.shieldUntil = 0;
     this.invuln = 0; this.dash = null; this.gathering = null; this.loot = []; this.allies = []; this.monsters = [];
@@ -80,7 +82,7 @@ export class WorldScene extends Phaser.Scene {
     this.portalObj = null; this.portalArmed = false;
     const pt = st.portal;
     if (pt && pt.stage === "open" && pt.zone === this.zoneId) this.spawnPortal(pt.x, pt.y, "Портал в Серый Брод");
-    if (pt && pt.stage === "intown" && this.zoneId === "town") { const [tx, ty] = TOWN_PORTAL; this.spawnPortal(tx * TILE, ty * TILE, "Портал обратно: " + ZONES[pt.zone].name); }
+    if (pt && pt.stage === "intown" && this.zoneId === "town") { const [px, py] = tw(...TOWN_PORTAL); this.spawnPortal(px, py, "Портал обратно: " + ZONES[pt.zone].name); }
     G.ui && G.ui.enterZone(this);
   }
 
@@ -95,23 +97,26 @@ export class WorldScene extends Phaser.Scene {
   buildGround() {
     const { W, H, ter } = this.gen;
     const base = this.z.base;
-    const cw = Math.ceil(W * TILE / CHUNK), ch = Math.ceil(H * TILE / CHUNK);
+    const [Wpx, Hpx] = isoSize(W, H);
+    const cw = Math.ceil(Wpx / CHUNK), ch = Math.ceil(Hpx / CHUNK);
     const order = ["grass", "forest", "swampgrass", "dirt", "mud", "ash", "road", "cobble", "stone", "water", "swampwater"];
+    const M = isoMatrix();
     for (let cy = 0; cy < ch; cy++) for (let cx = 0; cx < cw; cx++) {
       const key = `ground_${this.zoneId}_${cx}_${cy}`;
       if (!this.textures.exists(key)) {
         const size = CHUNK * CHUNK_RES;
         const c = canvas(size, size), ctx = c.getContext("2d");
+        ctx.fillStyle = "#07060a"; ctx.fillRect(0, 0, size, size);
+        // мир «квадратный» (клетка 64 px) → ромбы
         ctx.scale(CHUNK_RES, CHUNK_RES);
         ctx.translate(-cx * CHUNK, -cy * CHUNK);
+        ctx.transform(...M);
         ctx.fillStyle = ctx.createPattern(TERRAIN.tex[base], "repeat");
-        ctx.fillRect(cx * CHUNK, cy * CHUNK, CHUNK, CHUNK);
-        const x0 = Math.floor(cx * CHUNK / TILE) - 2, y0 = Math.floor(cy * CHUNK / TILE) - 2;
-        const x1 = x0 + CHUNK / TILE + 4, y1 = y0 + CHUNK / TILE + 4;
+        ctx.fillRect(0, 0, W * TILE, H * TILE);
         for (const t of order) {
           if (t === base) continue;
           const isWater = t === "water" || t === "swampwater";
-          for (let y = Math.max(0, y0); y < Math.min(H, y1); y++) for (let x = Math.max(0, x0); x < Math.min(W, x1); x++) {
+          for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
             if (ter[y * W + x] !== t) continue;
             const r = mulberry32(y * 7919 + x * 104729 + t.length);
             const brushes = TERRAIN.brushes[isWater ? "mud" : t];
@@ -121,7 +126,7 @@ export class WorldScene extends Phaser.Scene {
             ctx.drawImage(b, -sz / 2, -sz / 2, sz, sz); ctx.restore();
           }
           if (isWater) {
-            for (let y = Math.max(0, y0); y < Math.min(H, y1); y++) for (let x = Math.max(0, x0); x < Math.min(W, x1); x++) {
+            for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
               if (ter[y * W + x] !== t) continue;
               const r = mulberry32(y * 31 + x * 977);
               const b = TERRAIN.brushes[t][Math.floor(r() * 3)];
@@ -131,6 +136,8 @@ export class WorldScene extends Phaser.Scene {
             }
           }
         }
+        // тёмная кромка по краю земли
+        ctx.strokeStyle = "rgba(0,0,0,0.55)"; ctx.lineWidth = 10; ctx.strokeRect(0, 0, W * TILE, H * TILE);
         this.textures.addCanvas(key, c);
       }
       this.add.image(cx * CHUNK, cy * CHUNK, key).setOrigin(0).setScale(1 / CHUNK_RES).setDepth(-100000);
@@ -151,15 +158,20 @@ export class WorldScene extends Phaser.Scene {
       this.physics.add.existing(zn, true); zn.body.setCircle(r); this.obstacles.add(zn);
       this.solids.push({ c: [x, y, r] });
     };
-    for (let y = 0; y < H; y++) {
-      let run = -1;
-      for (let x = 0; x <= W; x++) {
-        const wv = x < W && water[y * W + x];
-        if (wv && run < 0) run = x;
-        if (!wv && run >= 0) { addRect(run * TILE + 10, y * TILE + 6, (x - run) * TILE - 20, TILE - 12); run = -1; }
+    // вода и постройки: круги по клеткам (ромбы физика не умеет)
+    const solidT = this.gen.solidT;
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (water[y * W + x] || (solidT && solidT[y * W + x])) { const [px, py] = tw(x + 0.5, y + 0.5); addCircle(px, py, IH * 0.55); }
+    // край земли: невидимые круги по ромбу, кроме выходов
+    const exits = this.z.exits || [];
+    const nearExit = (x, y) => exits.some(e => Math.hypot(x - e.x, y - e.y) < (e.w || 3) / 2 + 0.6);
+    for (let i = -1; i <= Math.max(W, H); i++) {
+      for (const [x, y] of [[i + 0.5, -0.5], [i + 0.5, H + 0.5], [-0.5, i + 0.5], [W + 0.5, i + 0.5]]) {
+        if (x < -1 || y < -1 || x > W + 1 || y > H + 1 || nearExit(x, y)) continue;
+        const [px, py] = tw(x, y); addCircle(px, py, IH * 0.6);
       }
     }
     for (const p of props) {
+      if (p.foot) continue;
       if (p.block) { const [bx, by, bw, bh] = p.block; addRect(p.x - p.w / 2 + bx, p.y - p.h + by + 10, bw, bh); }
       else if (p.col > 0) addCircle(p.x, p.y - p.col * 0.5, p.col);
     }
@@ -167,8 +179,10 @@ export class WorldScene extends Phaser.Scene {
 
   blockedAt(x, y) {
     const { W, H, water } = this.gen;
-    if (x < 8 || y < 8 || x > W * TILE - 8 || y > H * TILE - 8) return true;
-    if (water[Math.floor(y / TILE) * W + Math.floor(x / TILE)]) return true;
+    const [tx, ty] = tt(x, y);
+    if (tx < 0.1 || ty < 0.1 || tx > W - 0.1 || ty > H - 0.1) return true;
+    const ti = Math.floor(ty) * W + Math.floor(tx);
+    if (water[ti] || (this.gen.solidT && this.gen.solidT[ti])) return true;
     for (const s of this.solids) {
       if (s.c) { if (Math.hypot(x - s.c[0], y - s.c[1]) < s.c[2] + 6) return true; }
       else if (x > s.r[0] - 4 && x < s.r[0] + s.r[2] + 4 && y > s.r[1] - 4 && y < s.r[1] + s.r[3] + 4) return true;
@@ -178,6 +192,7 @@ export class WorldScene extends Phaser.Scene {
 
   buildProps() {
     this.propSprites = [];
+    this.buildings = [];
     this.nodes = [];
     this.lights = [];
     for (const p of this.gen.props) {
@@ -185,7 +200,12 @@ export class WorldScene extends Phaser.Scene {
       const img = this.add.image(p.x, p.y, "prop_" + key);
       const lk = propLook(this, key, p);
       img.setScale(lk.scale);
-      img.setOrigin(0.5, lk.originY);
+      img.setOrigin(lk.originX ?? 0.5, lk.originY);
+      if (p.foot) {
+        // нижний, левый и правый углы основания — для правильного порядка отрисовки
+        const [fw, fh] = p.foot, B = [p.x, p.y], L = tw(p.fx, p.fy + fh), R = tw(p.fx + fw, p.fy);
+        this.buildings.push({ img, B, L, R });
+      }
       img.setDepth(p.flat ? -50000 + p.y : p.y);
       if (lk.h > 120) this.propSprites.push(img);
       if (p.node) {
@@ -194,6 +214,9 @@ export class WorldScene extends Phaser.Scene {
         this.nodes.push({ img, x: p.x, y: p.y, kind, tier, res: p.node, charges: 3 + Math.floor(Math.random() * 3), respawn: 0 });
       }
       if (p.key === "lantern") this.addLight(p.x + 2, p.y - 66, 0xffb060, 1.4, 0.55);
+      if (p.key === "lamp2") this.addLight(p.x, p.y - lk.h * 0.82, 0xffb060, 1.5, 0.55);
+      if (p.key === "smithy2") this.addLight(p.x - lk.w * 0.1, p.y - lk.h * 0.3, 0xff8030, 2.2, 0.45, true);
+      if (p.key === "tavern2" || p.key === "house2") this.addLight(p.x, p.y - lk.h * 0.35, 0xffa050, 2.0, 0.22);
       if (p.key === "campfire") { this.addLight(p.x, p.y - 20, 0xff9040, 2.2, 0.6, true); this.emberEmitter(p.x, p.y - 20); }
       if (p.key === "tavern" || p.key === "house" || p.key === "smithy" || p.key === "shop" || p.key === "herbhut" || p.key === "hut") this.addLight(p.x, p.y - 50, 0xffa050, 1.7, 0.2);
       if (p.key === "portal") this.addLight(p.x, p.y - 20, 0x80b0ff, 1.6, 0.35, true);
@@ -202,10 +225,22 @@ export class WorldScene extends Phaser.Scene {
     }
     // подписи выходов
     for (const e of this.z.exits || []) {
-      const ex = e.x * TILE, ey = e.y * TILE;
+      const [ex, ey] = tw(e.x, e.y + (e.y < 2 ? 1.6 : e.y > this.gen.H - 2 ? -1.6 : 0));
       const name = ZONES[e.to].name + (ZONES[e.to].lvl ? ` (${ZONES[e.to].lvl})` : "");
-      this.add.text(ex, ey + (e.y < 2 ? 70 : -70), "➜ " + name, { fontFamily: "Georgia, serif", fontSize: "18px", color: "#d8e4ff", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100001);
+      this.add.text(ex, ey - 40, "➜ " + name, { fontFamily: "Georgia, serif", fontSize: "18px", color: "#d8e4ff", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100001);
     }
+  }
+
+  // существо перед фасадом изо-постройки рисуется поверх неё
+  isoDepth(a) {
+    let d = a.y;
+    for (const b of this.buildings) {
+      const { L, B, R } = b;
+      if (a.x < L[0] || a.x > R[0] || a.y > B[1] + 40) continue;
+      const edgeY = a.x < B[0] ? L[1] + (B[1] - L[1]) * (a.x - L[0]) / (B[0] - L[0]) : B[1] + (R[1] - B[1]) * (a.x - B[0]) / (R[0] - B[0]);
+      if (a.y > edgeY - 6) d = Math.max(d, B[1] + 1);
+    }
+    return d;
   }
 
   addLight(x, y, color, scale, alpha, flicker = false) {
@@ -222,7 +257,7 @@ export class WorldScene extends Phaser.Scene {
 
   buildAtmosphere() {
     const cam = this.cameras.main;
-    const Wpx = this.gen.W * TILE, Hpx = this.gen.H * TILE;
+    const [Wpx, Hpx] = isoSize(this.gen.W, this.gen.H);
     if (this.z.fog) {
       this.fog = this.add.tileSprite(0, 0, Wpx, Hpx, "fx_fog").setOrigin(0).setDepth(99500).setAlpha(Math.min(0.45, this.z.fog * 1.3)).setTileScale(3, 3);
     }
@@ -269,13 +304,16 @@ export class WorldScene extends Phaser.Scene {
 
   buildMinimap() {
     const { W, H, ter } = this.gen;
-    const c = canvas(W * 3, H * 3), ctx = c.getContext("2d");
+    const k = 3 / 64, [Wpx, Hpx] = isoSize(W, H);
+    const c = canvas(Math.ceil(Wpx * k), Math.ceil(Hpx * k)), ctx = c.getContext("2d");
     const col = { grass: "#2a3520", forest: "#1c2616", swampgrass: "#222a1c", dirt: "#4a3a2a", road: "#5a5244", mud: "#33301f", cobble: "#4a4642", stone: "#2a2724", ash: "#3a3634", water: "#1a3a44", swampwater: "#1e3022" };
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { ctx.fillStyle = col[ter[y * W + x]] || "#222"; ctx.fillRect(x * 3, y * 3, 3, 3); }
+    ctx.save(); ctx.scale(k, k); ctx.transform(...isoMatrix());
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) { ctx.fillStyle = col[ter[y * W + x]] || "#222"; ctx.fillRect(x * TILE - 1, y * TILE - 1, TILE + 2, TILE + 2); }
+    ctx.restore();
     ctx.fillStyle = "rgba(10,14,8,0.55)";
-    for (const p of this.gen.props) if (p.col > 10 || p.block) { ctx.beginPath(); ctx.arc(p.x / TILE * 3, p.y / TILE * 3, 2, 0, 7); ctx.fill(); }
+    for (const p of this.gen.props) if (p.col > 10 || p.block) { ctx.beginPath(); ctx.arc(p.x * k, p.y * k, 2, 0, 7); ctx.fill(); }
     ctx.fillStyle = "#7ab0ff";
-    for (const e of this.z.exits || []) { ctx.beginPath(); ctx.arc(e.x * 3, e.y * 3, 4, 0, 7); ctx.fill(); }
+    for (const e of this.z.exits || []) { const [ex, ey] = tw(e.x, e.y); ctx.beginPath(); ctx.arc(ex * k, ey * k, 4, 0, 7); ctx.fill(); }
     this.minimap = c;
   }
 
@@ -305,9 +343,9 @@ export class WorldScene extends Phaser.Scene {
     const art = this.heroArt();
     if (!art) ensureHumanoid(this, "hero", this.playerLook());
     let x, y;
-    if (this.arrive) { x = (this.arrive[0] + 0.5) * TILE; y = (this.arrive[1] + 0.5) * TILE; }
+    if (this.arrive) { [x, y] = tw(this.arrive[0] + 0.5, this.arrive[1] + 0.5); }
     else if (st.pos && st.pos.zone === this.zoneId) { x = st.pos.x; y = st.pos.y; }
-    else { const s = this.z.spawn || [this.gen.W / 2, this.gen.H / 2]; x = s[0] * TILE; y = s[1] * TILE; }
+    else { const s = this.z.spawn || [this.gen.W / 2, this.gen.H / 2]; [x, y] = tw(s[0], s[1]); }
     this.player = new Actor(this, { kind: "player", sheet: "h", tex: art ? art.key : "hero", idleCol: art ? art.idleCol : 0, x, y, scale: 1.05, radius: 13, hp: 100 });
     this.player.sprite.setCollideWorldBounds(true);
     this.player.name = st.name;
@@ -357,7 +395,7 @@ export class WorldScene extends Phaser.Scene {
       const key = "npc_" + n.id;
       const art = artSheet(this, key);
       if (!art && !this.textures.exists(key)) ensureHumanoid(this, key, n.look);
-      const a = new Actor(this, { kind: "npc", sheet: "h", tex: key, idleCol: art ? art.idleCol : 0, x: n.x * TILE, y: n.y * TILE, scale: 1.05 });
+      const a = new Actor(this, { kind: "npc", sheet: "h", tex: key, idleCol: art ? art.idleCol : 0, x: tw(n.x, n.y)[0], y: tw(n.x, n.y)[1], scale: 1.05 });
       a.sprite.body.setImmovable(true); a.sprite.body.moves = false;
       a.npc = n; a.dir = 0;
       a.label = this.add.text(a.x, a.y - 92, n.name, { fontFamily: "Georgia, serif", fontSize: "15px", color: "#f0d890", stroke: "#000", strokeThickness: 4 }).setOrigin(0.5).setDepth(100002);
@@ -395,7 +433,7 @@ export class WorldScene extends Phaser.Scene {
     this.spawnPts = this.gen.spawnPts.map(s => ({ ...s, respawnAt: 0, alive: null }));
     this.spawnPts.forEach((s, i) => { s.alive = this.spawnMonster(s.m, s.x, s.y, { spawnIdx: i }); });
     if (this.z.boss) {
-      this.bossPt = { m: this.z.boss.m, x: this.z.boss.x * TILE, y: this.z.boss.y * TILE, respawnAt: 0 };
+      const [bx, by] = tw(this.z.boss.x, this.z.boss.y); this.bossPt = { m: this.z.boss.m, x: bx, y: by, respawnAt: 0 };
       this.bossPt.alive = this.spawnMonster(this.bossPt.m, this.bossPt.x, this.bossPt.y, { boss: true });
     }
   }
@@ -731,7 +769,7 @@ export class WorldScene extends Phaser.Scene {
       this.travel("town", [TOWN_PORTAL[0], TOWN_PORTAL[1] + 1.2]);
     } else if (st.portal.stage === "intown" && this.zoneId === "town") {
       const back = st.portal; st.portal = null;
-      this.travel(back.zone, [back.x / TILE - 0.5, back.y / TILE + 0.6]);
+      const [bx, by] = tt(back.x, back.y); this.travel(back.zone, [bx - 0.5, by + 0.1]);
     }
   }
 
@@ -772,8 +810,9 @@ export class WorldScene extends Phaser.Scene {
   checkExits() {
     const p = this.player;
     for (const e of this.z.exits || []) {
-      const ex = e.x * TILE, ey = e.y * TILE, w = e.w * TILE;
-      const inside = e.vertical ? Math.abs(p.y - ey) < w / 2 && Math.abs(p.x - ex) < 46 : Math.abs(p.x - ex) < w / 2 && Math.abs(p.y - ey) < 46;
+      const [ptx, pty] = tt(p.x, p.y), w = e.w;
+      const [ex, ey] = tw(e.x, e.y);
+      const inside = e.vertical ? Math.abs(pty - e.y) < w / 2 && Math.abs(ptx - e.x) < 0.9 : Math.abs(ptx - e.x) < w / 2 && Math.abs(pty - e.y) < 0.9;
       if (!inside) continue;
       if (e.minLvl && G.st.level < e.minLvl) {
         if (!this.lvlMsgT || this.clock > this.lvlMsgT) { G.ui.toast(`${ZONES[e.to].name}: нужен ${e.minLvl}-й уровень`, "#ff9070"); this.lvlMsgT = this.clock + 2; }
@@ -865,7 +904,7 @@ export class WorldScene extends Phaser.Scene {
       this.fadeT = 0.15;
       for (const img of this.propSprites) {
         const b = img.getBounds();
-        const behind = p.y < img.y - 4 && p.x > b.x + 10 && p.x < b.right - 10 && p.y > b.y + 10;
+        const behind = p.sprite.depth < img.depth - 4 && p.x > b.x + 10 && p.x < b.right - 10 && p.y > b.y + 10;
         const target = behind ? 0.45 : 1;
         if (img.alpha !== target) img.setAlpha(img.alpha + (target - img.alpha) * 0.6);
       }

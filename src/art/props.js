@@ -550,6 +550,26 @@ function crystal(ctx, rnd, W, H, col = "#5a8ab0") {
 
 // Каталог: размеры, точка опоры и радиус столкновения (0 — проходимо).
 export const PROPS = {
+  // изометрический набор (картинки из assets/manifest.json; рисунок ниже — только запасной)
+  house2:    { w: 300, h: 300, v: 2, col: 0, foot: [4, 3], draw: (c, r) => house(c, r, 300, 300, {}) },
+  smithy2:   { w: 300, h: 300, v: 1, col: 0, foot: [4, 3], draw: (c, r) => house(c, r, 300, 300, {}) },
+  tavern2:   { w: 400, h: 340, v: 1, col: 0, foot: [5, 4], draw: (c, r) => house(c, r, 400, 340, {}) },
+  stall2:    { w: 150, h: 130, v: 2, col: 34, draw: (c, r) => stall(c, r, 150, 130, "#5a2020") },
+  well2:     { w: 130, h: 140, v: 1, col: 40, draw: (c, r) => well(c, r, 130, 140) },
+  lamp2:     { w: 46, h: 120, v: 1, col: 8, draw: (c, r) => lantern(c, r, 46, 120) },
+  board:     { w: 80, h: 90, v: 1, col: 16, draw: (c, r) => crate(c, r, 80, 90) },
+  barrels:   { w: 80, h: 70, v: 1, col: 26, draw: (c, r) => barrel(c, r, 80, 70) },
+  crates:    { w: 80, h: 80, v: 1, col: 26, draw: (c, r) => crate(c, r, 80, 80) },
+  cart2:     { w: 150, h: 100, v: 1, col: 40, draw: (c, r) => cart(c, r, 150, 100) },
+  banner:    { w: 50, h: 140, v: 1, col: 8, draw: (c, r) => lantern(c, r, 50, 140) },
+  signpost2: { w: 70, h: 100, v: 1, col: 10, draw: (c, r) => lantern(c, r, 70, 100) },
+  bench:     { w: 90, h: 60, v: 1, col: 18, draw: (c, r) => crate(c, r, 90, 60) },
+  wall_a:    { w: 140, h: 110, v: 1, col: 30, draw: (c, r) => crate(c, r, 140, 110) },
+  wall_b:    { w: 140, h: 110, v: 1, col: 30, draw: (c, r) => crate(c, r, 140, 110) },
+  pillar:    { w: 44, h: 90, v: 1, col: 18, draw: (c, r) => crate(c, r, 44, 90) },
+  palisade_a:{ w: 140, h: 120, v: 1, col: 30, draw: (c, r) => fence(c, r, 140, 120) },
+  palisade_b:{ w: 140, h: 120, v: 1, col: 30, draw: (c, r) => fence(c, r, 140, 120) },
+  stairs:    { w: 170, h: 120, v: 1, col: 0, flat: true, draw: (c, r) => crate(c, r, 170, 120) },
   pine:      { w: 150, h: 230, v: 4, col: 16, draw: (c, r, v) => pine(c, r, 150, 230, ["#1a2818", "#1d2a1a", "#172318", "#202c1c"][v]) },
   oak:       { w: 190, h: 220, v: 3, col: 18, draw: (c, r, v) => oak(c, r, 190, 220, ["#24301a", "#283318", "#1f2b18"][v]) },
   swamptree: { w: 170, h: 200, v: 2, col: 16, draw: (c, r) => oak(c, r, 170, 200, "#26301e") },

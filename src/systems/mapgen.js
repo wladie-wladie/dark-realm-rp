@@ -1,10 +1,14 @@
 // Генерация локации по описанию: земля, дороги, вода, деревья, ресурсы, точки появления монстров.
 import { RNG, makeNoise } from "../core/rng.js";
 import { TILE } from "../data/zones.js";
+import { tw, setIsoZone } from "../core/iso.js";
 import { PROPS } from "../art/props.js";
+import { G } from "../core/G.js";
+const footOf = (key, v) => { const m = G.art && G.art[`prop_${key}_${v}`]; return (m && m.foot) || (PROPS[key] && PROPS[key].foot) || null; };
 
 export function generateZone(id, z) {
   const [W, H] = z.size;
+  setIsoZone(W, H);
   const rng = new RNG(z.seed * 1000 + 7);
   const ter = new Array(W * H).fill(z.base);
   const free = new Uint8Array(W * H).fill(1); // 1 — можно ставить препятствия
@@ -63,13 +67,23 @@ export function generateZone(id, z) {
   const place = (key, x, y, v = null, extra = {}) => {
     const def = PROPS[key]; if (!def) return null;
     const variant = v ?? rng.int(0, def.v - 1);
-    const pr = { key, v: variant, x: x * TILE, y: y * TILE, col: def.col, block: def.block, flat: def.flat, w: def.w, h: def.h, ...extra };
+    const [px, py] = tw(x, y);
+    const pr = { key, v: variant, x: px, y: py, tx: x, ty: y, col: def.col, block: def.block, flat: def.flat, w: def.w, h: def.h, ...extra };
     props.push(pr); return pr;
   };
 
   // фиксированные объекты
+  const solidT = new Uint8Array(W * H); // клетки под постройками — непроходимы
   for (const f of z.fixed || []) {
     const [key, x, y, v] = f;
+    const foot = footOf(key, v ?? 0);
+    if (foot) {
+      // (x, y) — верхняя клетка основания; ставим картинку в нижний угол основания
+      const pr = place(key, x + foot[0], y + foot[1], v ?? 0, { foot, fx: x, fy: y, block: null, col: 0 });
+      for (let ty = y; ty < y + foot[1]; ty++) for (let tx = x; tx < x + foot[0]; tx++) if (inb(tx, ty)) { solidT[idx(tx, ty)] = 1; }
+      stampCircle(x + foot[0] / 2, y + foot[1] / 2, Math.max(foot[0], foot[1]) / 2 + 1, (tx, ty) => (free[idx(tx, ty)] = 0));
+      continue;
+    }
     place(key, x, y, v ?? 0);
     const def = PROPS[key];
     const r = Math.max(1, Math.ceil(Math.max(def.w, def.h * 0.5) / TILE / 2));
@@ -134,7 +148,7 @@ export function generateZone(id, z) {
   const spawnPts = [];
   const walk = [];
   for (let y = 2; y < H - 2; y++) for (let x = 2; x < W - 2; x++) {
-    if (water[idx(x, y)] || occupied.has(idx(x, y))) continue;
+    if (water[idx(x, y)] || solidT[idx(x, y)] || occupied.has(idx(x, y))) continue;
     const exitNear = (z.exits || []).some(e => Math.hypot(x - e.x, y - e.y) < 9);
     if (!exitNear) walk.push([x, y]);
   }
@@ -143,9 +157,9 @@ export function generateZone(id, z) {
     if (s.area) pool = walk.filter(([x, y]) => Math.hypot(x - s.area[0], y - s.area[1]) < s.area[2]);
     for (let i = 0; i < s.n && pool.length; i++) {
       const [x, y] = rng.pick(pool);
-      spawnPts.push({ m: s.m, x: (x + 0.5) * TILE, y: (y + 0.5) * TILE });
+      const [px, py] = tw(x + 0.5, y + 0.5); spawnPts.push({ m: s.m, x: px, y: py });
     }
   }
 
-  return { id, W, H, ter, water, props, nodes, spawnPts, rngSeed: z.seed };
+  return { id, W, H, ter, water, solidT, props, nodes, spawnPts, rngSeed: z.seed };
 }
