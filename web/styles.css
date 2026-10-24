@@ -241,3 +241,10 @@ body.hud-z .bar.mp i { background: linear-gradient(#8ac0ff, #2060e0 55%, #102a80
 body.hud-z .minimap { width: 130px; height: 94px; border-color: #c09040; }
 body.hud-z .mbtn { border-color: #c09040; }
 body.hud-z .zone-name { color: #fff2c0; }
+
+/* экран загрузки обновления */
+.update-screen { gap: 10px; }
+.upd-box { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 18px; min-height: 90px; }
+.upd-status { color: #c8bca0; font-size: 15px; text-align: center; }
+.upd-bar { width: min(320px, 70vw); height: 8px; background: rgba(0,0,0,.6); border: 1px solid #5a4a30; border-radius: 5px; overflow: hidden; }
+.upd-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #8a6a20, #f0d070); transition: width .3s; }

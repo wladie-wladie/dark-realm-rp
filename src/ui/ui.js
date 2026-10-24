@@ -29,6 +29,7 @@ export class UI {
   titleScreen() {
     G.paused = true;
     playMusic("title");
+    if (!this.updDone) return this.updateScreen();
     clear(this.root);
     const saves = listSaves();
     const slots = h("div.slots");
@@ -50,30 +51,46 @@ export class UI {
           h("button.btn", { onclick: () => this.createScreen(i) }, "Новый герой")));
       }
     });
-    const upd = h("div.upd");
     const scr = h("div.screen.title-screen", {},
       h("div.logo", {}, "Тёмные земли"),
       h("div.logo-sub", {}, "Серый Брод и окрестные земли"),
-      upd, slots,
+      slots,
       h("div.version", {}, "версия " + APP_VERSION));
     this.root.appendChild(scr);
-    // обновление проверяется и ставится прямо на стартовом экране
-    const drawUpd = u => {
-      if (!scr.isConnected) return;
-      upd.className = "upd " + u.state;
-      if (u.state === "checking") upd.textContent = "Проверка обновлений…";
-      else if (u.state === "downloading") { clear(upd); upd.append(`Загрузка обновления ${String(u.detail).split(" ")[0]}… ${u.progress || 0}%`, h("div.bar", {}, h("i", { style: { width: (u.progress || 0) + "%" } }))); }
-      else if (u.state === "ready") { upd.textContent = `Установка обновления ${u.detail}…`; setTimeout(() => { if (scr.isConnected) applyUpdateNow(); }, 600); }
-      else if (u.state === "latest") upd.textContent = "Установлена последняя версия";
-      else if (u.state === "error") upd.textContent = "Не удалось проверить обновления: " + u.detail;
-      else upd.textContent = "";
-      const busy = u.state === "checking" || u.state === "downloading" || u.state === "ready";
-      scr.querySelectorAll(".slots button").forEach(b => (b.disabled = busy && !this.skipUpd));
-      if (busy && !this.skipUpd && !upd.querySelector(".skip")) upd.appendChild(h("button.btn.small.skip", { onclick: () => { this.skipUpd = true; drawUpd(updateState); } }, "Играть без обновления"));
+  }
+
+  // ---------- экран загрузки: проверка и установка обновления до выбора героя ----------
+  updateScreen(initial) {
+    G.paused = true;
+    clear(this.root);
+    const status = h("div.upd-status", {}, "Проверка обновлений…");
+    const bar = h("i"), barBox = h("div.upd-bar", { style: { visibility: "hidden" } }, bar);
+    const skip = h("button.btn.small", { style: { visibility: "hidden" }, onclick: () => go() }, "Играть без обновления");
+    const scr = h("div.screen.title-screen.update-screen", {},
+      h("div.logo", {}, "Тёмные земли"),
+      h("div.logo-sub", {}, "Серый Брод и окрестные земли"),
+      h("div.upd-box", {}, status, barBox, skip),
+      h("div.version", {}, "версия " + APP_VERSION));
+    this.root.appendChild(scr);
+    let done = false;
+    const go = () => { if (done) return; done = true; this.updDraw = null; this.updDone = true; this.titleScreen(); };
+    const draw = u => {
+      if (done || !scr.isConnected) return;
+      if (u.state === "web") return go();
+      if (u.state === "idle" || u.state === "checking") { status.textContent = "Проверка обновлений…"; return; }
+      if (u.state === "downloading") {
+        status.textContent = `Загрузка обновления ${String(u.detail).split(" ")[0]}… ${u.progress || 0}%`;
+        barBox.style.visibility = "visible"; bar.style.width = (u.progress || 0) + "%"; skip.style.visibility = "visible"; return;
+      }
+      if (u.state === "ready") { status.textContent = `Установка обновления ${u.detail}…`; bar.style.width = "100%"; skip.style.visibility = "hidden"; setTimeout(() => applyUpdateNow(), 500); return; }
+      if (u.state === "latest") { status.textContent = "Установлена последняя версия"; setTimeout(go, 500); return; }
+      if (u.state === "error") { status.textContent = "Не удалось проверить обновления"; setTimeout(go, 1500); }
     };
     if (!this.updHooked) { this.updHooked = true; onUpdateState(u => this.updDraw && this.updDraw(u)); }
-    this.updDraw = drawUpd;
-    drawUpd(updateState);
+    this.updDraw = draw;
+    draw(initial || updateState);
+    // если проверка зависла (нет сети) — не держим игрока
+    setTimeout(() => { if (!done && (updateState.state === "idle" || updateState.state === "checking")) go(); }, 15000);
   }
 
   createScreen(slot) {
