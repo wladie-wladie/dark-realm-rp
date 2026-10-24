@@ -43,7 +43,7 @@ export class UI {
             h("button.btn.danger.small", { onclick: () => { if (confirm(`Удалить героя «${s.name}» навсегда?`)) { deleteGame(i); this.titleScreen(); } } }, "✕")));
         slots.appendChild(card);
       } else {
-        slots.appendChild(h("div.slot.frame", { style: { justifyContent: "center", alignItems: "center" } },
+        slots.appendChild(h("div.slot.frame.empty", { style: { justifyContent: "center", alignItems: "center" } },
           h("div.muted", {}, "Свободная ячейка"),
           h("button.btn", { onclick: () => this.createScreen(i) }, "Новый герой")));
       }

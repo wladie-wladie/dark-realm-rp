@@ -204,3 +204,21 @@ input { font-family: var(--serif); user-select: text; -webkit-user-select: text;
 .upd .bar { height: 6px; margin: 5px auto 0; width: 260px; background: rgba(0,0,0,.6); border: 1px solid #4a4030; border-radius: 4px; overflow: hidden; }
 .upd .bar i { display: block; height: 100%; background: linear-gradient(90deg, #4a7ab0, #a8d0ff); transition: width .3s; }
 .upd .skip { display: block; margin: 6px auto 0; }
+
+/* стартовый экран помещается на невысоком экране телефона */
+.title-screen { justify-content: safe center; overflow-y: auto; }
+.logo { font-size: clamp(28px, min(7vw, 11vh), 64px); }
+@media (max-height: 560px) {
+  .title-screen { gap: 6px; }
+  .logo { letter-spacing: 5px; line-height: 1.1; }
+  .logo-sub { margin-top: -4px; font-size: 14px; }
+  .upd { margin: 0 auto 2px; font-size: 13px; min-height: 0; }
+  .slots { gap: 10px; }
+  .slot { width: 250px; min-height: 0; padding: 10px; display: grid; grid-template-columns: auto 1fr; column-gap: 10px; row-gap: 2px; align-items: center; }
+  .slot > canvas, .slot > img { grid-row: 1 / span 3; width: 64px !important; height: 64px !important; object-fit: cover; }
+  .slot .nm { font-size: 17px; }
+  .slot .muted { font-size: 13px !important; }
+  .slot > .row { grid-column: 1 / -1; margin-top: 4px; }
+  .slot > .btn { grid-column: 1 / -1; }
+  .slot.empty { display: flex; flex-direction: row; justify-content: space-between !important; align-items: center !important; }
+}
