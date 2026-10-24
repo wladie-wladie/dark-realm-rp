@@ -408,7 +408,8 @@ export class Combat {
       }
       case "summon": {
         p.startCast(0.45);
-        for (let i = 0; i < s.count; i++) W.spawnAlly(s.mob, p.x + rand(-50, 50), p.y + rand(-30, 30), s.dur * (1 + (v.rank - 1) * 0.1), base);
+        const power = Math.max(ps.atk, ps.matk) * (1 + 0.12 * (v.rank - 1)) * (1 + v.mastery * 0.02);
+        for (let i = 0; i < s.count; i++) W.spawnAlly(s.mob, p.x + rand(-50, 50), p.y + rand(-30, 30), s.dur * (1 + (v.rank - 1) * 0.1), power);
         this.burst(p.x, p.y, color, 20, 120, 600);
         break;
       }

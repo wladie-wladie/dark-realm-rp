@@ -365,7 +365,7 @@ export class WorldScene extends Phaser.Scene {
     const [tex, sheet] = this.monsterTex(id);
     const ps = this.pstats;
     const a = new Actor(this, { kind: "ally", sheet, tex, x, y, scale: d.scale, radius: 12, hp: Math.round(this.player.maxHp * d.hp * (1 + ps.summon / 100)), flying: d.flying, def: d, alpha: d.alpha });
-    a.dmg = baseDmg * d.atk * (1 + ps.summon / 100) * 0.6; a.speed = d.speed; a.defense = ps.def * 0.6; a.cd = 0; a.expire = this.clock + dur;
+    a.dmg = baseDmg * d.atk * (1 + ps.summon / 100); a.speed = d.speed; a.defense = ps.def * 0.6; a.cd = 0; a.expire = this.clock + dur;
     a.sprite.setCollideWorldBounds(true);
     this.allyGroup.add(a.sprite);
     this.allies.push(a);

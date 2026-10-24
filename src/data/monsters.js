@@ -59,9 +59,9 @@ export const MONSTERS = {
     drops: [["heart", 1], ["crystal", 1], ["gear", 1, 4], ["gear", 1, 3]] },
 
   // союзники
-  pet_wolf: { name: "Волк", ally: true, sprite: { creature: "wolf", opts: { col: "#6a5a48", eye: "#80ff80" } }, scale: 0.8, hp: 0.6, atk: 0.5, speed: 150, attack: { range: 46, cd: 1.1 } },
-  pet_skeleton: { name: "Скелет-слуга", ally: true, sprite: { humanoid: { body: "skeleton", armor: "rags", weapon: "sword", offhand: "shield" } }, scale: 1, hp: 0.7, atk: 0.55, speed: 120, attack: { range: 50, cd: 1.3 } },
-  pet_shade: { name: "Двойник", ally: true, sprite: { humanoid: { gender: "m", skin: 5, hair: 3, armor: "leather", helm: "cloth", colors: { main: "#1a1424", trim: "#5a3a8a" }, weapon: "dagger", offhand: "dagger" } }, scale: 1, alpha: 0.6, hp: 0.5, atk: 0.8, speed: 170, attack: { range: 50, cd: 0.7 } },
-  pet_spirit: { name: "Дух-хранитель", ally: true, sprite: { creature: "wisp", opts: { col: "#e0e0ff" } }, scale: 1.1, flying: true, hp: 0.8, atk: 0.7, speed: 140, attack: { range: 260, cd: 1.2, proj: "holy" } },
-  pet_golem: { name: "Костяной голем", ally: true, sprite: { humanoid: { body: "golem" } }, scale: 1.2, hp: 1.6, atk: 1.0, speed: 100, attack: { range: 62, cd: 1.6 } },
+  pet_wolf: { name: "Волк", ally: true, sprite: { creature: "wolf", opts: { col: "#6a5a48", eye: "#80ff80" } }, scale: 0.8, hp: 0.6, atk: 0.75, speed: 150, attack: { range: 46, cd: 1.1 } },
+  pet_skeleton: { name: "Скелет-слуга", ally: true, sprite: { humanoid: { body: "skeleton", armor: "rags", weapon: "sword", offhand: "shield" } }, scale: 1, hp: 0.7, atk: 0.85, speed: 120, attack: { range: 50, cd: 1.3 } },
+  pet_shade: { name: "Двойник", ally: true, sprite: { humanoid: { gender: "m", skin: 5, hair: 3, armor: "leather", helm: "cloth", colors: { main: "#1a1424", trim: "#5a3a8a" }, weapon: "dagger", offhand: "dagger" } }, scale: 1, alpha: 0.6, hp: 0.5, atk: 0.9, speed: 170, attack: { range: 50, cd: 0.7 } },
+  pet_spirit: { name: "Дух-хранитель", ally: true, sprite: { creature: "wisp", opts: { col: "#e0e0ff" } }, scale: 1.1, flying: true, hp: 0.8, atk: 0.9, speed: 140, attack: { range: 260, cd: 1.2, proj: "holy" } },
+  pet_golem: { name: "Костяной голем", ally: true, sprite: { humanoid: { body: "golem" } }, scale: 1.2, hp: 1.6, atk: 1.3, speed: 100, attack: { range: 62, cd: 1.6 } },
 };

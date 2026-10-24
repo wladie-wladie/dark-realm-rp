@@ -9,6 +9,8 @@ html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
 #game canvas { display: block; }
 #ui { position: fixed; inset: 0; pointer-events: none; z-index: 10; }
 #ui > * { pointer-events: auto; }
+/* прозрачные для касаний слои HUD (иначе перекрывают кнопки) */
+#ui > .hud-tl, #ui > .tracker, #ui > .hud-top, #ui > .toasts, #ui > .gatherbar, #ui > .actions, #ui > .joy-base, #ui > .joy-knob { pointer-events: none; }
 #boot { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse at center, #1a1612 0%, #070605 70%); transition: opacity .6s; }
 .boot-title { font-size: 46px; letter-spacing: 6px; color: var(--gold); text-shadow: 0 0 24px rgba(216,180,106,.35), 0 3px 0 #000; }
 .boot-sub { margin-top: 10px; color: var(--muted); font-style: italic; }
