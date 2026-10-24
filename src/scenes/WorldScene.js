@@ -208,6 +208,7 @@ export class WorldScene extends Phaser.Scene {
   }
 
   addLight(x, y, color, scale, alpha, flicker = false) {
+    alpha = Math.min(0.95, alpha * ((this.z.mood && this.z.mood.lights) || 1));
     const l = this.add.image(x, y, "fx_glow_warm").setTint(color).setBlendMode(Phaser.BlendModes.ADD).setScale(scale).setAlpha(alpha).setDepth(99000);
     if (flicker) this.tweens.add({ targets: l, alpha: alpha * 0.7, scale: scale * 0.94, yoyo: true, repeat: -1, duration: 160 + Math.random() * 120 });
     this.lights.push(l);
@@ -234,14 +235,31 @@ export class WorldScene extends Phaser.Scene {
     if (amb === "town") {
       this.add.particles(0, 0, "fx_dot", { emitZone: { type: "random", source: area }, lifespan: 5000, speedX: { min: -20, max: -5 }, speedY: { min: 30, max: 50 }, scale: 0.25, alpha: { start: 0.2, end: 0 }, tint: 0xd0d8e0, frequency: 90 }).setDepth(99100);
     }
+    // погода и время суток у каждой земли своё
+    const mood = this.z.mood || {};
+    const view = new Phaser.Geom.Rectangle(-100, -100, this.scale.width + 200, this.scale.height + 100);
+    if (mood.weather === "snow") {
+      this.add.particles(0, 0, "fx_dot", { emitZone: { type: "random", source: view }, lifespan: 7000, speedX: { min: -25, max: 5 }, speedY: { min: 40, max: 80 }, scale: { min: 0.15, max: 0.4 }, alpha: { start: 0.85, end: 0.2 }, tint: 0xf0f6ff, frequency: 25, quantity: 1 }).setScrollFactor(0).setDepth(99600);
+    }
+    if (mood.weather === "dust") {
+      this.add.particles(0, 0, "fx_dot", { emitZone: { type: "random", source: view }, lifespan: 6000, speedX: { min: 15, max: 40 }, speedY: { min: -6, max: 6 }, scale: { min: 0.1, max: 0.25 }, alpha: { start: 0, end: 0.5, ease: "Sine.easeInOut" }, tint: 0xffc080, blendMode: "ADD", frequency: 90, quantity: 1 }).setScrollFactor(0).setDepth(99600);
+    }
+    if (mood.weather === "leaves") {
+      this.add.particles(0, 0, "fx_dot", { emitZone: { type: "random", source: view }, lifespan: 8000, speedX: { min: -40, max: -10 }, speedY: { min: 20, max: 45 }, scaleX: { min: 0.25, max: 0.4 }, scaleY: { min: 0.12, max: 0.2 }, rotate: { start: 0, end: 360 }, alpha: { start: 0.9, end: 0.3 }, tint: [0xc06020, 0xd09030, 0xa04018, 0xc8a040], frequency: 260, quantity: 1 }).setScrollFactor(0).setDepth(99600);
+    }
+    if (mood.weather === "fireflies") {
+      this.add.particles(0, 0, "fx_spark", { emitZone: { type: "random", source: area }, lifespan: 5000, speedX: { min: -10, max: 10 }, speedY: { min: -10, max: 10 }, scale: { start: 0.25, end: 0.08 }, alpha: { start: 0, end: 1, ease: "Sine.easeInOut" }, tint: 0xd0ff70, blendMode: "ADD", frequency: 70, quantity: 1 }).setDepth(99100);
+    }
     // свет вокруг героя
-    this.playerLight = this.add.image(0, 0, "fx_glow_warm").setBlendMode(Phaser.BlendModes.ADD).setScale(3.2).setAlpha(this.z.cave ? 0.32 : 0.14).setDepth(99000).setTint(0xffd0a0);
+    this.playerLight = this.add.image(0, 0, "fx_glow_warm").setBlendMode(Phaser.BlendModes.ADD).setScale(3.2).setAlpha(this.z.cave ? 0.32 : (mood.glow || 0.14)).setDepth(99000).setTint(0xffd0a0);
     // постобработка: тёмная мрачная гамма + виньетка
     if (cam.postFX) {
       const cm = cam.postFX.addColorMatrix();
-      cm.saturate(-0.25);
-      cm.brightness(1 - this.z.dark * 0.55, true);
-      cam.postFX.addVignette(0.5, 0.5, 0.88, 0.32 + this.z.dark * 0.35);
+      const dark = this.z.dark + (mood.extraDark || 0);
+      cm.saturate(mood.sat != null ? mood.sat : -0.25);
+      cm.brightness(1 - dark * 0.55, true);
+      if (mood.gain) { const [r, g, b] = mood.gain; cm.multiply([r, 0, 0, 0, 0, 0, g, 0, 0, 0, 0, 0, b, 0, 0, 0, 0, 0, 1, 0], true); }
+      cam.postFX.addVignette(0.5, 0.5, 0.88, 0.32 + dark * 0.35);
     }
   }
 

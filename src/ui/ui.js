@@ -168,8 +168,8 @@ export class UI {
   enterZone(W) {
     if (!this.el) return;
     const z = W.z, dz = DANGER[z.danger];
-    this.el.zone.textContent = z.name + (z.lvl ? ` · ${z.lvl} ур.` : "");
-    this.el.danger.textContent = dz.name;
+    this.el.zone.textContent = z.name;
+    this.el.danger.textContent = dz.name + (z.lvl ? ` · ${z.lvl} ур.` : "") + (z.mood ? ` · ${z.mood.name.toLowerCase()}` : "");
     this.el.danger.style.color = dz.color; this.el.danger.style.border = "1px solid " + dz.color;
     const mc = this.el.miniC; mc.width = W.minimap.width; mc.height = W.minimap.height;
     this.bossBar(null);

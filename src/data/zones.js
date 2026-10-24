@@ -12,6 +12,7 @@ export const DANGER = {
 export const ZONES = {
   town: {
     name: "Серый Брод", danger: "safe", lvl: "", size: [46, 34], base: "grass", seed: 11,
+    mood: { name: "Вечер", gain: [1.07, 0.95, 0.84], sat: -0.15, lights: 1.6, glow: 0.2 },
     tint: 0x9aa0b0, dark: 0.25, ambient: "town",
     paths: [
       { pts: [[23, 0], [23, 13]], w: 2.2, t: "road" },
@@ -49,6 +50,7 @@ export const ZONES = {
 
   forest: {
     name: "Сумрачный лес", danger: "blue", lvl: "1–6", size: [56, 40], base: "forest", seed: 23,
+    mood: { name: "Осенний день", gain: [1.06, 1.0, 0.84], sat: -0.1, lights: 0.8, glow: 0.12, weather: "leaves" },
     tint: 0x8a9a8a, dark: 0.35, fog: 0.15, ambient: "forest",
     paths: [{ pts: [[27, 40], [26, 30], [20, 22], [24, 14], [33, 9], [38, 4]], w: 1.6, t: "dirt" }, { pts: [[20, 22], [10, 20], [6, 12]], w: 1.2, t: "dirt" }],
     plazas: [{ x: 38, y: 8, rx: 7, ry: 5, t: "grass" }, { x: 12, y: 30, rx: 5, ry: 4, t: "grass" }],
@@ -65,6 +67,7 @@ export const ZONES = {
 
   swamp: {
     name: "Гнилые топи", danger: "yellow", lvl: "5–10", size: [56, 42], base: "swampgrass", seed: 37,
+    mood: { name: "Ночь", gain: [0.78, 0.9, 1.1], sat: -0.3, lights: 1.9, glow: 0.3, extraDark: 0.1, weather: "fireflies" },
     tint: 0x80907a, dark: 0.42, fog: 0.35, ambient: "swamp",
     paths: [{ pts: [[25, 0], [24, 10], [30, 18], [26, 28], [32, 36]], w: 1.4, t: "mud" }, { pts: [[30, 18], [44, 20]], w: 1.2, t: "mud" }],
     plazas: [{ x: 33, y: 36, rx: 6, ry: 4, t: "mud" }],
@@ -82,6 +85,7 @@ export const ZONES = {
 
   tract: {
     name: "Старый тракт", danger: "yellow", lvl: "8–13", size: [60, 40], base: "grass", seed: 51,
+    mood: { name: "Закат", gain: [1.14, 0.92, 0.76], sat: -0.12, lights: 1.3, glow: 0.18, weather: "dust" },
     tint: 0x9a9488, dark: 0.38, fog: 0.1, ambient: "tract",
     paths: [{ pts: [[0, 21], [14, 20], [26, 24], [40, 22], [52, 14], [56, 3]], w: 2, t: "road" }, { pts: [[26, 24], [24, 34]], w: 1.2, t: "dirt" }],
     plazas: [{ x: 23, y: 33, rx: 8, ry: 5, t: "dirt" }, { x: 42, y: 30, rx: 6, ry: 4, t: "dirt" }],
