@@ -106,6 +106,26 @@ export function generateZone(id, z) {
       for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (Math.hypot((x + 0.5 - r.x) / r.rx, (y + 0.5 - r.y) / r.ry) < 1) walk[idx(x, y)] = 1;
     }
     for (const e of z.exits || []) stampCircle(e.x, e.y, (e.w || 3) / 2 + 0.5, (x, y) => (walk[idx(x, y)] = 1));
+    // открытая земля (городок): ходить можно везде, кроме кромки карты; дороги — просто дороги
+    const deco = [];
+    if (z.walk.open) {
+      const nearRoad = new Uint8Array(W * H);
+      for (let i = 0; i < W * H; i++) if (walk[i]) nearRoad[i] = 1;
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        const edge = Math.min(x, y, W - 1 - x, H - 1 - y);
+        const ex = (z.exits || []).some(e => Math.hypot(x + 0.5 - e.x, y + 0.5 - e.y) < (e.w || 3) / 2 + 1.2);
+        if (edge >= z.walk.open || ex) walk[idx(x, y)] = 1;
+      }
+      // редкие деревья и кусты на траве — подальше от дорог и домов
+      for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+        if (!walk[idx(x, y)] || ter[idx(x, y)] !== z.base) continue;
+        let near = false;
+        for (let dy = -2; dy <= 2 && !near; dy++) for (let dx = -2; dx <= 2 && !near; dx++) { const j = inb(x + dx, y + dy) ? idx(x + dx, y + dy) : -1; if (j >= 0 && (nearRoad[j] || solidT[j])) near = true; }
+        if (near) { if (rng.chance(0.05)) deco.push(place(rng.pick(z.walk.edge || ["bush"]), x + 0.5, y + 0.6, null, { col: 0 })); continue; }
+        if (rng.chance(0.05)) place(rng.pick(z.walk.trees || ["oak"]), x + 0.5, y + 0.7);
+        else if (rng.chance(0.05)) place(rng.pick(z.walk.edge || ["bush"]), x + 0.5, y + 0.6, null, { col: 0 });
+      }
+    }
     // участки построек — на уровне земли
     for (const pr of props) if (pr.foot) {
       for (let y = pr.fy - 1; y < pr.fy + pr.foot[1] + 1; y++) for (let x = pr.fx - 1; x < pr.fx + pr.foot[0] + 1; x++) if (inb(x, y) && !walk[idx(x, y)]) lot[idx(x, y)] = 1;
@@ -114,22 +134,33 @@ export function generateZone(id, z) {
     for (let i = 0; i < W * H; i++) if (lot[i] && !solidT[i]) walk[i] = 1;
     for (let i = 0; i < W * H; i++) if (water[i] || solidT[i]) walk[i] = 0;
     for (let i = 0; i < W * H; i++) if (solidT[i]) lot[i] = 1; else lot[i] = 0;
-    // перед проходом (ближе к камере) — обрыв вниз; за проходом — скала вверх
-    const front = new Uint8Array(W * H), raised = new Uint8Array(W * H);
+    // граница проходов — живая изгородь из кустов и деревьев (как в Zenonia: сразу видно, куда можно пройти)
     const isW = (x, y) => inb(x, y) && walk[idx(x, y)];
+    const rr = rng, dist = new Uint8Array(W * H).fill(9);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const i = idx(x, y); if (walk[i] || lot[i] || water[i]) continue;
-      let f = false;
-      for (let d = 1; d <= 2 && !f; d++) f = isW(x - d, y) || isW(x, y - d) || isW(x - d, y - d);
-      if (f) front[i] = 1; else raised[i] = 1;
+      const i = idx(x, y); if (walk[i] || lot[i] || water[i]) { dist[i] = 0; continue; }
+      for (let d = 1; d <= 3; d++) {
+        let f = false;
+        for (let dy = -d; dy <= d && !f; dy++) for (let dx = -d; dx <= d && !f; dx++) if (isW(x + dx, y + dy)) f = true;
+        if (f) { dist[i] = d; break; }
+      }
     }
-    // земля в проходах — из описания (дорожки/площади уже проставлены в ter), остальное — основа
-    const rr = rng;
-    // деревья на скалах (поднятые)
+    const edgeP = z.walk.edge || ["bush", "bush", "rock"], trees = z.walk.trees || ["oak", "pine"];
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      if (!raised[idx(x, y)] || !rr.chance(z.walk.topTrees ?? 0.18)) continue;
-      place(rr.pick(z.walk.trees || ["oak"]), x + rr.range(0.3, 0.7), y + rr.range(0.4, 0.8), null, { elev: 1, col: 0, block: null });
+      const dd = dist[idx(x, y)];
+      if (dd === 1) {
+        place(rr.pick(edgeP), x + 0.5 + rr.range(-0.15, 0.15), y + 0.6 + rr.range(-0.1, 0.1), null, { col: 0 });
+        if (rr.chance(0.3)) place(rr.pick(edgeP), x + rr.range(0.1, 0.4), y + rr.range(0.2, 0.5), null, { col: 0 });
+      } else {
+        // перед проходом (ближе к камере) высокие деревья закрывали бы героя — там только кусты, деревья дальше
+        let front = false;
+        for (let d = 1; d <= 4 && !front; d++) front = isW(x - d, y) || isW(x, y - d) || isW(x - d, y - d);
+        if (front) { if (dd === 2 && rr.chance(0.35)) place(rr.pick(edgeP), x + rr.range(0.3, 0.7), y + rr.range(0.4, 0.8), null, { col: 0 }); }
+        else if (dd === 2 && rr.chance(0.5)) place(rr.pick(trees), x + rr.range(0.3, 0.7), y + rr.range(0.4, 0.8), null, { col: 0 });
+        else if (dd >= 3 && rr.chance(0.16)) place(rr.pick(trees), x + rr.range(0.3, 0.7), y + rr.range(0.4, 0.8), null, { col: 0 });
+      }
     }
+    const raised = null, front = null;
     // непроходимо всё вне проходов (физика — только по краю прохода)
     const solid = new Uint8Array(W * H);
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {

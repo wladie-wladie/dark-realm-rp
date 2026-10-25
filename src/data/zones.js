@@ -34,7 +34,7 @@ export const ZONES = {
         { pts: [[18.5, 12], [30, 12]], w: 2.6 }, { pts: [[1.5, 12.2], [11.5, 12.2]], w: 2.6 },
       ],
       rooms: [{ x: 3.2, y: 12.6, rx: 2, ry: 2 }],
-      trees: ["oak", "pine", "oak"], topTrees: 0.08,
+      trees: ["oak", "pine", "oak"], open: 2,
     },
     scatter: [{ p: "tuft", d: 0.02 }],
     fixed: [
