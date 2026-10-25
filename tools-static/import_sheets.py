@@ -191,6 +191,8 @@ if __name__ == "__main__":
             key = "hero_" + name.split("_", 1)[1].replace("hero_", "")
             hero(src, key)
             if key in TITLES: man[key]["title"] = TITLES[key]
+        elif name == "c_portraits2":
+            portraits(src, ["hero_warrior_m", "hero_warrior_f", "hero_ranger_m", "hero_ranger_f", "hero_rogue_m", "hero_rogue_f", "hero_cleric_m", "hero_cleric_f", "hero_warlock_m", "hero_warlock_f"], 4, 3)
         elif name == "c_portraits":
             portraits(src, ["hero_mage_m", "hero_mage_f", "npc_elder", "npc_smith", "npc_trader", "npc_alch", "npc_mentor", "npc_guard", "npc_guard2"], 3, 3)
         elif name.startswith("mobh_"):

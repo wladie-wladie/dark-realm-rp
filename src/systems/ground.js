@@ -7,7 +7,7 @@ import { canvas } from "../art/paint.js";
 import { mulberry32, makeNoise } from "../core/rng.js";
 import { ZONES } from "../data/zones.js";
 
-const CH = 256;                    // кусок мира; плотность пикселей = масштабу камеры (1 пиксель текстуры на пиксель экрана)
+const CH = 512;                    // кусок мира; плотность пикселей = масштабу камеры (1 пиксель текстуры на пиксель экрана)
 let RES = 2;
 const PERIOD = 4 * TILE;           // текстура повторяется раз в 4 клетки
 const PER = { cobble: 2.6 * TILE, stone: 3 * TILE };  // мельче камни — ближе к образцу
@@ -265,34 +265,31 @@ export class Ground {
     ctx.restore();
   }
 
-  update(force = false) {
-    const cam = this.s.cameras.main, v = cam.worldView;
-    if (!v.width) return;
-    // плотность текстуры = масштаб камеры: пиксель в пиксель, без мыла и ряби
-    const want = Math.max(1.25, Math.min(2.5, Math.round(cam.zoom * 4) / 4));
-    if (want !== this.res) { this.res = want; RES = want; this.destroy(); force = true; }
-    RES = this.res;
-    const m = CH * 0.25;
-    const ax = Math.max(0, Math.floor((v.x - m) / CH)), bx = Math.min(Math.ceil(this.Wpx / CH) - 1, Math.floor((v.right + m) / CH));
-    const ay = Math.max(0, Math.floor((v.y - m) / CH)), by = Math.min(Math.ceil(this.Hpx / CH) - 1, Math.floor((v.bottom + m) / CH));
-    let baked = 0;
-    for (let cy = ay; cy <= by; cy++) for (let cx = ax; cx <= bx; cx++) {
-      const id = cx + "_" + cy;
-      if (this.chunks.has(id)) continue;
-      if (!force && baked >= 1) continue;
-      const key = `gnd_${this.zoneId}_${id}`;
+  // вся земля готовится один раз при входе на карту — на ходу ничего не дорисовывается (иначе рывки на телефоне)
+  update() {
+    const cam = this.s.cameras.main;
+    if (!cam.worldView.width) return;
+    const { W, H } = this.gen;
+    const nx = Math.ceil(this.Wpx / CH), ny = Math.ceil(this.Hpx / CH);
+    const need = [];
+    for (let cy = 0; cy < ny; cy++) for (let cx = 0; cx < nx; cx++) {
+      // пропускаем куски целиком за пределами ромба карты
+      const pts = [[cx * CH, cy * CH], [(cx + 1) * CH, cy * CH], [cx * CH, (cy + 1) * CH], [(cx + 1) * CH, (cy + 1) * CH]].map(([x, y]) => tt(x, y + ELEV));
+      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+      if (Math.max(...xs) < -1.5 || Math.min(...xs) > W + 1.5 || Math.max(...ys) < -1.5 || Math.min(...ys) > H + 1.5) continue;
+      need.push([cx, cy]);
+    }
+    // память видеокарты под землю — не больше ~50 МБ
+    const budget = 12e6;
+    const want = Math.max(0.75, Math.min(2, Math.round(cam.zoom * 4) / 4, Math.floor(Math.sqrt(budget / (need.length * CH * CH)) * 8) / 8));
+    if (this.res && Math.abs(want - this.res) < 0.26) return;
+    this.res = want; RES = want; this.destroy();
+    for (const [cx, cy] of need) {
+      const id = cx + "_" + cy, key = `gnd_${this.zoneId}_${id}`;
       if (this.s.textures.exists(key)) this.s.textures.remove(key);
       this.s.textures.addCanvas(key, this.bake(cx, cy));
       const img = this.s.add.image(cx * CH, cy * CH, key).setOrigin(0).setScale(1 / RES).setDepth(-100000);
-      this.chunks.set(id, { img, key, cx, cy }); baked++;
-    }
-    // выгружаем далёкие куски
-    for (const [id, ch] of this.chunks) {
-      if (ch.cx < ax - 1 || ch.cx > bx + 1 || ch.cy < ay - 1 || ch.cy > by + 1) {
-        ch.img.destroy(); const tex = this.s.textures.get(ch.key); const src = tex && tex.getSourceImage(); this.s.textures.remove(ch.key);
-        if (src) { src.width = 0; src.height = 0; }
-        this.chunks.delete(id);
-      }
+      this.chunks.set(id, { img, key, cx, cy });
     }
   }
   destroy() { for (const ch of this.chunks.values()) { ch.img.destroy(); if (this.s.textures.exists(ch.key)) this.s.textures.remove(ch.key); } this.chunks.clear(); }

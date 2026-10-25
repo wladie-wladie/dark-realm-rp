@@ -17,7 +17,8 @@ export class Actor {
     const res = fw / (this.sheet === "h" ? 64 : 80);
     this.idleCol = o.idleCol ?? 0;
     sprite.setScale(this.scale / res);
-    if (this.sheet === "h") sprite.setOrigin(0.5, 74 / 80); else sprite.setOrigin(0.5, 54 / 64);
+    this.oy = this.sheet === "h" ? 74 / 80 : 54 / 64;
+    sprite.setOrigin(0.5, this.oy);
     const rWorld = (o.radius || 13) * Math.min(this.scale / ACTOR_SCALE, 1.6) * 1.15;
     const rSrc = rWorld / sprite.scaleX;
     const footX = this.sheet === "h" ? 32 * res : 40 * res, footY = this.sheet === "h" ? 74 * res : 54 * res;
@@ -64,12 +65,18 @@ export class Actor {
     const v = s.body.velocity;
     const sp = Math.hypot(v.x, v.y);
     this.moving = sp > 10;
-    if (this.moving) this.walkPhase = (this.walkPhase + dt * sp / 70) % 1;
+    if (this.moving) this.walkPhase = (this.walkPhase + dt * Math.max(1.8, sp / 85)) % 1;
     let col;
     if (this.castT >= 0) col = this.sheet === "h" ? 7 : 5;
     else if (this.attackT >= 0) col = 4 + Math.min(2, Math.floor((this.attackT / this.attackDur) * 3));
     else if (this.moving || this.flying) col = Math.floor((this.flying && !this.moving ? (this.scene.time.now / 1000 * 1.5) % 1 : this.walkPhase) * 4) % 4;
     else col = this.idleCol;
+    // шаг ощущается: подпрыгивание на каждом шаге и лёгкое покачивание корпуса
+    const step = this.moving && this.attackT < 0 && this.castT < 0 && !this.flying;
+    const ph = this.walkPhase * Math.PI * 4;
+    const bob = step ? Math.abs(Math.sin(ph)) * 0.035 : 0;
+    s.setOrigin(0.5, this.oy + bob);
+    s.setAngle(step && this.sheet === "h" ? Math.sin(ph) * 2.2 : 0);
     if (this.sheet === "h") {
       s.setFrame(this.dir * 8 + col);
       s.setFlipX(this.dir === 2 && this.flip);

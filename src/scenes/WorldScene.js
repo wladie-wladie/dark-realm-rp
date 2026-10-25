@@ -79,7 +79,7 @@ export class WorldScene extends Phaser.Scene {
     cam.startFollow(this.player.sprite, true, 0.12, 0.12, 0, 20);
     this.resize();
     cam.centerOn(this.player.x, this.player.y); cam.preRender && cam.preRender();
-    this.ground.update(true);
+    this.ground.update();
     this.scale.on("resize", this.resize, this);
     this.events.once("shutdown", () => this.scale.off("resize", this.resize, this));
     cam.fadeIn(500, 0, 0, 0);
@@ -103,6 +103,7 @@ export class WorldScene extends Phaser.Scene {
     cam.setZoom(Math.max(0.45, Math.min(h / (TILE * 6.6), w / (TILE * 10)) * style().zoom));
     this.textRes = Math.min(5, Math.max(2, Math.ceil(cam.zoom * 1.25)));
     if (this.grade || this.vignette) this.layoutOverlays();
+    if (this.ground && this.player) this.ground.update();
   }
 
   // ---------- земля ----------
@@ -887,7 +888,6 @@ export class WorldScene extends Phaser.Scene {
         if (img.alpha !== target) img.setAlpha(img.alpha + (target - img.alpha) * 0.6);
       }
     }
-    this.ground.update();
     if (this.fog) { this.fog.tilePositionX += dt * 8; this.fog.tilePositionY += dt * 2; }
 
     this.hudT -= dt;
