@@ -245,7 +245,7 @@ export class Panels {
   // ---------- меню ----------
   tab_menu() {
     const st = G.st;
-    const col = h("div.col", { style: { flex: 1, maxWidth: "460px", margin: "0 auto" } });
+    const col = h("div.col.scroll", { style: { flex: 1, maxWidth: "460px", margin: "0 auto", minHeight: 0, overflowY: "auto", paddingBottom: "12px" } });
     col.appendChild(h("button.btn", { onclick: () => { G.world && G.world.persist(); this.ui.toast("Игра сохранена"); } }, "Сохранить игру"));
     col.appendChild(h("label.row", { style: { padding: "8px" } }, h("input", { type: "checkbox", checked: st.settings.showHelm, onchange: e => { st.settings.showHelm = e.target.checked; G.world && G.world.refreshPlayerLook(); } }), "Показывать шлем"));
     col.appendChild(h("div.hint", {}, `Время в игре: ${Math.floor(st.playtime / 3600)} ч ${Math.floor(st.playtime / 60) % 60} мин · Смертей: ${st.deaths}`));
