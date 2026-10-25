@@ -175,6 +175,17 @@ export class UI {
     });
     const end = ev => { if (ev.pointerId !== jid) return; jid = null; G.input.mx = G.input.my = 0; base.style.display = knob.style.display = "none"; };
     joy.addEventListener("pointerup", end); joy.addEventListener("pointercancel", end);
+    joy.addEventListener("lostpointercapture", end);
+    // страховка от «залипания»: отпустили кнопку мыши вне джойстика, свернули окно — останавливаемся
+    const stopAll = () => {
+      jid = null; G.input.mx = G.input.my = 0; G.input.attack = false;
+      base.style.display = knob.style.display = "none";
+      const kb = G.world && G.world.input && G.world.input.keyboard; if (kb) kb.resetKeys();
+    };
+    window.addEventListener("pointerup", ev => { if (ev.pointerId === jid) end(ev); });
+    window.addEventListener("blur", stopAll);
+    document.addEventListener("visibilitychange", () => { if (document.hidden) stopAll(); });
+    window.addEventListener("pointermove", ev => { if (jid !== null && ev.pointerType === "mouse" && ev.buttons === 0) stopAll(); });
 
     // кнопки действий
     const act = h("div.actions");
@@ -182,7 +193,7 @@ export class UI {
     const atk = h("div.abtn.atk", { class: atkArt ? "art" : "" }, atkArt ? h("img", { src: atkArt, alt: "" }) : "⚔");
     atk.addEventListener("pointerdown", ev => { ev.preventDefault(); atk.setPointerCapture(ev.pointerId); G.input.attack = true; });
     const atkEnd = () => { G.input.attack = false; };
-    atk.addEventListener("pointerup", atkEnd); atk.addEventListener("pointercancel", atkEnd);
+    atk.addEventListener("pointerup", atkEnd); atk.addEventListener("pointercancel", atkEnd); atk.addEventListener("lostpointercapture", atkEnd);
     act.appendChild(atk);
     // 6 навыков дугой вокруг атаки
     const pos = [[104, 4], [92, 70], [52, 120], [0, 132], [176, 6], [160, 76]];
