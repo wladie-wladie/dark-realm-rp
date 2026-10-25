@@ -6,6 +6,7 @@ import { registerStatic } from "./art/registry.js";
 import { UI } from "./ui/ui.js";
 import { initNative, applyUpdateNow } from "./native.js";
 import { setStyle } from "./art/style.js";
+import { APP_VERSION } from "./version.js";
 
 // качество графики: сколько пикселей экрана рисуем (баланс — до 2×, максимум — полная плотность)
 const QUALITY = { max: 3, balance: 2, eco: 1.5 };
@@ -26,13 +27,13 @@ class BootScene extends Phaser.Scene {
   constructor() { super("boot"); }
   preload() {
     // своя графика (например, из GPT): assets/manifest.json → { "ключ_текстуры": "путь.png" }
-    this.load.json("manifest", "assets/manifest.json");
+    this.load.json("manifest", "assets/manifest.json?v=" + APP_VERSION + "-" + Date.now());
     this.load.on("filecomplete-json-manifest", (key, type, data) => {
       G.art = {};
       for (const [k, v] of Object.entries(data || {})) {
         const meta = typeof v === "string" ? { file: v } : v;
         G.art[k] = meta;
-        if (meta && meta.file) this.load.image(k, "assets/" + meta.file);
+        if (meta && meta.file) this.load.image(k, "assets/" + meta.file + "?v=" + APP_VERSION); // новая версия — картинки заново, без старого кэша
       }
     });
     this.load.on("loaderror", () => {});

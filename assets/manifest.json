@@ -140,7 +140,7 @@
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Светловолосый"
+  "title": "Красный плащ"
  },
  "mob_wolf": {
   "file": "chars/mob_wolf.webp",
@@ -177,63 +177,63 @@
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Седой мудрец"
+  "title": "Синяя мантия"
  },
  "hero_ranger_f": {
   "file": "chars/hero_ranger_f.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Тёмный хвост"
+  "title": "Зелёный плащ"
  },
  "hero_ranger_m": {
   "file": "chars/hero_ranger_m.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Бородатый"
+  "title": "Зелёный плащ"
  },
  "hero_warrior_f": {
   "file": "chars/hero_warrior_f.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Рыжая коса"
+  "title": "Красный плащ"
  },
  "hero_cleric_f": {
   "file": "chars/hero_cleric_f.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Светлый пучок"
+  "title": "Белая ряса"
  },
  "hero_cleric_m": {
   "file": "chars/hero_cleric_m.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Лысый с бородой"
+  "title": "Белая ряса"
  },
  "hero_mage_f": {
   "file": "chars/hero_mage_f.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Тёмные волосы"
+  "title": "Синяя мантия"
  },
  "hero_rogue_m": {
   "file": "chars/hero_rogue_m.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "В маске"
+  "title": "Чёрный капюшон"
  },
  "hero_warlock_m": {
   "file": "chars/hero_warlock_m.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Под капюшоном"
+  "title": "Багровый плащ"
  },
  "mob_pet_shade": {
   "file": "chars/hero_rogue_m.webp",
@@ -246,14 +246,14 @@
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Светлая стрижка"
+  "title": "Чёрный капюшон"
  },
  "hero_warlock_f": {
   "file": "chars/hero_warlock_f.webp",
   "type": "hsheet",
   "fw": 192,
   "fh": 240,
-  "title": "Чёрные волосы"
+  "title": "Багровый плащ"
  },
  "mob_archer": {
   "file": "chars/mob_archer.webp",

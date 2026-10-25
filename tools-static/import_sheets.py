@@ -170,6 +170,23 @@ def portraits(src, keys, cols, rows):
         man["pt_" + key] = {"file": fn}
     print("портреты", len(keys))
 
+def side_walk(src, cls):
+    # новые кадры ходьбы в профиль (2 ряда: мужчина, женщина × 4 шага) → ряд 3, колонки 0–3 листа героя
+    c = cells(src, 2, 4)
+    for r, g in enumerate(["m", "f"]):
+        key = f"hero_{cls}_{g}"; path = f"assets/chars/{key}.webp"
+        if not os.path.exists(path): continue
+        sheet = Image.open(path).convert("RGBA")
+        # масштаб — по высоте фигуры «стоит» в профиль на текущем листе
+        cur = np.array(sheet.crop((4 * 192, 2 * 240, 5 * 192, 3 * 240)))[..., 3] > 24
+        ys = np.where(cur.any(1))[0]; target_h = (ys.max() - ys.min()) if len(ys) else 176
+        hs = [c[(r, i)]["h"] for i in range(4) if (r, i) in c]
+        if len(hs) < 4: print(key, "не все кадры шага"); continue
+        part = pack([[(r, 0), (r, 1), (r, 2), (r, 3)]], c, 192, 240, 222, target_h / np.median(hs))
+        sheet.paste(Image.new("RGBA", (192 * 4, 240)), (0, 2 * 240)); sheet.alpha_composite(part, (0, 2 * 240))
+        sheet.save(path, "WEBP", quality=90, method=6)
+        print("шаг в профиль:", key)
+
 TITLES = {}  # ключ листа → название облика в редакторе
 if os.path.exists("tools-static/titles.json"): TITLES = json.load(open("tools-static/titles.json"))
 BEASTS = {"wolf": 210, "mobc_boar": 200, "mobc_spider": 175, "mobc_cavespider": 185, "mobc_toad": 190, "mobc_bat": 150}  # звери в профиль: ширина бега в кадре
@@ -205,6 +222,8 @@ if __name__ == "__main__":
             key = "hero_" + name.split("_", 1)[1].replace("hero_", "")
             hero(src, key)
             if key in TITLES: man[key]["title"] = TITLES[key]
+        elif name.startswith("w_"):
+            side_walk(src, name[2:])
         elif name == "c_portraits2":
             portraits(src, ["hero_warrior_m", "hero_warrior_f", "hero_ranger_m", "hero_ranger_f", "hero_rogue_m", "hero_rogue_f", "hero_cleric_m", "hero_cleric_f", "hero_warlock_m", "hero_warlock_f"], 4, 3)
         elif name == "c_portraits":

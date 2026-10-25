@@ -1,14 +1,14 @@
 {
- "hero_warrior_m": "Светловолосый",
- "hero_warrior_f": "Рыжая коса",
- "hero_ranger_m": "Бородатый",
- "hero_ranger_f": "Тёмный хвост",
- "hero_mage_m": "Седой мудрец",
- "hero_mage_f": "Тёмные волосы",
- "hero_cleric_m": "Лысый с бородой",
- "hero_cleric_f": "Светлый пучок",
- "hero_warlock_m": "Под капюшоном",
- "hero_warlock_f": "Чёрные волосы",
- "hero_rogue_m": "В маске",
- "hero_rogue_f": "Светлая стрижка"
+ "hero_warrior_m": "Красный плащ",
+ "hero_warrior_f": "Красный плащ",
+ "hero_ranger_m": "Зелёный плащ",
+ "hero_ranger_f": "Зелёный плащ",
+ "hero_rogue_m": "Чёрный капюшон",
+ "hero_rogue_f": "Чёрный капюшон",
+ "hero_cleric_m": "Белая ряса",
+ "hero_cleric_f": "Белая ряса",
+ "hero_mage_m": "Синяя мантия",
+ "hero_mage_f": "Синяя мантия",
+ "hero_warlock_m": "Багровый плащ",
+ "hero_warlock_f": "Багровый плащ"
 }
