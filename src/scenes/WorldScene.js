@@ -16,6 +16,8 @@ import { heroArtKey } from "../art/looks.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32 } from "../core/rng.js";
 import { Ground } from "../systems/ground.js";
+import { Bots } from "../systems/bots.js";
+import { Arena } from "../systems/arena.js";
 import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH, ELEV } from "../core/iso.js";
 import { questOnKill, questOnBoss } from "../systems/quests.js";
 
@@ -48,6 +50,9 @@ export class WorldScene extends Phaser.Scene {
     this.invuln = 0; this.dash = null; this.gathering = null; this.loot = []; this.allies = []; this.monsters = [];
     this.saveT = 0; this.hudT = 0; this.fadeT = 0; this.travelling = false; this.monsterGroup = null; this.allyGroup = null;
     this.combat = new Combat(this);
+    this.bots = new Bots(this);
+    this.arena = this.zoneId === "arena" ? new Arena(this) : null;
+    this.arenaSpectate = false; G.speed = 1; this.physics.world.timeScale = 1; this.tweens.timeScale = 1; this.time.timeScale = 1;
     // надписи в мире рисуем сразу в разрешении экрана (иначе камера их растягивает и они мылятся)
     this.textRes = Math.min(5, Math.max(2, Math.ceil(Math.min(this.scale.height / (TILE * 6.6), this.scale.width / (TILE * 10)) * style().zoom * 1.25)));
     if (!this.add.__crisp) {
@@ -432,6 +437,7 @@ export class WorldScene extends Phaser.Scene {
 
   killMonster(m) {
     if (m.dead) return;
+    if (m.bot) return this.bots.kill(m);
     m.dead = true;
     const st = G.st, d = m.def;
     m.sprite.body.enable = false;
@@ -644,19 +650,46 @@ export class WorldScene extends Phaser.Scene {
     this.keys.T.on("down", () => this.openPortal());
   }
 
-  useSlot(i) {
+  // автоприменение: вне города навыки с включённым «авто» срабатывают сами, когда есть повод
+  autoCast(dt) {
+    const st = G.st;
+    if (!st.auto || this.zoneId === "town" || this.player.dead || G.paused || this.arenaSpectate) return;
+    this.autoT = (this.autoT || 0) - dt; if (this.autoT > 0) return; this.autoT = 0.2;
+    const p = this.player;
+    for (let i = 0; i < 6; i++) {
+      if (!st.auto[i]) continue;
+      const id = st.slots[i]; if (!id) continue;
+      const s = findSkill(id); if (!s || (this.cds[id] || 0) > 0) continue;
+      const t = this.combat.nearestEnemy(600);
+      const d = t ? Math.hypot(t.x - p.x, t.y - p.y) : 1e9;
+      let ok = false;
+      switch (s.cast) {
+        case "melee": ok = d < (s.range || 70) + 30; break;
+        case "proj": case "chain": case "blink": ok = d < (s.range || 360) * 0.95; break;
+        case "aoe": ok = s.at === "target" ? d < 440 : s.at === "front" ? d < 170 : d < (s.radius || 120) + 10; break;
+        case "dash": ok = d < (s.dist || 200) + 30 && d > 60; break;
+        case "trap": ok = d < 220; break;
+        case "buff": case "shield": case "summon": ok = d < 380; break;
+        case "heal": ok = p.hp < p.maxHp * 0.6; break;
+      }
+      if (ok && this.useSlot(i, true)) break;
+    }
+  }
+
+  useSlot(i, quiet = false) {
     const id = G.st.slots[i]; if (!id) return;
     const s = findSkill(id); if (!s || s.kind !== "active" || !G.st.skills[id]) return;
     if (this.player.dead || G.paused) return;
     if ((this.cds[id] || 0) > 0) return;
     const v = skillValues(G.st, s);
-    if (this.mp < v.mp) { G.ui.toast("Не хватает маны", "#80a0ff", 1000); return; }
+    if (this.mp < v.mp) { if (!quiet) G.ui.toast("Не хватает маны", "#80a0ff", 1000); return; }
     if (this.player.statuses.some(x => x.type === "stun" || x.type === "freeze")) return;
     this.gathering = null;
     if (this.combat.castSkill(s) === false) return;
     this.mp -= v.mp;
     this.cds[id] = v.cd * (1 - this.pstats.cdr / 100);
     G.st.mastery[id] = (G.st.mastery[id] || 0) + 1;
+    return true;
   }
   usePotion(i) {
     const st = G.st, id = st.potionSlots[i]; if (!id || this.player.dead) return;
@@ -755,6 +788,7 @@ export class WorldScene extends Phaser.Scene {
   // ---------- смерть и переходы ----------
   playerDied() {
     const p = this.player; if (p.dead) return;
+    if (this.arena) { p.dead = true; p.hp = 0; p.sprite.body.setVelocity(0, 0); this.tweens.add({ targets: p.sprite, alpha: 0.3, angle: 80, duration: 600 }); this.arena.onPlayerDeath(); return; }
     p.dead = true; p.hp = 0; this.gathering = null;
     p.sprite.body.setVelocity(0, 0);
     this.tweens.add({ targets: p.sprite, alpha: 0.3, angle: 80, duration: 600 });
@@ -806,7 +840,7 @@ export class WorldScene extends Phaser.Scene {
   // ---------- цикл ----------
   update(time, delta) {
     if (this.travelling) return;
-    const dt = Math.min(delta / 1000, 0.05);
+    const dt = Math.min(delta / 1000, 0.05) * (G.speed || 1);
     if (G.paused) { this.physics.world.pause(); return; } else if (this.physics.world.isPaused) this.physics.world.resume();
     this.clock += dt;
     const st = G.st, p = this.player, ps = this.pstats;
@@ -864,7 +898,10 @@ export class WorldScene extends Phaser.Scene {
     if (changed) this.recalc();
     if (this.shield > 0 && this.clock > this.shieldUntil) this.shield = 0;
 
-    for (const m of this.monsters) if (!m.dead) this.updateMonster(m, dt);
+    for (const m of this.monsters) if (!m.dead && !m.bot) this.updateMonster(m, dt);
+    this.bots.update(dt);
+    this.autoCast(dt);
+    if (this.arenaSpectate) { this.invuln = 1; }
     this.monsters = this.monsters.filter(m => !m.dead || m.sprite.active);
     for (const a of [...this.allies]) if (!a.dead) this.updateAlly(a, dt);
     for (const n of this.npcs) { n.animate(dt); const d = Math.hypot(n.x - p.x, n.y - p.y); if (d < 200) n.face(p.x - n.x, p.y - n.y); }

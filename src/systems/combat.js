@@ -1,6 +1,7 @@
 // Бой: урон, эффекты, снаряды, области, применение навыков героя.
 import { style } from "../art/style.js";
 import Phaser from "phaser";
+import { PVP } from "./bots.js";
 import { G } from "../core/G.js";
 import { STATUS } from "../data/classes.js";
 import { skillValues, derive } from "./state.js";
@@ -75,6 +76,7 @@ export class Combat {
     let crit = false;
     if (!opts.dot && Math.random() * 100 < ps.crit + (opts.critBonus || 0)) { crit = true; dmg *= ps.critDmg / 100; }
     if (!opts.dot) dmg *= 100 / (100 + m.defense * 1.5);
+    if (m.bot && !m.minionOf) dmg *= PVP; // арена: урон по героям-ботам как в PvP
     dmg = Math.max(1, Math.round(dmg));
     m.hp -= dmg;
     if (!opts.dot) { m.hurtT = 0.08; m.aggro = true; }

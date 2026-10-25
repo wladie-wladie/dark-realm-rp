@@ -32,6 +32,11 @@ export class NpcUI {
     if (role === "shop") return this.shop(npc);
     if (role === "alchemy") return this.alchemy(npc);
     if (role === "mentor") return this.mentor(npc);
+    if (role === "arena") return G.world.arena.menu();
+    if (role === "arena_gate") return this.frame(npc, (say, api) => {
+      say.appendChild(h("p", {}, "Арена за воротами! Сразитесь с героем любого класса или посмотрите, как дерутся другие. Там ничего не теряется."));
+      say.appendChild(h("div.row", {}, h("button.btn.primary", { onclick: () => { api.close(); G.world.travel("arena", [6, 12]); } }, "На арену"), h("button.btn", { onclick: api.close }, "Позже")));
+    });
     this.frame(npc, (say, api) => {
       say.appendChild(h("p", {}, npc.lines[Math.floor(Math.random() * npc.lines.length)]));
       say.appendChild(h("button.btn", { onclick: api.close }, "Прощай"));

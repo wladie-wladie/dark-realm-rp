@@ -2450,5 +2450,19 @@
  },
  "pt_hero_warlock_f": {
   "file": "portraits/hero_warlock_f.webp"
+ },
+ "npc_arena": {
+  "file": "chars/npc_guard.webp",
+  "type": "hsheet",
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
+ },
+ "pt_npc_arena": {
+  "file": "portraits/npc_guard.webp"
  }
 }

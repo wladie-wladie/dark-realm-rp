@@ -248,3 +248,10 @@ body.hud-z .zone-name { color: #fff2c0; }
 .upd-status { color: #c8bca0; font-size: 15px; text-align: center; }
 .upd-bar { width: min(320px, 70vw); height: 8px; background: rgba(0,0,0,.6); border: 1px solid #5a4a30; border-radius: 5px; overflow: hidden; }
 .upd-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #8a6a20, #f0d070); transition: width .3s; }
+
+/* автоприменение навыка */
+.abtn.sk.auto { box-shadow: 0 0 0 2px #2a1a06, 0 0 0 4px #ffd060, 0 0 14px rgba(255,200,80,.9) !important; }
+.abtn.sk.auto::after { content: "АВТО"; position: absolute; top: 2px; left: 0; right: 0; text-align: center; font-size: 9px; font-weight: bold; color: #ffe08a; text-shadow: 0 1px 2px #000; letter-spacing: .5px; }
+.arena-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.arena-table th, .arena-table td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+.arena-table th { color: var(--gold2); font-weight: normal; }

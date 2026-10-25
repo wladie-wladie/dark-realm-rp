@@ -52,6 +52,7 @@ export const ZONES = {
       { id: "alch", name: "Травница Вела", role: "alchemy", x: 17.6, y: 11.4, look: { gender: "f", skin: 1, hair: 1, hairColor: 7, armor: "cloth", colors: { main: "#2a3a2a", trim: "#6a8a4a" } } },
       { id: "mentor", name: "Наставник Ольгерд", role: "mentor", x: 16.4, y: 13.8, look: { gender: "m", skin: 3, hair: 0, hairColor: 6, beard: 1, scar: 1, armor: "plate", colors: { main: "#4a4a50", trim: "#6a5a30" }, weapon: "sword" } },
       { id: "guard", name: "Стражник", role: "talk", x: 16.4, y: 2.6, look: { gender: "m", skin: 2, hair: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" }, lines: ["К северу — Сумрачный лес. Волки там совсем озверели.", "Без зелий за ворота не ходи."] },
+      { id: "arena", name: "Распорядитель арены", role: "arena_gate", x: 18.6, y: 15.8, look: { gender: "m", skin: 2, hair: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" } },
       { id: "guard2", name: "Стражница", role: "talk", x: 27, y: 13.4, look: { gender: "f", skin: 3, hair: 2, hairColor: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" }, lines: ["На восток — Старый тракт. Разбойники да мертвецы на погосте.", "Дальше по тракту — заброшенная шахта. Это красная зона: умрёшь — потеряешь часть добра."] },
     ],
     exits: [
@@ -60,6 +61,19 @@ export const ZONES = {
       { to: "swamp", x: 15, y: 23.6, w: 2.6, arrive: [25, 2], minLvl: 5 },
     ],
     spawn: [15, 14.6],
+  },
+
+  arena: {
+    name: "Арена", danger: "safe", lvl: "", size: [16, 16], base: "grass", seed: 77,
+    mood: { name: "День", gain: [1.04, 1.0, 0.94], sat: -0.05, lights: 1, glow: 0.14 },
+    tint: 0x9aa0b0, dark: 0.15, ambient: "town",
+    plazas: [{ x: 8, y: 8, rx: 6.2, ry: 6.2, t: "cobble" }],
+    walk: { paths: [], trees: ["oak", "pine"], edge: ["bush", "rock"], open: 1 },
+    scatter: [],
+    fixed: [["banner", 2.6, 2.6], ["banner", 13.4, 2.6], ["banner", 2.6, 13.4], ["banner", 13.4, 13.4], ["lamp2", 8, 1.8], ["lamp2", 1.8, 8], ["lamp2", 14.2, 8], ["portal", 8, 15.2]],
+    npcs: [{ id: "arena", name: "Распорядитель арены", role: "arena", x: 4.4, y: 12.6, look: { gender: "m", skin: 2, hair: 0, armor: "plate", helm: "plate", weapon: "sword", offhand: "shield" } }],
+    exits: [{ to: "town", x: 8, y: 15.6, w: 2.6, arrive: [17.6, 16.6] }],
+    spawn: [6, 12],
   },
 
   forest: {

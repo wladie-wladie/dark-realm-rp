@@ -187,7 +187,22 @@ export class UI {
     const pos = [[104, 4], [92, 70], [52, 120], [0, 132], [176, 6], [160, 76]];
     e.skillBtns = pos.map(([r, b], i) => {
       const btn = h("div.abtn.sk", { style: { right: r + "px", bottom: b + "px" } });
-      btn.addEventListener("pointerdown", ev => { ev.preventDefault(); if (!G.st.slots[i]) { this.panels.open("skills"); return; } G.world && G.world.useSlot(i); });
+      // короткое нажатие — применить, долгое (0,5 с) — включить/выключить автоприменение
+      let lp = null;
+      btn.addEventListener("pointerdown", ev => {
+        ev.preventDefault(); if (!G.st.slots[i]) { this.panels.open("skills"); return; }
+        G.world && G.world.useSlot(i);
+        clearTimeout(lp);
+        lp = setTimeout(() => {
+          const st = G.st; st.auto = st.auto || [false, false, false, false, false, false];
+          st.auto[i] = !st.auto[i]; btn.classList.toggle("auto", st.auto[i]);
+          if (navigator.vibrate) navigator.vibrate(30);
+          this.toast(st.auto[i] ? (G.world && G.world.zoneId === "town" ? "Автоприменение включено (заработает за пределами города)" : "Автоприменение включено") : "Автоприменение выключено", "#ffd060", 1600);
+        }, 500);
+      });
+      const cancel = () => clearTimeout(lp);
+      btn.addEventListener("pointerup", cancel); btn.addEventListener("pointercancel", cancel); btn.addEventListener("pointerleave", cancel);
+      if (G.st.auto && G.st.auto[i]) btn.classList.add("auto");
       act.appendChild(btn); return btn;
     });
     e.potBtns = [0, 1].map(i => {
