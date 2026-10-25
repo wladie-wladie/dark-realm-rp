@@ -19,6 +19,7 @@ export class Actor {
     const meta = G.art && G.art[o.tex];
     const res = meta && meta.res ? meta.res : fw / (this.sheet === "h" ? 64 : 80);
     this.idleCol = o.idleCol ?? 0;
+    this.r16 = !!(meta && meta.layout === "r16");
     sprite.setScale(this.scale / res);
     const footX = meta && meta.foot ? meta.foot[0] : this.sheet === "h" ? 32 * res : 40 * res;
     const footY = meta && meta.foot ? meta.foot[1] : this.sheet === "h" ? 74 * res : 54 * res;
@@ -81,7 +82,16 @@ export class Actor {
     const bob = 0;
     s.setOrigin(s.originX, this.oy + bob);
     s.setAngle(0);
-    if (this.sheet === "h") {
+    if (this.r16) {
+      // риг-лист: 16 кадров на направление
+      let c;
+      if (this.castT >= 0) c = 13;
+      else if (this.attackT >= 0) c = 8 + Math.min(4, Math.floor((this.attackT / this.attackDur) * 5));
+      else if (this.moving) c = Math.floor(this.walkPhase * 8) % 8;
+      else c = 14 + (Math.floor(this.scene.time.now / 900) % 2);
+      s.setFrame(this.dir * 16 + c);
+      s.setFlipX(this.dir === 2 && this.flip);
+    } else if (this.sheet === "h") {
       s.setFrame(this.dir * 8 + col);
       s.setFlipX(this.dir === 2 && this.flip);
     } else {

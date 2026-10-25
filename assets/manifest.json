@@ -283,7 +283,8 @@
    160,
    282
   ],
-  "title": "Багровый плащ"
+  "title": "Багровый плащ",
+  "layout": "r16"
  },
  "mob_pet_shade": {
   "file": "chars/hero_rogue_m.webp",
