@@ -170,6 +170,17 @@ def portraits(src, keys, cols, rows):
         man["pt_" + key] = {"file": fn}
     print("портреты", len(keys))
 
+def side_walk1(src, key):
+    # 4 кадра шага в профиль одного героя (1 ряд) → ряд 3, колонки 0–3
+    c = cells(src, 1, 4); path = f"assets/chars/{key}.webp"
+    if len([k for k in c]) < 4 or not os.path.exists(path): print(key, "пропуск"); return
+    sheet = Image.open(path).convert("RGBA")
+    cur = np.array(sheet.crop((4 * 192, 2 * 240, 5 * 192, 3 * 240)))[..., 3] > 24
+    ys = np.where(cur.any(1))[0]; target_h = (ys.max() - ys.min()) if len(ys) else 176
+    part = pack([[(0, 0), (0, 1), (0, 2), (0, 3)]], c, 192, 240, 222, target_h / np.median([c[(0, i)]["h"] for i in range(4)]))
+    sheet.paste(Image.new("RGBA", (192 * 4, 240)), (0, 2 * 240)); sheet.alpha_composite(part, (0, 2 * 240))
+    sheet.save(path, "WEBP", quality=90, method=6); print("шаг в профиль:", key)
+
 def side_walk(src, cls):
     # новые кадры ходьбы в профиль (2 ряда: мужчина, женщина × 4 шага) → ряд 3, колонки 0–3 листа героя
     c = cells(src, 2, 4)
@@ -222,6 +233,8 @@ if __name__ == "__main__":
             key = "hero_" + name.split("_", 1)[1].replace("hero_", "")
             hero(src, key)
             if key in TITLES: man[key]["title"] = TITLES[key]
+        elif name.startswith("vw1_"):
+            side_walk1(src, "hero_" + name[4:])
         elif name.startswith("w_"):
             side_walk(src, name[2:])
         elif name == "c_portraits2":
