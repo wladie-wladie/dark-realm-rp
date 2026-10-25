@@ -138,8 +138,13 @@
  "hero_warrior_m": {
   "file": "chars/hero_warrior_m.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Красный плащ"
  },
  "mob_wolf": {
@@ -175,84 +180,144 @@
  "hero_mage_m": {
   "file": "chars/hero_mage_m.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Синяя мантия"
  },
  "hero_ranger_f": {
   "file": "chars/hero_ranger_f.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Зелёный плащ"
  },
  "hero_ranger_m": {
   "file": "chars/hero_ranger_m.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Зелёный плащ"
  },
  "hero_warrior_f": {
   "file": "chars/hero_warrior_f.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Красный плащ"
  },
  "hero_cleric_f": {
   "file": "chars/hero_cleric_f.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Белая ряса"
  },
  "hero_cleric_m": {
   "file": "chars/hero_cleric_m.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Белая ряса"
  },
  "hero_mage_f": {
   "file": "chars/hero_mage_f.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Синяя мантия"
  },
  "hero_rogue_m": {
   "file": "chars/hero_rogue_m.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Чёрный капюшон"
  },
  "hero_warlock_m": {
   "file": "chars/hero_warlock_m.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Багровый плащ"
  },
  "mob_pet_shade": {
   "file": "chars/hero_rogue_m.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "hero_rogue_f": {
   "file": "chars/hero_rogue_f.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Чёрный капюшон"
  },
  "hero_warlock_f": {
   "file": "chars/hero_warlock_f.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240,
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ],
   "title": "Багровый плащ"
  },
  "mob_archer": {
@@ -354,44 +419,79 @@
  "npc_elder": {
   "file": "chars/npc_elder.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "npc_smith": {
   "file": "chars/npc_smith.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "npc_trader": {
   "file": "chars/npc_trader.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "npc_alch": {
   "file": "chars/npc_alch.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "npc_mentor": {
   "file": "chars/npc_mentor.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "npc_guard": {
   "file": "chars/npc_guard.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "npc_guard2": {
   "file": "chars/npc_guard2.webp",
   "type": "hsheet",
-  "fw": 192,
-  "fh": 240
+  "fw": 320,
+  "fh": 300,
+  "res": 3,
+  "foot": [
+   160,
+   282
+  ]
  },
  "prop_fern_0": {
   "file": "props/iso_fern_s_0.webp",

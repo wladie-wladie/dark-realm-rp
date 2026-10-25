@@ -95,15 +95,17 @@ man = json.load(open(man_path)) if os.path.exists(man_path) else {}
 os.makedirs("assets/chars", exist_ok=True); os.makedirs("assets/ground", exist_ok=True)
 
 # --- герой: 3 строки (вниз, вверх, вбок) × 6 (стоит, 4 шага, удар) → 8 столбцов игры
+HFW, HFH, HFOOT = 320, 300, 282   # кадр героя с запасом под оружие и размах удара
+
 def hero(src, key):
     c = cells(src, 3, 6)
     stand_h = np.median([c[(r, 0)]["h"] for r in range(3) if (r, 0) in c])
-    FW, FH = 192, 240; foot = 222
+    FW, FH = HFW, HFH; foot = HFOOT
     scale = 176 / stand_h
     order = [[(r, 1), (r, 2), (r, 3), (r, 4), (r, 0), (r, 5), (r, 5), (r, 0)] for r in range(3)]
     s = pack(order, c, FW, FH, foot, scale)
     fn = f"chars/{key}.webp"; s.save("assets/" + fn, "WEBP", quality=90, method=6)
-    man[key] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH}
+    man[key] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH, "res": 3, "foot": [FW // 2, foot]}
 
 # --- зверь в профиль: 2 строки (4 бега, 4 атаки) → 7 столбцов игры
 def beast(src, key, width_px=210):
@@ -143,7 +145,7 @@ def npcs(src):
         ys, xs = np.where(m)
         figs.append(Image.fromarray(sub[ys.min():ys.max() + 1, xs.min():xs.max() + 1]))
     med = float(np.median([f.height for f in figs]))
-    FW, FH, foot = 192, 240, 222
+    FW, FH, foot = HFW, HFH, HFOOT
     for im2, nid in zip(figs, NPC_IDS):
         sc = 176 / med; im2 = im2.resize((round(im2.width * sc), round(im2.height * sc)), Image.LANCZOS)
         frame = Image.new("RGBA", (FW, FH)); frame.alpha_composite(im2, (max(0, (FW - im2.width) // 2), max(0, foot - im2.height)))
@@ -151,7 +153,7 @@ def npcs(src):
         for r in range(3):
             for c in range(8): sheet.alpha_composite(frame, (c * FW, r * FH))
         fn = f"chars/npc_{nid}.webp"; sheet.save("assets/" + fn, "WEBP", quality=90, method=6)
-        man["npc_" + nid] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH}
+        man["npc_" + nid] = {"file": fn, "type": "hsheet", "fw": FW, "fh": FH, "res": 3, "foot": [FW // 2, foot]}
     print("npcs", len(figs))
 
 def portraits(src, keys, cols, rows):
@@ -175,10 +177,10 @@ def side_walk1(src, key):
     c = cells(src, 1, 4); path = f"assets/chars/{key}.webp"
     if len([k for k in c]) < 4 or not os.path.exists(path): print(key, "пропуск"); return
     sheet = Image.open(path).convert("RGBA")
-    cur = np.array(sheet.crop((4 * 192, 2 * 240, 5 * 192, 3 * 240)))[..., 3] > 24
+    cur = np.array(sheet.crop((4 * HFW, 2 * HFH, 5 * HFW, 3 * HFH)))[..., 3] > 24
     ys = np.where(cur.any(1))[0]; target_h = (ys.max() - ys.min()) if len(ys) else 176
-    part = pack([[(0, 0), (0, 1), (0, 2), (0, 3)]], c, 192, 240, 222, target_h / np.median([c[(0, i)]["h"] for i in range(4)]))
-    sheet.paste(Image.new("RGBA", (192 * 4, 240)), (0, 2 * 240)); sheet.alpha_composite(part, (0, 2 * 240))
+    part = pack([[(0, 0), (0, 1), (0, 2), (0, 3)]], c, HFW, HFH, HFOOT, target_h / np.median([c[(0, i)]["h"] for i in range(4)]))
+    sheet.paste(Image.new("RGBA", (HFW * 4, HFH)), (0, 2 * HFH)); sheet.alpha_composite(part, (0, 2 * HFH))
     sheet.save(path, "WEBP", quality=90, method=6); print("шаг в профиль:", key)
 
 def side_walk(src, cls):
@@ -189,12 +191,12 @@ def side_walk(src, cls):
         if not os.path.exists(path): continue
         sheet = Image.open(path).convert("RGBA")
         # масштаб — по высоте фигуры «стоит» в профиль на текущем листе
-        cur = np.array(sheet.crop((4 * 192, 2 * 240, 5 * 192, 3 * 240)))[..., 3] > 24
+        cur = np.array(sheet.crop((4 * HFW, 2 * HFH, 5 * HFW, 3 * HFH)))[..., 3] > 24
         ys = np.where(cur.any(1))[0]; target_h = (ys.max() - ys.min()) if len(ys) else 176
         hs = [c[(r, i)]["h"] for i in range(4) if (r, i) in c]
         if len(hs) < 4: print(key, "не все кадры шага"); continue
-        part = pack([[(r, 0), (r, 1), (r, 2), (r, 3)]], c, 192, 240, 222, target_h / np.median(hs))
-        sheet.paste(Image.new("RGBA", (192 * 4, 240)), (0, 2 * 240)); sheet.alpha_composite(part, (0, 2 * 240))
+        part = pack([[(r, 0), (r, 1), (r, 2), (r, 3)]], c, HFW, HFH, HFOOT, target_h / np.median(hs))
+        sheet.paste(Image.new("RGBA", (HFW * 4, HFH)), (0, 2 * HFH)); sheet.alpha_composite(part, (0, 2 * HFH))
         sheet.save(path, "WEBP", quality=90, method=6)
         print("шаг в профиль:", key)
 

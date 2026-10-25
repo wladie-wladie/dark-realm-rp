@@ -1,5 +1,6 @@
 // Существа в мире: герой, монстры, союзники, жители. Спрайт + физическое тело + анимация.
 import { style } from "../art/style.js";
+import { G } from "../core/G.js";
 
 // Общий масштаб существ относительно мира (герой ~1/5 высоты экрана, как в Zenonia)
 export const ACTOR_SCALE = 1.1;
@@ -13,15 +14,18 @@ export class Actor {
     this.id = o.id; this.def = o.def || null; this.name = o.name || "";
     const sprite = scene.physics.add.sprite(o.x, o.y, o.tex, 0);
     // разрешение листа: процедурный рисуется в CHAR_RES, картинки из ChatGPT — крупнее
-    const fw = sprite.frame.width;
-    const res = fw / (this.sheet === "h" ? 64 : 80);
+    const fw = sprite.frame.width, fh = sprite.frame.height;
+    // широкие кадры с запасом по краям: в описании листа заданы масштаб (res) и точка ступней (foot)
+    const meta = G.art && G.art[o.tex];
+    const res = meta && meta.res ? meta.res : fw / (this.sheet === "h" ? 64 : 80);
     this.idleCol = o.idleCol ?? 0;
     sprite.setScale(this.scale / res);
-    this.oy = this.sheet === "h" ? 74 / 80 : 54 / 64;
-    sprite.setOrigin(0.5, this.oy);
+    const footX = meta && meta.foot ? meta.foot[0] : this.sheet === "h" ? 32 * res : 40 * res;
+    const footY = meta && meta.foot ? meta.foot[1] : this.sheet === "h" ? 74 * res : 54 * res;
+    this.oy = footY / fh;
+    sprite.setOrigin(footX / fw, this.oy);
     const rWorld = (o.radius || 13) * Math.min(this.scale / ACTOR_SCALE, 1.6) * 1.15;
     const rSrc = rWorld / sprite.scaleX;
-    const footX = this.sheet === "h" ? 32 * res : 40 * res, footY = this.sheet === "h" ? 74 * res : 54 * res;
     sprite.body.setCircle(rSrc, footX - rSrc, footY - rSrc * 1.6);
     sprite.actor = this;
     this.sprite = sprite;
@@ -75,7 +79,7 @@ export class Actor {
     const step = this.moving && this.attackT < 0 && this.castT < 0 && !this.flying;
     const ph = this.walkPhase * Math.PI * 4;
     const bob = 0;
-    s.setOrigin(0.5, this.oy + bob);
+    s.setOrigin(s.originX, this.oy + bob);
     s.setAngle(0);
     if (this.sheet === "h") {
       s.setFrame(this.dir * 8 + col);

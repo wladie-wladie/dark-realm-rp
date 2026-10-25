@@ -20,8 +20,10 @@ export function heroArtKey(st) {
 // кадр листа: row 0 — спереди, 1 — со спины, 2 — сбоку; col 0–3 — шаги, 4 — стоит, 5 — удар
 export function drawArtFrame(ctx, key, row, col, dx, dy, dh, flip = false) {
   const meta = G.art[key]; const img = G.game.textures.get(key).getSourceImage();
-  const s = dh / meta.fh;
-  ctx.save(); ctx.translate(dx, dy);
+  // широкие кадры: масштаб по «старой» высоте 80 единиц, ступни — внизу области
+  const s = dh / (meta.res ? meta.res * 80 : meta.fh);
+  ctx.save();
+  if (meta.foot) ctx.translate(dx + dh * 0.4 - meta.foot[0] * s, dy + dh * 74 / 80 - meta.foot[1] * s); else ctx.translate(dx, dy);
   if (flip) { ctx.translate(meta.fw * s, 0); ctx.scale(-1, 1); }
   ctx.drawImage(img, col * meta.fw, row * meta.fh, meta.fw, meta.fh, 0, 0, meta.fw * s, meta.fh * s);
   ctx.restore();
