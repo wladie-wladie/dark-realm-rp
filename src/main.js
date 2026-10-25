@@ -13,7 +13,7 @@ const QUALITY = { max: 3, balance: 2, eco: 1.5 };
 let gfx = "max";
 try {
   // земля теперь рисуется видеокартой — по умолчанию полная чёткость (сбрасываем прежнее автоснижение один раз)
-  if (localStorage.getItem("gfxV") !== "2") { localStorage.setItem("gfxV", "2"); localStorage.removeItem("gfxQuality"); }
+  if (localStorage.getItem("gfxV") !== "3") { localStorage.setItem("gfxV", "3"); localStorage.removeItem("gfxQuality"); }
   gfx = localStorage.getItem("gfxQuality") || "max";
 } catch (_) {}
 let DPR = Math.min(window.devicePixelRatio || 1, QUALITY[gfx] || 2);
@@ -59,21 +59,6 @@ window.addEventListener("load", () => {
     scene: [BootScene, WorldScene],
   });
   const resize = () => G.game.scale.resize(innerWidth * DPR, innerHeight * DPR);
-  // если телефон не тянет — сами снижаем качество на шаг (один раз за запуск)
-  let slow = 0, lowered = false;
-  setInterval(() => {
-    if (lowered || !G.game || !G.st || G.paused || document.hidden) return;
-    const fps = G.game.loop.actualFps;
-    slow = fps < 30 ? slow + 1 : 0;
-    if (slow >= 6) {
-      const next = gfx === "max" ? "balance" : null; // ниже «Баланса» сами не опускаемся — только вручную
-      if (!next) { lowered = true; return; }
-      lowered = true; gfx = next; DPR = Math.min(window.devicePixelRatio || 1, QUALITY[gfx]);
-      try { localStorage.setItem("gfxQuality", gfx); } catch (_) {}
-      G.game.scale.setZoom(1 / DPR); resize();
-      G.ui && G.ui.toast && G.ui.toast("Качество графики снижено для плавности (Меню → Качество)", "#a0d0ff", 4000);
-    }
-  }, 1000);
   window.addEventListener("resize", resize);
   window.addEventListener("orientationchange", () => setTimeout(resize, 200));
   document.addEventListener("visibilitychange", () => { if (document.visibilityState === "hidden" && G.world && G.st && G.game.scene.isActive("world")) G.world.persist(); });

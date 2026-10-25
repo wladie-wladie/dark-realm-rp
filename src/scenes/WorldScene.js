@@ -16,7 +16,7 @@ import { heroArtKey } from "../art/looks.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32 } from "../core/rng.js";
 import { Ground } from "../systems/ground.js";
-import { Bots } from "../systems/bots.js";
+import { Bots, GCD } from "../systems/bots.js";
 import { Arena } from "../systems/arena.js";
 import { tw, tt, setIsoZone, isoSize, isoMatrix, IW, IH, ELEV } from "../core/iso.js";
 import { questOnKill, questOnBoss } from "../systems/quests.js";
@@ -659,7 +659,7 @@ export class WorldScene extends Phaser.Scene {
     for (let i = 0; i < 6; i++) {
       if (!st.auto[i]) continue;
       const id = st.slots[i]; if (!id) continue;
-      const s = findSkill(id); if (!s || (this.cds[id] || 0) > 0) continue;
+      const s = findSkill(id); if (!s || (this.cds[id] || 0) > 0 || (this.cds._gcd || 0) > 0) continue;
       const t = this.combat.nearestEnemy(600);
       const d = t ? Math.hypot(t.x - p.x, t.y - p.y) : 1e9;
       let ok = false;
@@ -680,7 +680,7 @@ export class WorldScene extends Phaser.Scene {
     const id = G.st.slots[i]; if (!id) return;
     const s = findSkill(id); if (!s || s.kind !== "active" || !G.st.skills[id]) return;
     if (this.player.dead || G.paused) return;
-    if ((this.cds[id] || 0) > 0) return;
+    if ((this.cds[id] || 0) > 0 || (this.cds._gcd || 0) > 0) return;
     const v = skillValues(G.st, s);
     if (this.mp < v.mp) { if (!quiet) G.ui.toast("Не хватает маны", "#80a0ff", 1000); return; }
     if (this.player.statuses.some(x => x.type === "stun" || x.type === "freeze")) return;
@@ -688,6 +688,7 @@ export class WorldScene extends Phaser.Scene {
     if (this.combat.castSkill(s) === false) return;
     this.mp -= v.mp;
     this.cds[id] = v.cd * (1 - this.pstats.cdr / 100);
+    this.cds._gcd = GCD;
     G.st.mastery[id] = (G.st.mastery[id] || 0) + 1;
     return true;
   }

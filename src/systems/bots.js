@@ -14,6 +14,8 @@ import { heroArtKey } from "../art/looks.js";
 const rand = (a, b) => a + Math.random() * (b - a);
 // урон героев рассчитан на монстров; между героями он делится, чтобы бой длился 10–30 секунд (как PvP в MMO)
 export const PVP = 0.22;
+// общий откат навыков: после любого навыка остальные недоступны
+export const GCD = 2;
 
 // синтетический герой: уровень, характеристики, навыки и снаряжение по уровню
 export function botState(cls, sub, level, gender = "m") {
@@ -277,12 +279,13 @@ export class Bots {
     b.face(t.x - b.x, t.y - b.y);
     const spd = b.speed * mods.slow;
     // навыки (у героев-ботов)
-    if (!b.minionOf && b.cd <= 0.3) {
+    b.gcd = (b.gcd || 0) - dt;
+    if (!b.minionOf && b.cd <= 0.3 && b.gcd <= 0) {
       for (const s of allSkills(b.cls, b.st.sub)) {
         if (s.kind !== "active" || !b.st.skills[s.id] || (b.cds[s.id] || 0) > 0) continue;
         const v = skillValues(b.st, s);
         if (b.mp < v.mp) continue;
-        if (this.useSkill(b, s, t, td)) { b.mp -= v.mp; b.cds[s.id] = v.cd * (1 - b.ps.cdr / 100); b.cd = 0.45; break; }
+        if (this.useSkill(b, s, t, td)) { b.mp -= v.mp; b.cds[s.id] = v.cd * (1 - b.ps.cdr / 100); b.cd = 0.45; b.gcd = GCD; break; }
       }
     }
     // обычная атака

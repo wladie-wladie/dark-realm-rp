@@ -16,6 +16,7 @@ import { CharacterCreator } from "./create.js";
 import { Panels } from "./panels.js";
 import { NpcUI } from "./npc.js";
 import { APP_VERSION } from "../version.js";
+import { GCD } from "../systems/bots.js";
 
 export class UI {
   constructor(root) {
@@ -259,10 +260,12 @@ export class UI {
       }
       if (s) {
         const v = skillValues(st, s);
-        const total = v.cd * (1 - ps.cdr / 100) || 1;
+        let total = v.cd * (1 - ps.cdr / 100) || 1, c = cd;
+        const g = W.cds._gcd || 0;
+        if (g > c) { c = g; total = GCD; }   // общий откат после любого навыка
         const cdEl = b.querySelector(".cd");
-        cdEl.style.setProperty("--p", cd > 0 ? (cd / total * 100) + "%" : "0%");
-        cdEl.textContent = cd > 0 ? Math.ceil(cd) : "";
+        cdEl.style.setProperty("--p", c > 0 ? (c / total * 100) + "%" : "0%");
+        cdEl.textContent = c > 0 ? Math.ceil(c) : "";
         b.querySelector(".mp").textContent = v.mp || "";
         b.classList.toggle("nomana", W.mp < v.mp);
       }
