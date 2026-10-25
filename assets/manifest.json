@@ -2320,5 +2320,35 @@
  },
  "pt_npc_guard2": {
   "file": "portraits/npc_guard2.webp"
+ },
+ "pt_hero_warrior_m": {
+  "file": "portraits/hero_warrior_m.webp"
+ },
+ "pt_hero_warrior_f": {
+  "file": "portraits/hero_warrior_f.webp"
+ },
+ "pt_hero_ranger_m": {
+  "file": "portraits/hero_ranger_m.webp"
+ },
+ "pt_hero_ranger_f": {
+  "file": "portraits/hero_ranger_f.webp"
+ },
+ "pt_hero_rogue_m": {
+  "file": "portraits/hero_rogue_m.webp"
+ },
+ "pt_hero_rogue_f": {
+  "file": "portraits/hero_rogue_f.webp"
+ },
+ "pt_hero_cleric_m": {
+  "file": "portraits/hero_cleric_m.webp"
+ },
+ "pt_hero_cleric_f": {
+  "file": "portraits/hero_cleric_f.webp"
+ },
+ "pt_hero_warlock_m": {
+  "file": "portraits/hero_warlock_m.webp"
+ },
+ "pt_hero_warlock_f": {
+  "file": "portraits/hero_warlock_f.webp"
  }
 }

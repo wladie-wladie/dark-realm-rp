@@ -254,7 +254,7 @@ export class Panels {
     const volIn = h("input", { type: "range", min: 0, max: 100, value: Math.round(musicVolume() * 100), style: { flex: "1" }, oninput: e => setMusicVolume(e.target.value / 100) });
     col.appendChild(h("div.box", {}, h("h3", {}, "Звук"), h("div.row", {}, h("span", {}, "Музыка"), volIn)));
     // качество графики (плавность против чёткости)
-    let gq = "balance"; try { gq = localStorage.getItem("gfxQuality") || "balance"; } catch (_) {}
+    let gq = "max"; try { gq = localStorage.getItem("gfxQuality") || "max"; } catch (_) {}
     const segQ = h("div.seg", {}, [["max", "Максимум"], ["balance", "Баланс"], ["eco", "Экономия"]].map(([id, nm]) => h("button", { class: id === gq ? "on" : "", onclick: () => {
       if (id === gq) return; try { localStorage.setItem("gfxQuality", id); } catch (_) {} G.world && G.world.persist(); location.reload();
     } }, nm)));

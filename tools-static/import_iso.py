@@ -67,9 +67,8 @@ for name in sys.argv[1:]:
     src = f"assets/raw/iso/{name}.png"
     if name == "s_cliff":
         from quilt import _cut_cols
-        A = np.array(Image.open(src).convert("RGB")); W2 = A.shape[1]; o = W2 // 8
-        A = np.concatenate([_cut_cols(A[:, W2 - o:], A[:, :o]), A[:, o:W2 - o]], 1)
-        t = Image.fromarray(A).resize((1024, 512), Image.LANCZOS)
+        im0 = Image.open(src).convert("RGB"); im0 = im0.crop((0, int(im0.height * 0.14), im0.width, im0.height))
+        t = seamless_quilt(im0).resize((1024, 512), Image.LANCZOS)
         fn = "ground/simple_cliff.webp"; t.save("assets/" + fn, "WEBP", quality=90, method=6)
         man["ter_cliff"] = {"file": fn}; print("cliff"); continue
     if name in TEX:

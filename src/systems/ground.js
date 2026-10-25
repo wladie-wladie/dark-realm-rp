@@ -1,296 +1,196 @@
-// Земля в изометрии: текстуры в полном разрешении, чёткие края у мостовой и дорог, трава нависает на край.
-// Рисуется кусками вокруг камеры (чтобы хватало памяти телефона), лишние куски выгружаются.
+// Земля в изометрии — рисует видеокарта: повторяющиеся текстуры в полном разрешении,
+// вырезанные по форме дорог, площадей, воды и рельефа. Ничего не дорисовывается на ходу.
 import { TERRAIN } from "../art/registry.js";
-import { TILE } from "../data/zones.js";
-import { isoMatrix, isoSize, tt, tw, ELEV } from "../core/iso.js";
+import { TILE, ZONES } from "../data/zones.js";
+import { isoSize, tw, ELEV, IW, IH } from "../core/iso.js";
 import { canvas } from "../art/paint.js";
 import { mulberry32, makeNoise } from "../core/rng.js";
-import { ZONES } from "../data/zones.js";
 
-const CH = 512;                    // кусок мира; плотность пикселей = масштабу камеры (1 пиксель текстуры на пиксель экрана)
-let RES = 2;
-const PERIOD = 4 * TILE;           // текстура повторяется раз в 4 клетки
-const PER = { cobble: 2.6 * TILE, stone: 3 * TILE };  // мельче камни — ближе к образцу
-// порядок: что выше — то рисуется позже и нависает краем на соседей
-const ORDER = ["water", "swampwater", "mud", "ash", "stone", "dirt", "road", "cobble", "swampgrass", "forest", "grass"];
-const STYLE = { grass: "tuft", forest: "tuft", swampgrass: "tuft", cobble: "curb", stone: "curb", dirt: "soft", road: "soft", mud: "soft", ash: "soft", water: "water", swampwater: "water" };
+const PER = { cobble: 2.6, stone: 3 };   // период текстуры в клетках
+const TUFT = { grass: 1, forest: 1, swampgrass: 1 };
+const D = -100000;                       // глубина земли
+
+// изометрическая версия бесшовной текстуры: прямоугольник 2S×S повторяется без швов
+function isoTexture(scene, t) {
+  const key = "isotex_" + t;
+  if (scene.textures.exists(key)) return key;
+  const src = (TERRAIN.src && TERRAIN.src[t]) || TERRAIN.tex[t] || TERRAIN.tex.grass;
+  const S = (PER[t] || 4) * TILE, Wt = Math.min(2048, 2 ** Math.round(Math.log2(2 * S * 3))), k = Wt / (2 * S);
+  const c = canvas(Wt, Wt / 2), ctx = c.getContext("2d");
+  ctx.imageSmoothingQuality = "high";
+  ctx.setTransform(k, 0, 0, k, 0, 0); ctx.transform(IW / 128, IH / 128, -IW / 128, IH / 128, 0, 0);
+  const p = ctx.createPattern(src, "repeat"); const s = S / src.width;
+  if (p.setTransform) p.setTransform(new DOMMatrix([s, 0, 0, s, 0, 0]));
+  ctx.fillStyle = p; ctx.fillRect(-4 * S, -4 * S, 12 * S, 12 * S);
+  scene.textures.addCanvas(key, c);
+  scene.textures.get(key).setFilter && scene.textures.get(key).setFilter(0);
+  return key;
+}
 
 export class Ground {
   constructor(scene, gen, zoneId) {
-    this.s = scene; this.gen = gen; this.zoneId = zoneId;
+    this.s = scene; this.gen = gen; this.zoneId = zoneId; this.z = ZONES[zoneId];
     [this.Wpx, this.Hpx] = isoSize(gen.W, gen.H);
-    this.chunks = new Map(); this.patterns = {};
-    this.M = isoMatrix();
-    this.buildShapes(ZONES[zoneId]);
+    this.objs = []; this.chunks = new Map(); this.res = 1;
+    this.build();
     scene.events.once("shutdown", () => this.destroy());
   }
+  P(x, y) { return tw(x / TILE, y / TILE); }               // точка «квадратного» мира (64 px на клетку) → мир
+  layer(t, polys, depth, dy = 0) {
+    if (!polys.length) return null;
+    const key = isoTexture(this.s, t), S = (PER[t] || 4) * TILE, k = this.s.textures.get(key).getSourceImage().width / (2 * S);
+    const ts = this.s.add.tileSprite(0, 0, this.Wpx, this.Hpx + ELEV * 2, key).setOrigin(0, 0).setDepth(D + depth);
+    ts.setTileScale(1 / k, 1 / k);
+    // привязка узора к началу «квадратного» мира
+    const [ox, oy] = tw(0, 0);
+    ts.tilePositionX = -ox * k; ts.tilePositionY = -(oy + dy) * k;
+    const g = this.s.make.graphics({ add: false }); g.fillStyle(0xffffff);
+    for (const poly of polys) g.fillPoints(poly.map(([x, y]) => ({ x, y: y + dy })), true);
+    ts.setMask(g.createGeometryMask());
+    this.objs.push(ts, g);
+    return ts;
+  }
+  gfx(depth) { const g = this.s.add.graphics().setDepth(D + depth); this.objs.push(g); return g; }
 
-  // формы земли из описания зоны (в пикселях «квадратного» мира): плавные дороги, площади, водоёмы
-  buildShapes(z) {
-    const S = TILE, noise = makeNoise(z.seed, 8);
-    this.paths = (z.paths || []).map(p => {
+  build() {
+    const z = this.z, S = TILE, { W, H } = this.gen, base = z.base;
+    const noise = makeNoise(z.seed, 8);
+    // фон за пределами карты и основа
+    const bg = this.s.add.rectangle(-2000, -2000, this.Wpx + 4000, this.Hpx + 4000, 0x07060a).setOrigin(0).setDepth(D - 10); this.objs.push(bg);
+    const diamond = [tw(0, 0), tw(W, 0), tw(W, H), tw(0, H)];
+    this.layer(base, [diamond], 0);
+    // формы из описания зоны
+    const pathPolys = [], caps = [];
+    const paths = (z.paths || []).map(p => {
       const pts = [];
       for (let i = 0; i < p.pts.length - 1; i++) {
-        const [ax, ay] = p.pts[i], [bx, by] = p.pts[i + 1];
-        const steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 3);
-        for (let st = 0; st <= steps; st++) {
-          const t = st / steps;
-          const x = ax + (bx - ax) * t + (noise(st * 0.2 + i, 3) - 0.5) * 1.2, y = ay + (by - ay) * t + (noise(5, st * 0.2 + i) - 0.5) * 1.2;
-          pts.push([x * S, y * S]);
-        }
+        const [ax, ay] = p.pts[i], [bx, by] = p.pts[i + 1], steps = Math.ceil(Math.hypot(bx - ax, by - ay) * 3);
+        for (let st = 0; st <= steps; st++) { const t = st / steps; pts.push([(ax + (bx - ax) * t + (noise(st * 0.2 + i, 3) - 0.5) * 1.2) * S, (ay + (by - ay) * t + (noise(5, st * 0.2 + i) - 0.5) * 1.2) * S]); }
       }
-      // сглаживание ломаной
       for (let k = 0; k < 3; k++) for (let i = 1; i < pts.length - 1; i++) pts[i] = [(pts[i - 1][0] + pts[i][0] * 2 + pts[i + 1][0]) / 4, (pts[i - 1][1] + pts[i][1] * 2 + pts[i + 1][1]) / 4];
       return { t: p.t, pts, w: p.w * S };
     });
-    const blob = (e, amp, f) => {
-      const poly = [];
-      for (let i = 0; i < 96; i++) {
-        const a = i / 96 * Math.PI * 2, cx = e.x + Math.cos(a) * e.rx, cy = e.y + Math.sin(a) * e.ry;
-        const k = 1 - (noise(cx * f + (e.t === "water" || e.t === "swampwater" ? 9 : 0), cy * f) - 0.5) * amp;
-        poly.push([(e.x + Math.cos(a) * e.rx * k) * S, (e.y + Math.sin(a) * e.ry * k) * S]);
+    const buffer = p => {
+      const L = [], R = [], n = p.pts.length;
+      for (let i = 0; i < n; i++) {
+        const a = p.pts[Math.max(0, i - 1)], b = p.pts[Math.min(n - 1, i + 1)];
+        let dx = b[0] - a[0], dy = b[1] - a[1]; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
+        const [x, y] = p.pts[i]; L.push([x - dy * p.w / 2, y + dx * p.w / 2]); R.push([x + dy * p.w / 2, y - dx * p.w / 2]);
       }
-      return poly;
+      const circ = ([x, y]) => Array.from({ length: 14 }, (_, k) => [x + Math.cos(k / 14 * 6.283) * p.w / 2, y + Math.sin(k / 14 * 6.283) * p.w / 2]);
+      return [[...L, ...R.reverse()], circ(p.pts[0]), circ(p.pts[n - 1])];
     };
-    this.plazas = (z.plazas || []).map(p => ({ t: p.t, poly: blob(p, 0.3, 0.4) }));
-    this.waters = (z.water || []).map(w => ({ t: w.t || "water", poly: blob(w, 0.4, 0.5) }));
-    // трава, нависающая на края дорог
-    const inPlaza = (x, y) => (z.plazas || []).some(p => Math.hypot((x / S - p.x) / p.rx, (y / S - p.y) / p.ry) < 1.02);
-    const onRoad = (x, y, self) => this.paths.some(pp => pp !== self && pp.pts.some(q => Math.hypot(q[0] - x, q[1] - y) < pp.w / 2 - 3));
-    this.tufts = [];
-    const r = mulberry32(z.seed * 31 + 5);
-    for (const p of this.paths) {
-      let acc = 0;
-      for (let i = 1; i < p.pts.length; i++) {
-        const [ax, ay] = p.pts[i - 1], [bx, by] = p.pts[i], len = Math.hypot(bx - ax, by - ay); if (!len) continue;
-        const nx = -(by - ay) / len, ny = (bx - ax) / len;
-        acc += len;
-        while (acc > 11) {
-          acc -= 11;
-          for (const side of [-1, 1]) {
-            const off = p.w / 2 + (r() * 6 - 4), rad = 4 + r() * 7;
-            const x = bx + nx * side * off, y = by + ny * side * off;
-            if (inPlaza(x, y) || onRoad(x, y, p)) continue;
-            this.tufts.push([x, y, rad, r() * 3]);
-          }
-        }
-      }
-    }
-  }
-  pattern(ctx, t) {
-    const src = (TERRAIN.src && TERRAIN.src[t]) || TERRAIN.tex[t] || TERRAIN.tex.grass;
-    const p = ctx.createPattern(src, "repeat");
-    const k = (PER[t] || PERIOD) / src.width;
-    if (p.setTransform) p.setTransform(new DOMMatrix([k, 0, 0, k, 0, 0]));
-    return p;
-  }
-  ter(x, y) { const { W, H, ter } = this.gen; return x < 0 || y < 0 || x >= W || y >= H ? null : ter[y * W + x]; }
-
-  bake(cx, cy) {
-    const { W, H } = this.gen;
-    const size = CH * RES, c = canvas(size, size), ctx = c.getContext("2d");
-    ctx.imageSmoothingQuality = "high";
-    ctx.fillStyle = "#07060a"; ctx.fillRect(0, 0, size, size);
-    ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES);
-    ctx.transform(...this.M);
-    const z = ZONES[this.zoneId], base = z.base, S = TILE;
-    // основа
-    ctx.fillStyle = this.pattern(ctx, base); ctx.fillRect(0, 0, W * S, H * S);
-    const polyPath = poly => { const p = new Path2D(); poly.forEach(([x, y], i) => (i ? p.lineTo(x, y) : p.moveTo(x, y))); p.closePath(); return p; };
-    const linePath = pts => { const p = new Path2D(); pts.forEach(([x, y], i) => (i ? p.lineTo(x, y) : p.moveTo(x, y))); return p; };
-    // вода — ниже всего
-    for (const w of this.waters) {
-      const p = polyPath(w.poly);
-      ctx.fillStyle = this.pattern(ctx, w.t); ctx.fill(p);
-      ctx.save(); ctx.strokeStyle = "rgba(10,8,4,0.6)"; ctx.lineWidth = 7; ctx.stroke(p); ctx.restore();
-    }
-    // дороги: тень, полотно
-    ctx.lineCap = "round"; ctx.lineJoin = "round";
-    for (const p of this.paths) {
-      const lp = linePath(p.pts);
-      ctx.save(); ctx.strokeStyle = "rgba(20,14,6,0.35)"; ctx.lineWidth = p.w + 6; ctx.stroke(lp); ctx.restore();
-      ctx.strokeStyle = this.pattern(ctx, p.t); ctx.lineWidth = p.w; ctx.stroke(lp);
-    }
+    const proj = poly => poly.map(([x, y]) => this.P(x, y));
+    const blob = (e, amp, f) => Array.from({ length: 72 }, (_, i) => {
+      const a = i / 72 * Math.PI * 2, cx = e.x + Math.cos(a) * e.rx, cy = e.y + Math.sin(a) * e.ry;
+      const kk = 1 - (noise(cx * f + (e.t === "water" || e.t === "swampwater" ? 9 : 0), cy * f) - 0.5) * amp;
+      return [(e.x + Math.cos(a) * e.rx * kk) * S, (e.y + Math.sin(a) * e.ry * kk) * S];
+    });
+    // вода
+    const byT = {};
+    for (const w of z.water || []) (byT[w.t || "water"] = byT[w.t || "water"] || []).push(proj(blob(w, 0.4, 0.5)));
+    let d = 1;
+    for (const [t, polys] of Object.entries(byT)) { this.layer(t, polys, d++); const g = this.gfx(d++); g.lineStyle(6, 0x0a0804, 0.6); polys.forEach(p => g.strokePoints(p.map(([x, y]) => ({ x, y })), true)); }
+    // дороги: тень и полотно
+    const roads = {};
+    for (const p of paths) for (const poly of buffer(p)) (roads[p.t] = roads[p.t] || []).push(proj(poly));
+    const sh = this.gfx(d++); sh.fillStyle(0x140e06, 0.3);
+    for (const polys of Object.values(roads)) polys.forEach(poly => sh.fillPoints(poly.map(([x, y]) => ({ x: x + 2, y: y + 4 })), true));
+    for (const [t, polys] of Object.entries(roads)) this.layer(t, polys, d++);
     // площади с бордюром
-    for (const pl of this.plazas) {
-      const p = polyPath(pl.poly);
-      ctx.save(); ctx.translate(2, 3); ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fill(p); ctx.restore();
-      ctx.fillStyle = this.pattern(ctx, pl.t); ctx.fill(p);
-      ctx.save(); ctx.strokeStyle = "rgba(24,18,12,0.9)"; ctx.lineWidth = 4.5; ctx.stroke(p);
-      ctx.strokeStyle = "rgba(220,200,160,0.35)"; ctx.lineWidth = 1.6; ctx.translate(-1.3, -1.3); ctx.stroke(p); ctx.restore();
+    const plazas = {};
+    for (const p of z.plazas || []) (plazas[p.t] = plazas[p.t] || []).push(proj(blob(p, 0.3, 0.4)));
+    const psh = this.gfx(d++); psh.fillStyle(0x000000, 0.45);
+    for (const polys of Object.values(plazas)) polys.forEach(poly => psh.fillPoints(poly.map(([x, y]) => ({ x: x + 2, y: y + 4 })), true));
+    for (const [t, polys] of Object.entries(plazas)) this.layer(t, polys, d++);
+    const curb = this.gfx(d++);
+    for (const polys of Object.values(plazas)) for (const poly of polys) {
+      curb.lineStyle(4, 0x18120c, 0.9); curb.strokePoints(poly.map(([x, y]) => ({ x, y })), true);
+      curb.lineStyle(1.5, 0xdcc8a0, 0.35); curb.strokePoints(poly.map(([x, y]) => ({ x: x - 1.3, y: y - 1.3 })), true);
     }
     // трава нависает на края дорог
-    if (STYLE[base] === "tuft" && this.tufts.length) {
-      const sh = new Path2D(), gr = new Path2D();
-      for (const [x, y, rad, rot] of this.tufts) {
-        sh.moveTo(x + rad + 1.5, y + 2.5); sh.ellipse(x + 1.5, y + 2.5, rad, rad * 0.8, rot, 0, Math.PI * 2);
-        gr.moveTo(x + rad, y); gr.ellipse(x, y, rad, rad * 0.8, rot, 0, Math.PI * 2);
-      }
-      ctx.fillStyle = "rgba(12,10,4,0.4)"; ctx.fill(sh);
-      ctx.fillStyle = this.pattern(ctx, base); ctx.fill(gr);
-    }
-    // кромка земли
-    ctx.strokeStyle = "rgba(0,0,0,0.6)"; ctx.lineWidth = 6; ctx.strokeRect(0, 0, W * TILE, H * TILE);
-    if (this.gen.raised) {
-      const pts = [[cx * CH, cy * CH], [(cx + 1) * CH, cy * CH], [cx * CH, (cy + 1) * CH + ELEV], [(cx + 1) * CH, (cy + 1) * CH + ELEV]].map(([x, y]) => tt(x, y));
-      const x0 = Math.floor(Math.min(...pts.map(p => p[0]))) - 1, x1 = Math.ceil(Math.max(...pts.map(p => p[0]))) + 1;
-      const y0 = Math.floor(Math.min(...pts.map(p => p[1]))) - 1, y1 = Math.ceil(Math.max(...pts.map(p => p[1]))) + 1;
-      this.relief(ctx, cx, cy, x0, y0, x1, y1, base);
-    }
-    return c;
-  }
-
-  layer(ctx, t, x0, y0, x1, y1) {
-    const style = STYLE[t] || "soft", S = TILE;
-    const region = new Path2D(), edges = new Path2D();
-    let any = false;
-    for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) {
-      if (this.ter(x, y) !== t) continue;
-      any = true;
-      region.rect(x * S - 0.5, y * S - 0.5, S + 1, S + 1);
-      // стороны, где сосед — другая земля
-      const sides = [[0, -1, x * S, y * S, x * S + S, y * S], [1, 0, x * S + S, y * S, x * S + S, y * S + S], [0, 1, x * S, y * S + S, x * S + S, y * S + S], [-1, 0, x * S, y * S, x * S, y * S + S]];
-      for (const [dx, dy, ax, ay, bx, by] of sides) {
-        const n = this.ter(x + dx, y + dy);
-        if (n === t || n === null) continue;
-        edges.moveTo(ax, ay); edges.lineTo(bx, by);
-        if (style === "tuft" || style === "soft") {
-          // выступы края (одинаковые в соседних кусках — сид от координат)
-          const r = mulberry32((x * 73856093) ^ (y * 19349663) ^ ((dx + 2) * 83492791) ^ ((dy + 2) * 2654435761));
-          const n2 = style === "tuft" ? 4 : 3;
-          for (let i = 0; i < n2; i++) {
-            const f = (i + 0.2 + r() * 0.6) / n2, rad = style === "tuft" ? 5 + r() * 7 : 4 + r() * 6;
-            const px = ax + (bx - ax) * f + dx * rad * (0.2 + r() * 0.5), py = ay + (by - ay) * f + dy * rad * (0.2 + r() * 0.5);
-            region.moveTo(px + rad, py); region.ellipse(px, py, rad, rad * (0.8 + r() * 0.4), r() * 3, 0, Math.PI * 2);
+    if (TUFT[base]) {
+      const r = mulberry32(z.seed * 31 + 5), tufts = [];
+      const inPlaza = (x, y) => (z.plazas || []).some(p => Math.hypot((x / S - p.x) / p.rx, (y / S - p.y) / p.ry) < 1.02);
+      const onRoad = (x, y, self) => paths.some(pp => pp !== self && pp.pts.some(q => Math.hypot(q[0] - x, q[1] - y) < pp.w / 2 - 3));
+      for (const p of paths) {
+        let acc = 0;
+        for (let i = 1; i < p.pts.length; i++) {
+          const [ax, ay] = p.pts[i - 1], [bx, by] = p.pts[i], len = Math.hypot(bx - ax, by - ay); if (!len) continue;
+          const nx = -(by - ay) / len, ny = (bx - ax) / len; acc += len;
+          while (acc > 11) {
+            acc -= 11;
+            for (const side of [-1, 1]) {
+              const off = p.w / 2 + (r() * 6 - 4), rad = 4 + r() * 7, x = bx + nx * side * off, y = by + ny * side * off;
+              if (inPlaza(x, y) || onRoad(x, y, p)) continue;
+              const rot = r() * 3;
+              tufts.push(proj(Array.from({ length: 9 }, (_, k) => { const a = k / 9 * 6.283; return [x + Math.cos(a) * rad * Math.cos(rot) - Math.sin(a) * rad * 0.8 * Math.sin(rot), y + Math.cos(a) * rad * Math.sin(rot) + Math.sin(a) * rad * 0.8 * Math.cos(rot)]; })));
+            }
           }
         }
       }
+      const tsh = this.gfx(d++); tsh.fillStyle(0x0c0a04, 0.4); tufts.forEach(p => tsh.fillPoints(p.map(([x, y]) => ({ x: x + 1.5, y: y + 2.5 })), true));
+      this.layer(base, tufts, d++);
     }
-    if (!any) return;
-    if (style === "water") {
-      ctx.fillStyle = this.pattern(ctx, t); ctx.fill(region);
-      ctx.save(); ctx.strokeStyle = "rgba(0,0,0,0.45)"; ctx.lineWidth = 5; ctx.stroke(edges); ctx.restore();
-      return;
-    }
-    // тень под краем (приподнятость слоя)
-    ctx.save(); ctx.translate(2.5, 3.5); ctx.fillStyle = style === "curb" ? "rgba(0,0,0,0.5)" : "rgba(10,8,4,0.38)"; ctx.fill(region); ctx.restore();
-    ctx.fillStyle = this.pattern(ctx, t); ctx.fill(region);
-    if (style === "curb") {
-      // бордюр: тёмный шов и светлая грань камня
-      ctx.save(); ctx.lineCap = "round";
-      ctx.strokeStyle = "rgba(20,16,12,0.85)"; ctx.lineWidth = 4; ctx.stroke(edges);
-      ctx.strokeStyle = "rgba(210,190,150,0.35)"; ctx.lineWidth = 1.5; ctx.translate(-1.2, -1.2); ctx.stroke(edges);
-      ctx.restore();
-    }
+    this.relief(d, base);
   }
 
-  cliffPattern(ctx) {
-    let src = TERRAIN.src && TERRAIN.src.cliff;
-    if (!src) {
-      // запасная скала, пока нет картинки
-      src = this._cliff || (this._cliff = (() => { const c = canvas(256, 128), g = c.getContext("2d"); const gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, "#8a7a62"); gr.addColorStop(1, "#4a3e30"); g.fillStyle = gr; g.fillRect(0, 0, 256, 128); g.strokeStyle = "rgba(30,22,14,0.5)"; g.lineWidth = 3; for (let i = 0; i < 9; i++) { g.beginPath(); g.moveTo(i * 30 + 8, 0); g.lineTo(i * 30 + 14, 70); g.lineTo(i * 30 + 6, 128); g.stroke(); } return c; })());
-    }
-    const p = ctx.createPattern(src, "repeat"), k = (ELEV * 1.0) / src.height;
-    if (p.setTransform) p.setTransform(new DOMMatrix([k, 0, 0, k, 0, 0]));
-    return p;
-  }
-
-  // скалы: поднятые клетки — верх с травой и отвесная стена к проходу
-  relief(ctx, cx, cy, x0, y0, x1, y1, base) {
-    const { W, H, raised, lowered } = this.gen, S = TILE;
+  // рельеф: обрыв вниз перед проходом, скала вверх за ним
+  relief(d, base) {
+    const { W, H, raised, lowered } = this.gen;
+    if (!raised) return;
     const R = (x, y) => x >= 0 && y >= 0 && x < W && y < H && raised[y * W + x];
     const Lo = (x, y) => lowered && x >= 0 && y >= 0 && x < W && y < H && lowered[y * W + x];
-    // низина перед проходом: затемнённая земля и обрыв от края прохода вниз
-    if (lowered) {
-      const low = new Path2D(), dfaces = [];
-      for (let y = Math.max(0, y0 - 2); y <= Math.min(H - 1, y1 + 2); y++) for (let x = Math.max(0, x0 - 2); x <= Math.min(W - 1, x1 + 2); x++) {
-        if (Lo(x, y)) { low.rect(x * S - 0.5, y * S - 0.5, S + 1, S + 1); continue; }
-        if (R(x, y)) continue;
-        if (Lo(x + 1, y)) dfaces.push([tw(x + 1, y), tw(x + 1, y + 1), 1, x + y]);
-        if (Lo(x, y + 1)) dfaces.push([tw(x, y + 1), tw(x + 1, y + 1), 0, x + y]);
+    const diam = (x, y, dy = 0) => [tw(x, y), tw(x + 1, y), tw(x + 1, y + 1), tw(x, y + 1)].map(([a, b]) => [a, b + dy]);
+    const lowT = [], dF = [], uF = [], tops = [], lipsD = [], lipsU = [];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (Lo(x, y)) { lowT.push(diam(x, y)); continue; }
+      if (R(x, y)) {
+        tops.push(diam(x, y, -ELEV));
+        if (!R(x + 1, y)) { const A = tw(x + 1, y), B = tw(x + 1, y + 1); uF.push([[A[0], A[1] - ELEV], [B[0], B[1] - ELEV], B, A, 1]); lipsU.push([A, B]); }
+        if (!R(x, y + 1)) { const A = tw(x, y + 1), B = tw(x + 1, y + 1); uF.push([[A[0], A[1] - ELEV], [B[0], B[1] - ELEV], B, A, 0]); lipsU.push([A, B]); }
+        continue;
       }
-      ctx.save(); ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES); ctx.transform(...this.M);
-      ctx.fillStyle = this.pattern(ctx, base); ctx.fill(low);
-      ctx.fillStyle = "rgba(14,20,10,0.55)"; ctx.fill(low);
-      ctx.restore();
-      ctx.save(); ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES);
-      // обрезаем стену по низине, чтобы не залезала на соседей
-      ctx.save(); ctx.transform(...this.M); ctx.clip(low); ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES);
-      const cp = this.cliffPattern(ctx);
-      dfaces.sort((a, b) => a[3] - b[3]);
-      for (const [A, B, side] of dfaces) {
-        ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.lineTo(B[0], B[1] + ELEV); ctx.lineTo(A[0], A[1] + ELEV); ctx.closePath();
-        ctx.fillStyle = cp; ctx.fill();
-        ctx.fillStyle = side ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.1)"; ctx.fill();
-        // тень у подножия
-        ctx.beginPath(); ctx.moveTo(A[0], A[1] + ELEV); ctx.lineTo(B[0], B[1] + ELEV); ctx.lineTo(B[0], B[1] + ELEV + 16); ctx.lineTo(A[0], A[1] + ELEV + 16); ctx.closePath();
-        ctx.fillStyle = "rgba(0,0,0,0.35)"; ctx.fill();
-      }
-      ctx.restore();
-      // кромка обрыва
-      ctx.strokeStyle = "rgba(255,240,200,0.35)"; ctx.lineWidth = 1.5;
-      for (const [A, B] of dfaces) { ctx.beginPath(); ctx.moveTo(A[0], A[1] - 1); ctx.lineTo(B[0], B[1] - 1); ctx.stroke(); }
-      ctx.strokeStyle = "rgba(20,14,8,0.7)"; ctx.lineWidth = 2.5;
-      for (const [A, B] of dfaces) { ctx.beginPath(); ctx.moveTo(A[0], A[1] + 1); ctx.lineTo(B[0], B[1] + 1); ctx.stroke(); }
-      ctx.restore();
+      if (Lo(x + 1, y)) { const A = tw(x + 1, y), B = tw(x + 1, y + 1); dF.push([A, B, [B[0], B[1] + ELEV], [A[0], A[1] + ELEV], 1]); lipsD.push([A, B]); }
+      if (Lo(x, y + 1)) { const A = tw(x, y + 1), B = tw(x + 1, y + 1); dF.push([A, B, [B[0], B[1] + ELEV], [A[0], A[1] + ELEV], 0]); lipsD.push([A, B]); }
     }
-    const faces = [], tops = new Path2D(), lips = new Path2D();
-    let any = false;
-    for (let y = Math.max(0, y0 - 2); y <= Math.min(H - 1, y1 + 2); y++) for (let x = Math.max(0, x0 - 2); x <= Math.min(W - 1, x1 + 2); x++) {
-      if (!R(x, y)) continue;
-      any = true;
-      tops.rect(x * S - 0.5, y * S - 0.5, S + 1, S + 1);
-      if (!R(x + 1, y)) { faces.push([tw(x + 1, y), tw(x + 1, y + 1), 1, x + y]); lips.moveTo((x + 1) * S, y * S); lips.lineTo((x + 1) * S, (y + 1) * S); }
-      if (!R(x, y + 1)) { faces.push([tw(x, y + 1), tw(x + 1, y + 1), 0, x + y]); lips.moveTo(x * S, (y + 1) * S); lips.lineTo((x + 1) * S, (y + 1) * S); }
-    }
-    if (!any) return;
-    ctx.setTransform(RES, 0, 0, RES, -cx * CH * RES, -cy * CH * RES);
-    // тень у подножия
-    ctx.fillStyle = "rgba(10,8,4,0.32)";
-    for (const [A, B] of faces) { ctx.beginPath(); ctx.moveTo(A[0], A[1]); ctx.lineTo(B[0], B[1]); ctx.lineTo(B[0] + 10, B[1] + 12); ctx.lineTo(A[0] + 10, A[1] + 12); ctx.closePath(); ctx.fill(); }
-    // стены
-    const cp = this.cliffPattern(ctx);
-    faces.sort((a, b) => a[3] - b[3]);
-    for (const [A, B, side] of faces) {
-      ctx.beginPath(); ctx.moveTo(A[0], A[1] - ELEV); ctx.lineTo(B[0], B[1] - ELEV); ctx.lineTo(B[0], B[1]); ctx.lineTo(A[0], A[1]); ctx.closePath();
-      ctx.fillStyle = cp; ctx.fill();
-      ctx.fillStyle = side ? "rgba(0,0,0,0.28)" : "rgba(255,230,190,0.05)"; ctx.fill();
-      ctx.strokeStyle = "rgba(20,14,8,0.55)"; ctx.lineWidth = 1.5; ctx.stroke();
-    }
-    // верх скал
-    ctx.save(); ctx.translate(0, -ELEV); ctx.transform(...this.M);
-    ctx.fillStyle = this.pattern(ctx, base); ctx.fill(tops);
-    ctx.strokeStyle = "rgba(24,18,10,0.85)"; ctx.lineWidth = 3.5; ctx.stroke(lips);
-    ctx.strokeStyle = "rgba(255,240,200,0.25)"; ctx.lineWidth = 1.2; ctx.translate(-1.5, -1.5); ctx.stroke(lips);
-    ctx.restore();
+    // низина: затемнение
+    const low = this.gfx(d++); low.fillStyle(0x0e140a, 0.55); lowT.forEach(p => low.fillPoints(p.map(([x, y]) => ({ x, y })), true));
+    // обрыв вниз (стена под краем прохода) — обрезаем низиной
+    const quads = f => f.map(q => q.slice(0, 4));
+    this.cliff(quads(dF), d++);
+    const dsh = this.gfx(d++);
+    for (const q of dF) { dsh.fillStyle(0x000000, q[4] ? 0.3 : 0.1); dsh.fillPoints(q.slice(0, 4).map(([x, y]) => ({ x, y })), true); }
+    dsh.fillStyle(0x000000, 0.35);
+    for (const q of dF) { const [A, B] = q; dsh.fillPoints([{ x: A[0], y: A[1] + ELEV }, { x: B[0], y: B[1] + ELEV }, { x: B[0], y: B[1] + ELEV + 14 }, { x: A[0], y: A[1] + ELEV + 14 }], true); }
+    dsh.lineStyle(2.5, 0x140e08, 0.7); lipsD.forEach(([A, B]) => dsh.lineBetween(A[0], A[1] + 1, B[0], B[1] + 1));
+    dsh.lineStyle(1.5, 0xfff0c8, 0.35); lipsD.forEach(([A, B]) => dsh.lineBetween(A[0], A[1] - 1, B[0], B[1] - 1));
+    // скала вверх: тень у подножия, стена, верх с травой
+    const ush = this.gfx(d++); ush.fillStyle(0x0a0804, 0.32);
+    for (const q of uF) { const A = q[3], B = q[2]; ush.fillPoints([{ x: A[0], y: A[1] }, { x: B[0], y: B[1] }, { x: B[0] + 10, y: B[1] + 12 }, { x: A[0] + 10, y: A[1] + 12 }], true); }
+    this.cliff(quads(uF), d++);
+    const us = this.gfx(d++);
+    for (const q of uF) { us.fillStyle(q[4] ? 0x000000 : 0xffe6be, q[4] ? 0.28 : 0.05); us.fillPoints(q.slice(0, 4).map(([x, y]) => ({ x, y })), true); }
+    this.layer(base, tops, d++);
+    const lip = this.gfx(d++);
+    lip.lineStyle(3.5, 0x18120a, 0.85); lipsU.forEach(([A, B]) => lip.lineBetween(A[0], A[1] - ELEV, B[0], B[1] - ELEV));
+    lip.lineStyle(1.2, 0xfff0c8, 0.25); lipsU.forEach(([A, B]) => lip.lineBetween(A[0] - 1.5, A[1] - ELEV - 1.5, B[0] - 1.5, B[1] - ELEV - 1.5));
   }
-
-  // вся земля готовится один раз при входе на карту — на ходу ничего не дорисовывается (иначе рывки на телефоне)
-  update() {
-    const cam = this.s.cameras.main;
-    if (!cam.worldView.width) return;
-    const { W, H } = this.gen;
-    const nx = Math.ceil(this.Wpx / CH), ny = Math.ceil(this.Hpx / CH);
-    const need = [];
-    for (let cy = 0; cy < ny; cy++) for (let cx = 0; cx < nx; cx++) {
-      // пропускаем куски целиком за пределами ромба карты
-      const pts = [[cx * CH, cy * CH], [(cx + 1) * CH, cy * CH], [cx * CH, (cy + 1) * CH], [(cx + 1) * CH, (cy + 1) * CH]].map(([x, y]) => tt(x, y + ELEV));
-      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
-      if (Math.max(...xs) < -1.5 || Math.min(...xs) > W + 1.5 || Math.max(...ys) < -1.5 || Math.min(...ys) > H + 1.5) continue;
-      need.push([cx, cy]);
+  cliff(polys, depth) {
+    if (!polys.length) return;
+    const src = TERRAIN.src && TERRAIN.src.cliff;
+    let key = "cliffwall";
+    if (!this.s.textures.exists(key)) {
+      if (src) this.s.textures.addImage(key, src);
+      else { const c = canvas(256, 128), g = c.getContext("2d"); g.fillStyle = "#6a5a46"; g.fillRect(0, 0, 256, 128); this.s.textures.addCanvas(key, c); }
     }
-    // память видеокарты под землю — не больше ~50 МБ
-    const budget = 12e6;
-    const want = Math.max(0.75, Math.min(2, Math.round(cam.zoom * 4) / 4, Math.floor(Math.sqrt(budget / (need.length * CH * CH)) * 8) / 8));
-    if (this.res && Math.abs(want - this.res) < 0.26) return;
-    this.res = want; RES = want; this.destroy();
-    for (const [cx, cy] of need) {
-      const id = cx + "_" + cy, key = `gnd_${this.zoneId}_${id}`;
-      if (this.s.textures.exists(key)) this.s.textures.remove(key);
-      this.s.textures.addCanvas(key, this.bake(cx, cy));
-      const img = this.s.add.image(cx * CH, cy * CH, key).setOrigin(0).setScale(1 / RES).setDepth(-100000);
-      this.chunks.set(id, { img, key, cx, cy });
-    }
+    const img = this.s.textures.get(key).getSourceImage(), k = ELEV / img.height;
+    const ts = this.s.add.tileSprite(0, -ELEV * 2, this.Wpx, this.Hpx + ELEV * 4, key).setOrigin(0).setDepth(D + depth).setTileScale(k, k);
+    const g = this.s.make.graphics({ add: false }); g.fillStyle(0xffffff);
+    polys.forEach(p => g.fillPoints(p.map(([x, y]) => ({ x, y })), true));
+    ts.setMask(g.createGeometryMask());
+    this.objs.push(ts, g);
   }
-  destroy() { for (const ch of this.chunks.values()) { ch.img.destroy(); if (this.s.textures.exists(ch.key)) this.s.textures.remove(ch.key); } this.chunks.clear(); }
+  update() {}
+  destroy() { for (const o of this.objs) o.destroy(); this.objs = []; }
 }

@@ -26,9 +26,19 @@ def cells(path, rows, cols, dilate=5, min_px=300):
     im = to_rgba(path); A = np.array(im)
     a = A[:, :, 3] > 24
     H, W = a.shape
-    ry = _cuts(a.sum(1), rows, H // rows // 4); rx = _cuts(a.sum(0), cols, W // cols // 4)
+    ry = _cuts(a.sum(1), rows, H // rows // 4)
     out = {}
     for r in range(rows):
+        # разрезы по колонкам: общие для листа или свои для ряда — берём те, что дают кадры ровнее
+        band = a[ry[r]:ry[r + 1]]
+        def score(cx):
+            ws = []
+            for c in range(cols):
+                sub = band[:, cx[c]:cx[c + 1]]; xs = np.where(sub.any(0))[0]
+                ws.append(xs.max() - xs.min() if len(xs) else 0)
+            ws = np.array(ws, float); return ws.std() + 3 * (ws > np.median(ws) * 1.45).sum() * ws.mean()
+        rx_g = _cuts(a.sum(0), cols, W // cols // 4); rx_r = _cuts(band.sum(0), cols, W // cols // 4)
+        rx = rx_r if score(rx_r) < score(rx_g) else rx_g
         for c in range(cols):
             y0c, y1c, x0c, x1c = ry[r], ry[r + 1], rx[c], rx[c + 1]
             ac = a[y0c:y1c, x0c:x1c]
@@ -52,6 +62,10 @@ def cells(path, rows, cols, dilate=5, min_px=300):
     return out
 
 def pack(frames_order, cells_, fw, fh, foot_y, scale, flip=False):
+    # обрезки (кусок плаща вместо фигуры) — считаем пропущенными кадрами
+    if cells_:
+        med = float(np.median([c["h"] for c in cells_.values()]))
+        cells_ = {k: v for k, v in cells_.items() if v["h"] >= med * 0.6}
     sheet = Image.new("RGBA", (fw * len(frames_order[0]), fh * len(frames_order)), (0, 0, 0, 0))
     for ri, row in enumerate(frames_order):
         for ci, key in enumerate(row):
