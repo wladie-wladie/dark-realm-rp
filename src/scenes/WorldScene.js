@@ -327,7 +327,8 @@ export class WorldScene extends Phaser.Scene {
     const art = this.heroArt();
     if (!art) ensureHumanoid(this, "hero", this.playerLook());
     let x, y;
-    if (this.arrive) { [x, y] = tw(this.arrive[0] + 0.5, this.arrive[1] + 0.5); }
+    if (this.arrive && this.arrive.x != null && !this.blockedAt(this.arrive.x, this.arrive.y)) { x = this.arrive.x; y = this.arrive.y; } // точная точка (возврат порталом)
+    else if (Array.isArray(this.arrive)) { [x, y] = tw(this.arrive[0] + 0.5, this.arrive[1] + 0.5); }
     else if (st.pos && st.pos.zone === this.zoneId && !this.blockedAt(st.pos.x, st.pos.y)) { x = st.pos.x; y = st.pos.y; } // старая точка могла оказаться в скале после перестройки карты
     else { const s = this.z.spawn || [this.gen.W / 2, this.gen.H / 2]; [x, y] = tw(s[0], s[1]); }
     this.player = new Actor(this, { kind: "player", sheet: "h", tex: art ? art.key : "hero", idleCol: art ? art.idleCol : 0, x, y, scale: 1.05, radius: 13, hp: 100 });
@@ -749,11 +750,17 @@ export class WorldScene extends Phaser.Scene {
     const st = G.st, p = this.player;
     if (p.dead || this.travelling) return;
     if (this.zoneId === "town") { G.ui.toast("В городе портал не открыть", "#c0c0c0"); return; }
+    // портал — рядом, на свободном месте; если вокруг тесно — прямо под героем
     const [fx, fy] = p.faceVec();
-    let x = p.x + fx * 70, y = p.y + fy * 50;
-    if (this.blockedAt(x, y)) { x = p.x; y = p.y + 40; }
+    const tries = [[fx * 70, fy * 50], [-fx * 70, -fy * 50], [60, 30], [-60, 30], [60, -30], [-60, -30], [0, 50], [0, -50]];
+    let x = p.x, y = p.y;
+    for (const [dx, dy] of tries) {
+      const cx = p.x + dx, cy = p.y + dy;
+      if (!this.blockedAt(cx, cy) && !this.blockedAt((p.x + cx) / 2, (p.y + cy) / 2)) { x = cx; y = cy; break; }
+    }
     if (this.portalObj) this.closePortalSprite();
-    st.portal = { zone: this.zoneId, x, y, stage: "open" };
+    // возвращаемся туда, где стоял герой, когда открывал портал
+    st.portal = { zone: this.zoneId, x, y, rx: p.x, ry: p.y, stage: "open" };
     this.spawnPortal(x, y, "Портал в Серый Брод");
     this.portalArmed = true;
     this.combat.ringFx(x, y, 80, "#80b0ff", 600);
@@ -782,7 +789,7 @@ export class WorldScene extends Phaser.Scene {
       this.travel("town", [TOWN_PORTAL[0], TOWN_PORTAL[1] + 1.2]);
     } else if (st.portal.stage === "intown" && this.zoneId === "town") {
       const back = st.portal; st.portal = null;
-      const [bx, by] = tt(back.x, back.y); this.travel(back.zone, [bx - 0.5, by + 0.1]);
+      this.travel(back.zone, back.rx != null ? { x: back.rx, y: back.ry } : { x: back.x, y: back.y + 30 });
     }
   }
 
