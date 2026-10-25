@@ -74,9 +74,9 @@ export class Actor {
     // шаг ощущается: подпрыгивание на каждом шаге и лёгкое покачивание корпуса
     const step = this.moving && this.attackT < 0 && this.castT < 0 && !this.flying;
     const ph = this.walkPhase * Math.PI * 4;
-    const bob = step ? Math.abs(Math.sin(ph)) * 0.035 : 0;
+    const bob = 0;
     s.setOrigin(0.5, this.oy + bob);
-    s.setAngle(step && this.sheet === "h" ? Math.sin(ph) * 2.2 : 0);
+    s.setAngle(0);
     if (this.sheet === "h") {
       s.setFrame(this.dir * 8 + col);
       s.setFlipX(this.dir === 2 && this.flip);
